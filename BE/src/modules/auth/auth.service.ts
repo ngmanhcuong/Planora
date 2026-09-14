@@ -1,0 +1,180 @@
+import bcrypt from 'bcryptjs';
+import { prisma } from '../../config/prisma';
+import { signAccessToken } from '../../utils/jwt';
+import type { RegisterInput, LoginInput } from './auth.schemas';
+import type { AuthSuccessData, SafeUserResponse } from './auth.types';
+
+export class AuthService {
+  async register(input: RegisterInput): Promise<AuthSuccessData> {
+    const normalizedEmail = input.email.trim().toLowerCase();
+
+    // Check existing email
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (existingUser) {
+      throw new Error('Email này đã được đăng ký tài khoản');
+    }
+
+    // Hash password securely
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(input.password, saltRounds);
+
+    // Create user and related entities in a transaction
+    const newUser = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          name: input.name.trim(),
+          email: normalizedEmail,
+          passwordHash,
+        },
+      });
+
+      // Default Profile
+      await tx.profile.create({
+        data: {
+          userId: user.id,
+        },
+      });
+
+      // Default Settings
+      await tx.userSetting.create({
+        data: {
+          userId: user.id,
+        },
+      });
+
+      // Default Categories
+      const defaultCategories = [
+        { name: 'Học tập', type: 'STUDY' as const, color: '#0058BE', bgColor: '#D8E2FF', textColor: '#001A42' },
+        { name: 'Công việc', type: 'WORK' as const, color: '#3525CD', bgColor: '#DAE2FD', textColor: '#131B2E' },
+        { name: 'Cuộc họp', type: 'MEETING' as const, color: '#4F46E5', bgColor: '#E2DFFF', textColor: '#3323CC' },
+        { name: 'Thói quen', type: 'HABIT' as const, color: '#006E4B', bgColor: '#D7E8CD', textColor: '#002113' },
+        { name: 'Sắp đến hạn', type: 'DEADLINE' as const, color: '#BA1A1A', bgColor: '#FFDAD6', textColor: '#93000A' },
+        { name: 'Cá nhân', type: 'PERSONAL' as const, color: '#64748B', bgColor: '#F1F5F9', textColor: '#0F172A' },
+      ];
+
+      for (const cat of defaultCategories) {
+        await tx.category.create({
+          data: {
+            userId: user.id,
+            name: cat.name,
+            type: cat.type,
+            color: cat.color,
+            bgColor: cat.bgColor,
+            textColor: cat.textColor,
+          },
+        });
+      }
+
+      return user;
+    });
+
+    const accessToken = signAccessToken({
+      userId: newUser.id,
+      email: newUser.email,
+      role: newUser.role,
+    });
+
+    const safeUser: SafeUserResponse = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      isVerified: newUser.isVerified,
+      createdAt: newUser.createdAt,
+    };
+
+    return {
+      user: safeUser,
+      accessToken,
+    };
+  }
+
+  async login(input: LoginInput): Promise<AuthSuccessData> {
+    const normalizedEmail = input.email.trim().toLowerCase();
+
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    // Generic error message to prevent account enumeration
+    if (!user) {
+      throw new Error('Email hoặc mật khẩu không chính xác');
+    }
+
+    const isMatch = await bcrypt.compare(input.password, user.passwordHash);
+    if (!isMatch) {
+      throw new Error('Email hoặc mật khẩu không chính xác');
+    }
+
+    const accessToken = signAccessToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    const safeUser: SafeUserResponse = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+    };
+
+    return {
+      user: safeUser,
+      accessToken,
+    };
+  }
+
+  async getCurrentUser(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isVerified: true,
+        createdAt: true,
+        profile: {
+          select: {
+            studentId: true,
+            major: true,
+            university: true,
+            gpa: true,
+            completedCredits: true,
+            totalCredits: true,
+            bio: true,
+            avatarUrl: true,
+          },
+        },
+        settings: {
+          select: {
+            theme: true,
+            language: true,
+            emailNotifications: true,
+            pushNotifications: true,
+            deadlineReminderHours: true,
+            timetableAlerts: true,
+            soundEffects: true,
+            twoFactorAuth: true,
+            loginAlerts: true,
+            autoSaveDrafts: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new Error('Người dùng không tồn tại');
+    }
+
+    return user;
+  }
+}
+
+export const authService = new AuthService();

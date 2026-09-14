@@ -1,0 +1,60 @@
+import type { CategoryType, CategoryInfo } from '@/types';
+
+export const CATEGORY_MAP: Record<CategoryType, CategoryInfo> = {
+  study: {
+    type: 'study',
+    label: 'Học tập',
+    color: '#3B82F6',
+    bgColor: '#EFF6FF',
+    borderColor: '#DBEAFE',
+    accentColor: '#3B82F6',
+  },
+  work: {
+    type: 'work',
+    label: 'Công việc',
+    color: '#8B5CF6',
+    bgColor: '#F5F3FF',
+    borderColor: '#EDE9FE',
+    accentColor: '#8B5CF6',
+  },
+  task: {
+    type: 'task',
+    label: 'Cần làm',
+    color: '#F97316',
+    bgColor: '#FFF7ED',
+    borderColor: '#FFEDD5',
+    accentColor: '#F97316',
+  },
+  meeting: {
+    type: 'meeting',
+    label: 'Cuộc họp',
+    color: '#06B6D4',
+    bgColor: '#ECFEFF',
+    borderColor: '#CFFAFE',
+    accentColor: '#06B6D4',
+  },
+  personal: {
+    type: 'personal',
+    label: 'Cá nhân',
+    color: '#EC4899',
+    bgColor: '#FDF2F8',
+    borderColor: '#FCE7F3',
+    accentColor: '#EC4899',
+  },
+  habit: {
+    type: 'habit',
+    label: 'Thói quen',
+    color: '#10B981',
+    bgColor: '#ECFDF5',
+    borderColor: '#D1FAE5',
+    accentColor: '#10B981',
+  },
+  deadline: {
+    type: 'deadline',
+    label: 'Deadline',
+    color: '#F43F5E',
+    bgColor: '#FFF1F2',
+    borderColor: '#FFE4E6',
+    accentColor: '#F43F5E',
+  },
+};

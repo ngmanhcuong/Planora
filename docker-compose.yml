@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: planora-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: planora_db
+      MYSQL_USER: planora_user
+      MYSQL_PASSWORD: planora_password
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-prootpassword']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./BE
+      dockerfile: Dockerfile
+    container_name: planora-backend
+    restart: always
+    ports:
+      - '5000:5000'
+    environment:
+      PORT: '5000'
+      NODE_ENV: production
+      DATABASE_URL: mysql://root:rootpassword@mysql:3306/planora_db
+      JWT_SECRET: planora_production_secure_jwt_secret_key_2026_hardened
+      JWT_EXPIRES_IN: 7d
+      AI_PROVIDER: none
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./FE
+      dockerfile: Dockerfile
+    container_name: planora-frontend
+    restart: always
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
