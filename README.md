@@ -1,274 +1,1109 @@
-# 🌟 Planora - Smart Personal Schedule & Task Management System (v1.0.0)
+# Planora - Smart Personal Schedule & Task Management System
 
-**Release Identifier**: Planora Core v1.0.0  
-**Phase**: Final Release Verification & Presentation Preparation  
+**Version:** 1.0.0  
+**Release:** Planora Core v1.0.0  
+**Status:** Final Release
 
-Planora is a comprehensive personal productivity platform designed for students and professionals. It integrates task management, event calendar, academic timetables, habit tracking, push/in-app notifications, dashboard analytics, and AI-assisted scheduling.
+Planora là hệ thống quản lý lịch trình và công việc cá nhân, được xây dựng chủ yếu cho sinh viên và người dùng có nhu cầu quản lý thời gian hằng ngày.
 
----
+Hệ thống hỗ trợ quản lý công việc, sự kiện, thời khóa biểu, thói quen, thông báo và dashboard thống kê. Ngoài ra, Planora có tích hợp AI để hỗ trợ phân tích công việc và đề xuất cách sắp xếp lịch dựa trên các khoảng thời gian còn trống.
 
-## 📚 Project Documentation & Handover Links
-
-Comprehensive system design, API references, presentation guides, and defense materials are documented in the [`docs/`](file:///d:/Planora/docs) directory:
-
-- 🏛️ [**System Architecture**](file:///d:/Planora/docs/ARCHITECTURE.md): Multi-tier architecture overview, component diagram, and technology stack breakdown.
-- 📁 [**Project Structure**](file:///d:/Planora/docs/PROJECT_STRUCTURE.md): Detailed directory layout and layer responsibilities for `BE/`, `FE/`, and root level files.
-- 🗄️ [**Database Documentation**](file:///d:/Planora/docs/DATABASE.md): Complete Prisma data model reference and Mermaid Entity-Relationship Diagram (ERD).
-- 🔌 [**API Documentation**](file:///d:/Planora/docs/API.md): Comprehensive REST API endpoint reference covering all 14 module route groups.
-- 🌟 [**User Feature Guide**](file:///d:/Planora/docs/FEATURES.md): Functional user features and explicit advisory AI scheduling boundaries.
-- 🔒 [**Security Architecture**](file:///d:/Planora/docs/SECURITY.md): JWT authentication, bcrypt encryption, multi-tenant isolation, and prompt injection defense.
-- 🧠 [**AI Design Specification**](file:///d:/Planora/docs/AI_DESIGN.md): Hybrid deterministic free-slot engine and AI advisory workflow design.
-- 📋 [**System Use Cases**](file:///d:/Planora/docs/USE_CASES.md): Formal software engineering use case specifications (UC01 – UC15).
-- 🎬 [**Presentation & Demo Script**](file:///d:/Planora/docs/DEMO_SCRIPT.md): Step-by-step 7–10 minute live presentation demo script with natural Vietnamese dialogue.
-- 🧪 [**Demo Data Preparation**](file:///d:/Planora/docs/DEMO_DATA.md): Safe manual data population guide for presentation environments.
-- 📊 [**Presentation Slide Deck Outline**](file:///d:/Planora/docs/PRESENTATION_OUTLINE.md): 15-slide presentation deck structure, bullet points, and presenter scripts.
-- 🎓 [**Lecturer Defense Q&A**](file:///d:/Planora/docs/DEFENSE_QA.md): 32 comprehensive lecturer defense questions and technical implementation answers.
-- 📋 [**Pre-Demo Checklist**](file:///d:/Planora/docs/DEMO_CHECKLIST.md): T-30 minute pre-presentation environment check and offline AI fallback plan.
-- 🛠️ [**Command Cheat Sheet**](file:///d:/Planora/docs/COMMANDS.md): Quick reference guide for backend, frontend, database, testing, and Docker commands.
+AI chỉ đóng vai trò hỗ trợ. Các chức năng chính của hệ thống vẫn có thể hoạt động khi AI chưa được cấu hình.
 
 ---
 
-## 🏗️ Architecture & Completed Phases
+## Project Documentation
 
-Planora backend and frontend have been fully developed, hardened, and verified across 14 systematic phases:
+Các tài liệu chi tiết của project được lưu trong thư mục `docs/`:
 
-- **B3: Authentication & Security**: JWT authentication, bcrypt password hashing, input validation.
-- **B4: Profile & Settings**: User profile management, theme selection, and notification preferences.
-- **B5: Task Management**: Full CRUD, priority scoring, due date tracking, and overdue status semantics.
-- **B6: Events & Calendar**: Event scheduling, date range filtering, timetable conflict checks.
-- **B7: Timetable Management**: Weekly class schedules, subject cataloging, and active timetable toggle.
-- **B8: Habit Tracking**: Daily habit streak calculation, logging check-ins, and target frequencies.
-- **B9: Notifications System**: In-app notifications, unread count badge, mark as read operations.
-- **B10: Dashboard Analytics**: Real-time statistics aggregation, completion rates, and consistent overdue metrics.
-- **B11: Full Frontend-Backend Integration**: Complete Axios/Zustand integration replacing all frontend mock data.
-- **B12: AI Smart Scheduling & Assistant**: Advisory AI prioritization, free slot schedule generation, atomic schedule application, and conversational assistant.
-- **B13: Production Hardening & E2E Validation**: Zod environment startup validation, database readiness probes, helmet security headers, sanitized error responses, 45 automated integration tests, and multi-stage Docker containerization.
-- **B14: Release Verification & Deployment Preparation**: Clean repository audit, secret & path sanitization, environment configuration validation, UTF-8 verification, and final deployment documentation.
+- [System Architecture](docs/ARCHITECTURE.md): Kiến trúc tổng thể, component diagram và các công nghệ được sử dụng.
+- [Project Structure](docs/PROJECT_STRUCTURE.md): Cấu trúc thư mục và trách nhiệm của từng phần trong `BE/`, `FE/` và root project.
+- [Database Documentation](docs/DATABASE.md): Prisma data model và Entity-Relationship Diagram (ERD).
+- [API Documentation](docs/API.md): Danh sách REST API của các module trong hệ thống.
+- [User Feature Guide](docs/FEATURES.md): Mô tả các chức năng dành cho người dùng.
+- [Security Architecture](docs/SECURITY.md): JWT authentication, bcrypt, data isolation và các xử lý liên quan đến bảo mật.
+- [AI Design Specification](docs/AI_DESIGN.md): Thiết kế chức năng AI Scheduling và free-slot engine.
+- [System Use Cases](docs/USE_CASES.md): Các Use Case của hệ thống từ UC01 đến UC15.
+- [Presentation & Demo Script](docs/DEMO_SCRIPT.md): Kịch bản demo khoảng 7–10 phút.
+- [Demo Data Preparation](docs/DEMO_DATA.md): Hướng dẫn chuẩn bị dữ liệu trước khi demo.
+- [Presentation Slide Deck Outline](docs/PRESENTATION_OUTLINE.md): Nội dung dự kiến cho 15 slide thuyết trình.
+- [Lecturer Defense Q&A](docs/DEFENSE_QA.md): Các câu hỏi và câu trả lời chuẩn bị cho phần bảo vệ.
+- [Pre-Demo Checklist](docs/DEMO_CHECKLIST.md): Các bước cần kiểm tra trước khi demo.
+- [Command Cheat Sheet](docs/COMMANDS.md): Các command thường dùng cho Backend, Frontend, Database, Testing và Docker.
 
 ---
 
-## 🛠️ System Requirements & Tech Stack
+## Architecture & Development Phases
+
+Planora được phát triển theo từng phase, từ authentication, quản lý dữ liệu người dùng đến AI scheduling, testing và chuẩn bị deployment.
+
+### B3 - Authentication & Security
+
+- JWT authentication.
+- Hash password bằng bcrypt.
+- Validate dữ liệu đầu vào.
+- Bảo vệ các API cần đăng nhập.
+
+### B4 - Profile & Settings
+
+- Quản lý thông tin profile.
+- Thay đổi theme.
+- Quản lý notification preferences.
+- Cập nhật các thiết lập cá nhân.
+
+### B5 - Task Management
+
+- Tạo, xem, cập nhật và xóa task.
+- Quản lý priority.
+- Theo dõi due date.
+- Xử lý trạng thái overdue.
+- Tính priority score phục vụ việc sắp xếp task.
+
+### B6 - Events & Calendar
+
+- Tạo và quản lý event.
+- Lọc event theo khoảng thời gian.
+- Hiển thị dữ liệu cho calendar.
+- Kiểm tra một số trường hợp trùng lịch.
+
+### B7 - Timetable Management
+
+- Quản lý thời khóa biểu theo tuần.
+- Quản lý danh sách môn học.
+- Cho phép bật/tắt timetable đang sử dụng.
+- Kiểm tra xung đột thời gian.
+
+### B8 - Habit Tracking
+
+- Tạo và quản lý habit.
+- Check-in habit hằng ngày.
+- Tính streak.
+- Quản lý target frequency.
+
+### B9 - Notifications System
+
+- Hiển thị notification trong ứng dụng.
+- Theo dõi số lượng notification chưa đọc.
+- Mark notification as read.
+- Quản lý trạng thái notification.
+
+### B10 - Dashboard Analytics
+
+- Tổng hợp dữ liệu từ các module.
+- Thống kê task.
+- Tính completion rate.
+- Theo dõi overdue task.
+- Cung cấp dữ liệu cho dashboard.
+
+### B11 - Frontend & Backend Integration
+
+- Kết nối Frontend với Backend API.
+- Sử dụng Axios cho HTTP request.
+- Sử dụng Zustand cho state management.
+- Thay thế mock data bằng dữ liệu từ Backend.
+
+### B12 - AI Smart Scheduling & Assistant
+
+- Phân tích task để hỗ trợ sắp xếp mức độ ưu tiên.
+- Tìm khoảng thời gian trống.
+- Đề xuất lịch dựa trên task và lịch hiện tại.
+- Apply lịch bằng transaction.
+- Hỗ trợ AI assistant.
+- Có fallback khi AI chưa được cấu hình.
+
+### B13 - Production Setup & E2E Validation
+
+- Validate environment bằng Zod.
+- Database readiness probe.
+- Helmet security headers.
+- Xử lý error response cho production.
+- Integration testing.
+- Docker containerization.
+
+### B14 - Release Verification & Deployment Preparation
+
+- Kiểm tra repository trước khi release.
+- Kiểm tra secret và environment configuration.
+- Kiểm tra đường dẫn trong project.
+- Kiểm tra UTF-8.
+- Chuẩn bị tài liệu deployment và demo.
+
+---
+
+## System Requirements & Tech Stack
 
 ### System Requirements
-- **Node.js**: `Node.js 20 LTS` (v20.x recommended)
-- **Database**: `MySQL 8.0` with `utf8mb4` charset support
-- **Package Manager**: `npm` (v9.x or later)
-- **Containerization**: `Docker 24.x+` & `Docker Compose v2.x+` (optional for local containerized deployment)
 
-### Tech Stack
-- **Backend (`BE/`)**: Node.js, Express, TypeScript, Prisma ORM, MySQL 8.0, Zod, Helmet, JWT, Bcrypt.js.
-- **Frontend (`FE/`)**: React 18, TypeScript, Vite, TailwindCSS, Zustand, Lucide Icons, Axios.
-- **Infrastructure & Proxy**: Docker, Docker Compose, Nginx (Frontend Reverse Proxy & Static Host).
+Project được phát triển và kiểm tra với các thành phần sau:
+
+- **Node.js:** Node.js 20 LTS
+- **Database:** MySQL 8.0
+- **Package Manager:** npm 9.x trở lên
+- **Docker:** Docker 24.x trở lên
+- **Docker Compose:** Docker Compose v2.x trở lên
+
+Docker không bắt buộc khi chạy local nhưng có thể được sử dụng để chạy toàn bộ hệ thống bằng container.
+
+### Backend
+
+Backend nằm trong thư mục `BE/` và sử dụng:
+
+- Node.js
+- Express
+- TypeScript
+- Prisma ORM
+- MySQL 8.0
+- Zod
+- Helmet
+- JWT
+- Bcrypt.js
+
+### Frontend
+
+Frontend nằm trong thư mục `FE/` và sử dụng:
+
+- React 18
+- TypeScript
+- Vite
+- TailwindCSS
+- Zustand
+- Lucide Icons
+- Axios
+
+### Infrastructure
+
+Các thành phần hỗ trợ deployment:
+
+- Docker
+- Docker Compose
+- Nginx
+
+Nginx được sử dụng để serve React frontend và reverse proxy request `/api` tới Backend khi chạy bằng Docker.
 
 ---
 
-## ⚙️ Environment Configuration
+# Environment Configuration
 
-### Backend (`BE/.env`)
-Copy `BE/.env.example` to `BE/.env` and update values accordingly:
+## Backend
+
+Backend sử dụng file:
+
+```text
+BE/.env
+```
+
+Có thể copy từ:
+
+```text
+BE/.env.example
+```
+
+Ví dụ:
 
 ```env
 # Application Configuration
-NODE_ENV=development # 'development' | 'production' | 'test'
+
+NODE_ENV=development
 PORT=5000
+
 CLIENT_URL=http://localhost:5173
 FRONTEND_URL=http://localhost:5173
 
-# Database Connection (MySQL)
+
+# Database Connection
+
 DATABASE_URL="mysql://root:password@localhost:3306/planora_db"
 
-# JWT Secret Configuration
-JWT_SECRET="planora_super_secret_production_jwt_key_2026"
+
+# JWT Configuration
+
+JWT_SECRET="your_jwt_secret_key"
 JWT_EXPIRES_IN=7d
 
-# AI Configuration (Optional: default is 'none')
-AI_PROVIDER=none # 'none' | 'gemini' | 'openai'
+
+# AI Configuration
+
+AI_PROVIDER=none
 AI_API_KEY=""
 AI_MODEL=gemini-1.5-flash
 ```
 
-#### Variable Reference:
-- `NODE_ENV` *(Required)*: Application environment (`development` | `production` | `test`).
-- `PORT` *(Required)*: Backend server listening port (default: `5000`).
-- `DATABASE_URL` *(Required)*: MySQL connection string format `mysql://USER:PASSWORD@HOST:PORT/DATABASE`.
-- `JWT_SECRET` *(Required)*: Cryptographic secret key used to sign JWT tokens.
-- `JWT_EXPIRES_IN` *(Optional)*: Token validity duration (default: `7d`).
-- `FRONTEND_URL` / `CLIENT_URL` *(Required)*: Origin URL of frontend for CORS security policies.
-- `AI_PROVIDER` *(Optional)*: Set to `none` (default safe mode), `gemini`, or `openai`.
-- `AI_API_KEY` *(Optional)*: API Key for AI services when `AI_PROVIDER` is enabled.
-- `AI_MODEL` *(Optional)*: Specified LLM model name (default: `gemini-1.5-flash`).
+> Không commit file `.env` lên GitHub. Repository chỉ nên chứa `.env.example`.
 
-### Frontend (`FE/.env`)
-Copy `FE/.env.example` to `FE/.env`:
+### Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `NODE_ENV` | Yes | Environment hiện tại: `development`, `production` hoặc `test` |
+| `PORT` | Yes | Port của Backend, mặc định `5000` |
+| `DATABASE_URL` | Yes | Connection string tới MySQL |
+| `JWT_SECRET` | Yes | Secret dùng để ký JWT |
+| `JWT_EXPIRES_IN` | No | Thời gian hết hạn của token, mặc định `7d` |
+| `FRONTEND_URL` | Yes | URL của Frontend |
+| `CLIENT_URL` | Yes | Client origin được sử dụng cho CORS |
+| `AI_PROVIDER` | No | AI provider: `none`, `gemini` hoặc `openai` |
+| `AI_API_KEY` | No | API key khi sử dụng AI |
+| `AI_MODEL` | No | Model AI được sử dụng |
+
+Format của `DATABASE_URL`:
+
+```text
+mysql://USER:PASSWORD@HOST:PORT/DATABASE
+```
+
+---
+
+## Frontend
+
+Frontend sử dụng:
+
+```text
+FE/.env
+```
+
+Có thể copy từ:
+
+```text
+FE/.env.example
+```
+
+Khi chạy local:
 
 ```env
-# For local development against standalone backend:
 VITE_API_URL=http://localhost:5000/api
+```
 
-# For Docker Nginx reverse-proxy deployment:
-# VITE_API_URL=/api
+Khi chạy bằng Docker và Nginx:
+
+```env
+VITE_API_URL=/api
 ```
 
 ---
 
-## 🚀 Quick Start (Local Development Workflow)
+# Local Development
 
-### 1. Database Setup
-Ensure MySQL 8.0 is running on `localhost:3306` with database `planora_db` created:
+## 1. Database Setup
+
+Đảm bảo MySQL 8.0 đang chạy.
+
+Mặc định project sử dụng:
+
+```text
+Host: localhost
+Port: 3306
+Database: planora_db
+```
+
+Có thể tạo database bằng:
 
 ```sql
-CREATE DATABASE IF NOT EXISTS planora_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS planora_db
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 ```
 
-### 2. Backend Installation & Migration
+---
+
+## 2. Backend Installation
+
+Di chuyển vào Backend:
+
 ```bash
 cd BE
+```
+
+Cài dependencies:
+
+```bash
 npm ci
+```
+
+Generate Prisma Client:
+
+```bash
 npx prisma generate
+```
+
+Chạy migration:
+
+```bash
 npx prisma migrate deploy
+```
+
+Build Backend:
+
+```bash
 npm run build
+```
+
+Chạy Backend ở development mode:
+
+```bash
 npm run dev
 ```
-*Backend API will be running at `http://localhost:5000/api`.*  
-*Health Check*: `http://localhost:5000/api/health`  
-*Readiness Probe*: `http://localhost:5000/api/ready`
 
-### 3. Frontend Installation & Startup
+Backend API:
+
+```text
+http://localhost:5000/api
+```
+
+Health check:
+
+```text
+http://localhost:5000/api/health
+```
+
+Database readiness:
+
+```text
+http://localhost:5000/api/ready
+```
+
+---
+
+## 3. Frontend Installation
+
+Mở terminal khác và vào thư mục Frontend:
+
 ```bash
 cd FE
+```
+
+Cài dependencies:
+
+```bash
 npm ci
+```
+
+Build Frontend:
+
+```bash
 npm run build
+```
+
+Chạy development server:
+
+```bash
 npm run dev
 ```
-*Frontend application will be accessible at `http://localhost:5173`.*
+
+Frontend mặc định chạy tại:
+
+```text
+http://localhost:5173
+```
 
 ---
 
-## 🗄️ Database Seeding & Migration Policy
+# Database Migration
 
-- **Production Migration Command**: Always execute `npx prisma migrate deploy` in production environments. Do **NOT** use `npx prisma migrate dev` in production.
-- **Database Seed Policy**: **No database seed is required for normal startup.** Default category entries (Work, Study, Personal, Health) are created dynamically upon user registration.
+Project sử dụng Prisma để quản lý database schema và migration.
+
+Khi chạy production sử dụng:
+
+```bash
+npx prisma migrate deploy
+```
+
+Không sử dụng:
+
+```bash
+npx prisma migrate dev
+```
+
+trong production.
+
+`migrate dev` chủ yếu được sử dụng trong quá trình development khi cần tạo hoặc chỉnh sửa migration.
+
+## Database Seed
+
+Project không yêu cầu database seed để chạy bình thường.
+
+Các category mặc định như:
+
+- Work
+- Study
+- Personal
+- Health
+
+được tạo trong quá trình đăng ký user.
 
 ---
 
-## 🧪 Automated Integration Testing
+# Automated Integration Testing
 
-Planora includes a 45-point automated integration test suite covering authentication, multi-tenant isolation, CRUD operations across all modules, and AI error fallbacks:
+Backend có integration test để kiểm tra các chức năng chính như:
+
+- Authentication
+- User data isolation
+- CRUD của các module
+- Task management
+- Events
+- Timetables
+- Habits
+- Notifications
+- Dashboard
+- AI fallback
+
+Để chạy integration test:
 
 ```bash
 cd BE
 npm run test:integration
 ```
 
-Expected Summary Output:
+Kết quả test hiện tại:
+
 ```text
-📊 PLANORA TEST RESULTS SUMMARY
-   Passed: 45
-   Failed: 0
-   Total:  45
+PLANORA TEST RESULTS SUMMARY
+
+Passed: 45
+Failed: 0
+Total:  45
 ```
 
 ---
 
-## 🤖 AI Smart Scheduling Configuration
+# AI Smart Scheduling
 
-### Default Safe Configuration (`AI_PROVIDER=none`)
-- If `AI_PROVIDER=none` or `AI_API_KEY` is omitted, the application runs in safe mode.
-- `GET /api/ai/status` returns `{"enabled": false}`.
-- AI smart scheduling endpoints return HTTP 503 Service Unavailable with clean fallback notifications.
-- All core product modules (Auth, Tasks, Events, Timetables, Habits, Notifications, Dashboard) remain 100% operational.
+AI trong Planora được sử dụng để hỗ trợ việc phân tích và đề xuất lịch.
 
-### Enabling AI Capabilities
-To enable Gemini/OpenAI smart scheduling:
-1. Set `AI_PROVIDER=gemini` (or `openai`) in `BE/.env`.
-2. Provide valid `AI_API_KEY` in `BE/.env`.
-3. Restart the backend service (`npm run dev` or container restart).
+Luồng xử lý cơ bản:
+
+```text
+Tasks
+   ↓
+Priority Analysis
+   ↓
+Free Slot Detection
+   ↓
+AI Recommendation
+   ↓
+Schedule Proposal
+   ↓
+User Confirmation
+   ↓
+Apply Schedule
+```
+
+AI không tự động thay đổi dữ liệu lịch của người dùng nếu chưa đi qua luồng xử lý của hệ thống.
 
 ---
 
-## 🐳 Production Deployment with Docker Compose
+## Default AI Configuration
 
-Deploy the complete containerized stack (MySQL database, Express backend, Nginx frontend reverse-proxy) using Docker Compose:
+Mặc định:
 
-### 1. Validate Docker Compose Configuration
+```env
+AI_PROVIDER=none
+```
+
+Khi:
+
+```text
+AI_PROVIDER=none
+```
+
+hoặc không có:
+
+```text
+AI_API_KEY
+```
+
+hệ thống vẫn có thể chạy mà không cần AI.
+
+Endpoint:
+
+```http
+GET /api/ai/status
+```
+
+sẽ trả về trạng thái AI, ví dụ:
+
+```json
+{
+  "enabled": false
+}
+```
+
+Các endpoint cần AI có thể trả về:
+
+```text
+503 Service Unavailable
+```
+
+khi AI chưa được bật.
+
+Các module chính vẫn hoạt động:
+
+- Authentication
+- Tasks
+- Events
+- Timetables
+- Habits
+- Notifications
+- Dashboard
+
+---
+
+## Enable AI
+
+Để bật Gemini:
+
+```env
+AI_PROVIDER=gemini
+AI_API_KEY=your_api_key
+AI_MODEL=gemini-1.5-flash
+```
+
+Hoặc sử dụng OpenAI:
+
+```env
+AI_PROVIDER=openai
+AI_API_KEY=your_api_key
+AI_MODEL=your_model
+```
+
+Sau khi thay đổi `.env`, restart Backend:
+
+```bash
+npm run dev
+```
+
+Nếu chạy bằng Docker thì restart container tương ứng.
+
+---
+
+# Docker Deployment
+
+Project có thể chạy toàn bộ stack bằng Docker Compose.
+
+Stack gồm:
+
+```text
+MySQL
+  ↓
+Express Backend
+  ↓
+Nginx
+  ↓
+React Frontend
+```
+
+---
+
+## 1. Validate Docker Compose
+
 ```bash
 docker compose config
 ```
 
-### 2. Build Docker Images
+---
+
+## 2. Build Docker Images
+
 ```bash
 docker compose build --no-cache
 ```
 
-### 3. Start Containers in Background
+---
+
+## 3. Start Containers
+
 ```bash
 docker compose up -d
 ```
 
-### 4. Verify Container Status
+---
+
+## 4. Check Container Status
+
 ```bash
 docker compose ps
 ```
 
-### 5. Container Endpoints
-- **Frontend App (Nginx SPA & API Reverse Proxy)**: `http://localhost:80`
-- **Direct Backend API**: `http://localhost:5000/api`
-- **Backend Health Check**: `http://localhost:5000/api/health`
-- **Database Readiness Probe**: `http://localhost:5000/api/ready`
+---
 
-### 6. Container Logs & Shutdown
-```bash
-# View backend logs
-docker compose logs -f backend
+## 5. Container Endpoints
 
-# Gracefully stop stack (preserves database volume)
-docker compose down
+### Frontend
 
-# Stop stack and PURGE database volume (CAUTION: DELETES ALL DATA)
-docker compose down -v
+```text
+http://localhost:80
+```
+
+### Backend API
+
+```text
+http://localhost:5000/api
+```
+
+### Backend Health Check
+
+```text
+http://localhost:5000/api/health
+```
+
+### Database Readiness
+
+```text
+http://localhost:5000/api/ready
 ```
 
 ---
 
-## 🌐 Nginx Reverse Proxy & CORS Strategy
+## 6. View Logs
 
-In Docker Compose deployment, the Nginx container serves the static React frontend SPA on port `80` and proxies all `/api/` HTTP requests directly to `http://backend:5000/api/`.
+Backend logs:
+
+```bash
+docker compose logs -f backend
+```
+
+Có thể kiểm tra toàn bộ logs bằng:
+
+```bash
+docker compose logs
+```
+
+---
+
+## 7. Stop Containers
+
+Dừng container:
+
+```bash
+docker compose down
+```
+
+Lệnh trên vẫn giữ database volume.
+
+Nếu muốn xóa cả volume:
+
+```bash
+docker compose down -v
+```
+
+> Lưu ý: `docker compose down -v` sẽ xóa dữ liệu được lưu trong Docker volume.
+
+Sau đó có thể khởi tạo lại bằng:
+
+```bash
+docker compose up -d
+```
+
+---
+
+# Nginx Reverse Proxy
+
+Khi chạy bằng Docker, Nginx đảm nhiệm hai việc chính:
+
+1. Serve React Frontend.
+2. Proxy các request `/api/` tới Backend.
+
+Cấu hình cơ bản:
 
 ```nginx
 location /api/ {
     proxy_pass http://backend:5000/api/;
+
     proxy_http_version 1.1;
+
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
 }
+```
 
+Các route Frontend được xử lý bằng:
+
+```nginx
 location / {
     try_files $uri $uri/ /index.html;
 }
 ```
 
-This single-origin design simplifies CORS requirements while `try_files` ensures React Router SPA client-side routes (`/dashboard`, `/tasks`, `/calendar`, `/timetable`, `/profile`, `/settings`) refresh seamlessly without 404 errors.
+Cấu hình này giúp các route của React như:
+
+```text
+/dashboard
+/tasks
+/calendar
+/timetable
+/profile
+/settings
+```
+
+có thể refresh trực tiếp mà không bị trả về lỗi `404`.
+
+Khi sử dụng Nginx reverse proxy, Frontend có thể gọi:
+
+```text
+/api
+```
+
+thay vì gọi trực tiếp:
+
+```text
+http://localhost:5000/api
+```
 
 ---
 
-## 🛠️ Troubleshooting Guide
+# CORS
+
+Khi chạy Frontend và Backend riêng trong development:
+
+```text
+Frontend
+http://localhost:5173
+
+Backend
+http://localhost:5000
+```
+
+Backend sử dụng:
+
+```env
+CLIENT_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:5173
+```
+
+để xác định origin được phép truy cập API.
+
+Khi chạy Docker với Nginx, Frontend và API được truy cập thông qua cùng một origin, giúp việc cấu hình CORS đơn giản hơn.
+
+---
+
+# Troubleshooting
 
 | Problem | Cause | Solution |
-| :--- | :--- | :--- |
-| **Port 3306 already in use** | A local MySQL instance is already running on port 3306. | Stop the host MySQL service or change host port mapping in `docker-compose.yml` (e.g., `'3307:3306'`). |
-| **Port 5000 or 80 in use** | Another service or application is occupying port 5000/80. | Stop the conflicting application or update port mapping in `BE/.env` / `docker-compose.yml`. |
-| **Prisma cannot connect to DB** | MySQL is still starting up or credentials mismatch. | Verify `DATABASE_URL` credentials. Ensure MySQL container health check `mysqladmin ping` reports healthy. |
-| **Frontend cannot reach backend** | Incorrect `VITE_API_URL` environment setting. | For local dev set `VITE_API_URL=http://localhost:5000/api`. For Docker set `VITE_API_URL=/api` before building FE. |
-| **AI endpoint returns HTTP 503** | `AI_PROVIDER` is set to `none` or `AI_API_KEY` is missing. | This is expected default behavior. To enable AI, supply a valid `AI_API_KEY` and set `AI_PROVIDER=gemini`. |
-| **SPA page refresh gives 404** | Web server missing SPA catch-all rewrite rule. | Ensure Nginx `try_files $uri $uri/ /index.html;` configuration is applied (included in `FE/nginx.conf`). |
-| **Docker Volume Reset** | `docker compose down -v` was executed. | Running `down -v` deletes named volumes. Re-run `docker compose up -d` to re-initialize schema via Prisma entrypoint. |
+|---|---|---|
+| **Port 3306 already in use** | MySQL local đang sử dụng port `3306` | Stop MySQL local hoặc đổi host port trong `docker-compose.yml`, ví dụ `3307:3306` |
+| **Port 5000 already in use** | Có application khác đang sử dụng port Backend | Dừng application đó hoặc thay đổi `PORT` |
+| **Port 80 already in use** | Có web server/application khác đang dùng port `80` | Dừng service đang sử dụng port hoặc thay đổi Docker port mapping |
+| **Prisma cannot connect to DB** | MySQL chưa chạy hoặc `DATABASE_URL` sai | Kiểm tra MySQL và thông tin trong `DATABASE_URL` |
+| **Frontend cannot reach Backend** | `VITE_API_URL` không đúng | Local dùng `http://localhost:5000/api`, Docker dùng `/api` |
+| **AI returns HTTP 503** | AI chưa được cấu hình | Thêm `AI_API_KEY` và thay đổi `AI_PROVIDER` nếu muốn sử dụng AI |
+| **SPA refresh gives 404** | Web server chưa có SPA fallback | Kiểm tra `try_files $uri $uri/ /index.html;` trong Nginx |
+| **Docker database data disappeared** | Đã chạy `docker compose down -v` | Volume đã bị xóa, cần khởi tạo lại database |
 
 ---
 
-## 🔒 Security & Reliability Features
+# Security & Reliability
 
-- **Helmet Security Headers**: Applied globally across Express routes.
-- **Production Error Sanitization**: Detailed error traces suppressed in production (`NODE_ENV=production`).
-- **Multi-Tenant Data Isolation**: Database queries enforce user scoping (`where: { id, userId }`) across all business modules.
-- **Atomic Transactions**: Multi-session AI schedule applications execute inside Prisma `$transaction` blocks.
-- **UTF-8 Vietnamese Support**: Verified full support for Vietnamese Unicode characters (`utf8mb4`).
+## JWT Authentication
+
+Các API cần đăng nhập sử dụng JWT để xác thực user.
+
+Token được tạo sau khi user đăng nhập thành công và được kiểm tra ở các protected routes.
+
+---
+
+## Password Hashing
+
+Password không được lưu trực tiếp dưới dạng plain text.
+
+Backend sử dụng:
+
+```text
+bcrypt
+```
+
+để hash password trước khi lưu vào database.
+
+---
+
+## Environment Variables
+
+Các thông tin như:
+
+```text
+DATABASE_URL
+JWT_SECRET
+AI_API_KEY
+```
+
+được lưu trong:
+
+```text
+.env
+```
+
+File `.env` được ignore bởi Git và không nên được commit lên repository.
+
+Repository chỉ giữ:
+
+```text
+.env.example
+```
+
+để làm file cấu hình mẫu.
+
+---
+
+## Helmet
+
+Backend sử dụng Helmet để thêm các HTTP security headers cho Express.
+
+---
+
+## Production Error Handling
+
+Khi:
+
+```env
+NODE_ENV=production
+```
+
+các thông tin lỗi nội bộ không được trả trực tiếp cho client.
+
+Việc này hạn chế việc làm lộ stack trace hoặc các thông tin không cần thiết của Backend.
+
+---
+
+## User Data Isolation
+
+Các query liên quan đến dữ liệu cá nhân được giới hạn theo user.
+
+Ví dụ:
+
+```ts
+where: {
+  id,
+  userId
+}
+```
+
+Mục đích là tránh trường hợp user có thể truy cập dữ liệu thuộc về tài khoản khác.
+
+---
+
+## Database Transactions
+
+Các thao tác cần cập nhật nhiều dữ liệu cùng lúc, đặc biệt trong quá trình apply AI schedule, sử dụng Prisma transaction:
+
+```ts
+prisma.$transaction(...)
+```
+
+Nếu một bước trong transaction gặp lỗi, các thay đổi liên quan có thể được rollback.
+
+---
+
+## UTF-8 Support
+
+Database sử dụng:
+
+```text
+utf8mb4
+```
+
+để hỗ trợ Unicode, bao gồm tiếng Việt.
+
+Ví dụ cấu hình database:
+
+```sql
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+```
+
+---
+
+# Project Structure
+
+Cấu trúc tổng quát:
+
+```text
+Planora/
+│
+├── BE/
+│   ├── prisma/
+│   ├── src/
+│   │   ├── modules/
+│   │   ├── routes/
+│   │   ├── types/
+│   │   ├── utils/
+│   │   ├── app.ts
+│   │   └── server.ts
+│   │
+│   ├── tests/
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── FE/
+│   ├── src/
+│   ├── public/
+│   ├── .env.example
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   └── package.json
+│
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── PROJECT_STRUCTURE.md
+│   ├── DATABASE.md
+│   ├── API.md
+│   ├── FEATURES.md
+│   ├── SECURITY.md
+│   ├── AI_DESIGN.md
+│   ├── USE_CASES.md
+│   ├── DEMO_SCRIPT.md
+│   ├── DEMO_DATA.md
+│   ├── PRESENTATION_OUTLINE.md
+│   ├── DEFENSE_QA.md
+│   ├── DEMO_CHECKLIST.md
+│   └── COMMANDS.md
+│
+├── docker-compose.yml
+└── README.md
+```
+
+Chi tiết từng thư mục được mô tả trong:
+
+```text
+docs/PROJECT_STRUCTURE.md
+```
+
+---
+
+# Main Modules
+
+Planora hiện gồm các module chính:
+
+```text
+Auth
+Profile
+Settings
+Tasks
+Events
+Timetables
+Habits
+Notifications
+Dashboard
+AI Scheduling
+```
+
+Mỗi module Backend được tách riêng để dễ quản lý và mở rộng.
+
+Ví dụ:
+
+```text
+src/modules/tasks/
+src/modules/events/
+src/modules/habits/
+src/modules/notifications/
+```
+
+Các phần như controller, service, schema, route và type được tổ chức theo từng module.
+
+---
+
+# API
+
+Base URL khi chạy local:
+
+```text
+http://localhost:5000/api
+```
+
+Ví dụ:
+
+```http
+POST /api/auth/register
+POST /api/auth/login
+
+GET /api/tasks
+POST /api/tasks
+
+GET /api/events
+POST /api/events
+
+GET /api/timetables
+
+GET /api/habits
+
+GET /api/notifications
+
+GET /api/dashboard
+
+GET /api/ai/status
+```
+
+Danh sách endpoint chi tiết nằm trong:
+
+```text
+docs/API.md
+```
+
+---
+
+# Before Demo / Presentation
+
+Trước khi demo nên kiểm tra:
+
+```bash
+docker compose ps
+```
+
+hoặc khi chạy local:
+
+```bash
+cd BE
+npm run build
+npm run test:integration
+```
+
+Frontend:
+
+```bash
+cd FE
+npm run build
+```
+
+Kiểm tra thêm:
+
+- Database đang hoạt động.
+- Backend kết nối được MySQL.
+- Frontend gọi được Backend API.
+- Login hoạt động.
+- Task và Calendar có dữ liệu demo.
+- Notification hoạt động.
+- Dashboard có dữ liệu.
+- AI API key hợp lệ nếu demo AI.
+- Có phương án demo không dùng AI nếu AI service gặp lỗi.
+
+Checklist chi tiết:
+
+```text
+docs/DEMO_CHECKLIST.md
+```
+
+---
+
+# Notes
+
+Một số lưu ý khi làm việc với project:
+
+- Không push `.env` lên GitHub.
+- Không lưu API key trực tiếp trong source code.
+- Sử dụng `.env.example` để mô tả các environment variable cần thiết.
+- Chạy Prisma migration sau khi database schema thay đổi.
+- Kiểm tra Backend và Frontend build trước khi push các thay đổi lớn.
+- Chạy integration test trước khi release.
+- Không sử dụng `prisma migrate dev` trong production.
+- Cẩn thận khi sử dụng `docker compose down -v` vì command này xóa database volume.
+
+---
+
+# Planora v1.0.0
+
+Phiên bản hiện tại tập trung vào các chức năng quản lý lịch trình cá nhân gồm task, calendar, timetable, habit, notification và dashboard.
+
+AI Scheduling được bổ sung để hỗ trợ người dùng trong việc tìm khoảng thời gian phù hợp và đề xuất lịch dựa trên dữ liệu hiện có.
+
+Project cũng đã có cấu hình cho local development, integration testing và Docker deployment để thuận tiện cho việc phát triển, kiểm thử và demo.
