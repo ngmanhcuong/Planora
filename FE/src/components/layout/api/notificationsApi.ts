@@ -8,6 +8,7 @@ export const notificationsApi = {
   },
 
   getUnreadCount: async (): Promise<number> => {
+    await apiClient.post('/notifications/generate');
     const response = await apiClient.get<ApiResponse<{ unreadCount: number }>>('/notifications/unread-count');
     return response.data.data.unreadCount;
   },

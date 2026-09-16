@@ -9,6 +9,7 @@ import { TimetablePage } from '@/features/timetable/TimetablePage';
 import { TasksPage } from '@/features/tasks/TasksPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { AssistantPage, GoalsPage, NotesPage, ReportsPage } from '@/features/tools/ToolPages';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Loader2 } from 'lucide-react';
@@ -92,6 +93,7 @@ export const AppRouter: React.FC = () => {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/timetable" element={<TimetablePage />} />
           <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/notes" element={<NotesPage />} />

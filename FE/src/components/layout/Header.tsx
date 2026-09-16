@@ -1,19 +1,21 @@
 import React from 'react';
-import { Bell, Search } from 'lucide-react';
+import { NotificationMenu } from './NotificationMenu';
+import { Search } from 'lucide-react';
 import { UserMenu } from './UserMenu';
 import { useUIStore } from '@/stores/useUIStore';
-import { useUnreadCount } from './hooks/useNotifications';
+
 import { clsx } from 'clsx';
 import { useSettings } from '@/features/settings/hooks/useSettings';
 import { normalizeLanguage, translate } from '@/lib/i18n';
 
 export const Header: React.FC = () => {
+
   const { isSidebarCollapsed } = useUIStore();
-  const { data: unreadData } = useUnreadCount();
+
   const { data: settings } = useSettings();
   const language = normalizeLanguage(settings?.language);
 
-  const unreadCount = typeof unreadData === 'number' ? unreadData : 0;
+
 
   return (
     <header
@@ -36,17 +38,7 @@ export const Header: React.FC = () => {
 
       {/* Right Action Icons & User Menu */}
       <div className="flex items-center justify-self-end gap-4">
-        <button
-          className="relative p-2 text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] rounded-xl transition-colors"
-          title={translate(language, 'header.notifications')}
-        >
-          <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 px-1.5 py-0.5 text-[10px] font-bold bg-[#F43F5E] text-white rounded-full ring-2 ring-white">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
-          )}
-        </button>
+        <NotificationMenu />
 
         <div className="h-6 w-px bg-[#E2E8F0]" />
 

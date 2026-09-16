@@ -9,15 +9,22 @@ export const notificationKeys = {
 
 export const useNotifications = () => {
   return useQuery({
-    queryKey: notificationKeys.all,
+    queryKey: [...notificationKeys.all, 'list'],
     queryFn: () => notificationsApi.getNotifications(),
+    refetchInterval: 60000,
   });
 };
 
 export const useUnreadCount = () => {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: notificationKeys.unreadCount,
-    queryFn: () => notificationsApi.getUnreadCount(),
+    queryFn: async () => {
+      const count = await notificationsApi.getUnreadCount();
+      void queryClient.invalidateQueries({ queryKey: [...notificationKeys.all, 'list'] });
+      return count;
+    },
+    refetchInterval: 60000,
   });
 };
 

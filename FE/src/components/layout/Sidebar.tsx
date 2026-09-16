@@ -11,6 +11,7 @@ import {
   Target,
   User,
   Settings,
+  Bell,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -18,12 +19,14 @@ import { useUIStore } from '@/stores/useUIStore';
 import { clsx } from 'clsx';
 import { Logo } from '@/components/ui/Logo';
 import { useSettings } from '@/features/settings/hooks/useSettings';
+import { useUnreadCount } from './hooks/useNotifications';
 import { normalizeLanguage, translate, type TranslationKey } from '@/lib/i18n';
 
 interface NavItem {
   to: string;
   labelKey: TranslationKey;
   icon: React.ReactNode;
+  badge?: number;
 }
 
 const MAIN_NAV_ITEMS: NavItem[] = [
@@ -31,6 +34,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { to: '/calendar', labelKey: 'sidebar.calendar', icon: <CalendarIcon className="w-5 h-5" /> },
   { to: '/timetable', labelKey: 'sidebar.timetable', icon: <Clock className="w-5 h-5" /> },
   { to: '/tasks', labelKey: 'sidebar.tasks', icon: <CheckSquare className="w-5 h-5" /> },
+  { to: '/notifications', labelKey: 'sidebar.notifications', icon: <Bell className="w-5 h-5" /> },
   { to: '/assistant', labelKey: 'sidebar.assistant', icon: <Bot className="w-5 h-5" /> },
   { to: '/goals', labelKey: 'sidebar.goals', icon: <Target className="w-5 h-5" /> },
   { to: '/notes', labelKey: 'sidebar.notes', icon: <NotebookPen className="w-5 h-5" /> },
@@ -45,7 +49,10 @@ const ACCOUNT_NAV_ITEMS: NavItem[] = [
 export const Sidebar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
   const { data: settings } = useSettings();
+  const { data: unreadData } = useUnreadCount();
   const language = normalizeLanguage(settings?.language);
+
+  const unreadCount = typeof unreadData === 'number' ? unreadData : 0;
 
   return (
     <aside
@@ -94,6 +101,7 @@ export const Sidebar: React.FC = () => {
                 item={item}
                 language={language}
                 collapsed={isSidebarCollapsed}
+                badge={item.to === '/notifications' ? unreadCount : item.badge}
               />
             ))}
           </div>
@@ -105,6 +113,7 @@ export const Sidebar: React.FC = () => {
                 item={item}
                 language={language}
                 collapsed={isSidebarCollapsed}
+                badge={item.badge}
               />
             ))}
           </div>
@@ -118,7 +127,8 @@ const SidebarNavLink: React.FC<{
   item: NavItem;
   language: string;
   collapsed: boolean;
-}> = ({ item, language, collapsed }) => {
+  badge?: number;
+}> = ({ item, language, collapsed, badge }) => {
   const label = translate(language, item.labelKey);
   const navigate = useNavigate();
   const location = useLocation();
@@ -140,13 +150,25 @@ const SidebarNavLink: React.FC<{
     >
       <span
         className={clsx(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-150',
+          'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-150',
           isActive ? 'bg-white/70 text-[#4F46E5]' : 'text-current group-hover:bg-white/70'
         )}
       >
         {item.icon}
+        {collapsed && badge !== undefined && badge > 0 && (
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#F43F5E] px-1 text-[9px] font-bold text-white ring-2 ring-white">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
       </span>
-      {!collapsed && <span className="truncate font-[family-name:var(--font-heading)]">{label}</span>}
+      {!collapsed && (
+        <span className="truncate font-[family-name:var(--font-heading)] flex-1">{label}</span>
+      )}
+      {!collapsed && badge !== undefined && badge > 0 && (
+        <span className="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F43F5E] text-white shadow-sm">
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
       {isActive && !collapsed && (
         <span className="absolute right-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#4F46E5]" />
       )}
@@ -156,3 +178,4 @@ const SidebarNavLink: React.FC<{
     </button>
   );
 };
+

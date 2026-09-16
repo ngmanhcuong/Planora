@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Video, AlertTriangle } from 'lucide-react';
+import { MapPin, Video, AlertTriangle, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import type { CalendarEventItem } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, type TranslationKey } from '@/lib/i18n';
@@ -29,62 +29,156 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
 }) => {
   const language = useCurrentLanguage();
   const isDayView = weekDays.length === 1;
-  const headerDays = isDayView && fullWeekDays ? fullWeekDays : weekDays;
+  const activeDay = weekDays[0];
+
+  const handlePrevDay = () => {
+    if (!selectedDate || !onSelectDate) return;
+    const prev = new Date(selectedDate);
+    prev.setDate(prev.getDate() - 1);
+    onSelectDate(prev);
+  };
+
+  const handleNextDay = () => {
+    if (!selectedDate || !onSelectDate) return;
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() + 1);
+    onSelectDate(next);
+  };
 
   return (
     <div className="flex-1 w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col min-w-0">
-      {/* 7-Day Header Selector Row */}
-      <div
-        style={{ gridTemplateColumns: `64px repeat(${headerDays.length}, minmax(0, 1fr))` }}
-        className="grid bg-slate-50/80 border-b border-slate-200/80 py-3 text-center"
-      >
-        <div className="flex items-center justify-center text-xs font-black text-slate-400">
-          GMT+7
-        </div>
-        {headerDays.map((d, index) => {
-          const isSelected = isDayView && selectedDate
-            ? d.dateObj.toDateString() === selectedDate.toDateString()
-            : d.isToday;
+      {/* 7-Day Quick Selector Strip (Visible in Day View) */}
+      {isDayView && fullWeekDays && fullWeekDays.length > 0 && (
+        <div className="bg-slate-50/90 border-b border-slate-200/60 px-4 py-2 flex items-center justify-between gap-2 overflow-x-auto">
+          <div className="flex items-center gap-1 text-xs font-bold text-slate-500 shrink-0 pr-2 border-r border-slate-200">
+            <CalendarIcon className="w-4 h-4 text-indigo-600" />
+            <span>Chọn ngày:</span>
+          </div>
 
-          return (
+          <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+            {fullWeekDays.map((d, index) => {
+              const isSelected = selectedDate
+                ? d.dateObj.toDateString() === selectedDate.toDateString()
+                : d.isToday;
+
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => onSelectDate?.(d.dateObj)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                      : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <span className={isSelected ? 'text-indigo-100' : 'text-slate-400'}>
+                    {translate(language, d.dayKey as TranslationKey)}
+                  </span>
+                  <span className="text-sm font-extrabold">{d.dateNum}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Grid Header Row (Aligned 1-to-1 with grid columns below) */}
+      {isDayView ? (
+        <div
+          style={{ gridTemplateColumns: '64px 1fr' }}
+          className="grid bg-slate-50 border-b border-slate-200/80 items-center text-center py-2.5"
+        >
+          <div className="flex items-center justify-center text-xs font-black text-slate-400">
+            GMT+7
+          </div>
+          <div className="flex items-center justify-between px-6">
             <button
-              key={index}
-              type="button"
-              onClick={() => onSelectDate?.(d.dateObj)}
-              className={`flex flex-col items-center gap-1 py-1.5 transition-all cursor-pointer rounded-xl mx-1 ${
-                isSelected
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                  : 'hover:bg-slate-200/60'
-              }`}
+              onClick={handlePrevDay}
+              className="p-1.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+              title="Ngày trước"
             >
-              <span
-                className={`text-[11px] font-black uppercase tracking-wider ${
-                  isSelected
-                    ? 'text-indigo-100'
-                    : d.isWeekend
-                    ? 'text-slate-400'
-                    : 'text-slate-500'
-                }`}
-              >
-                {translate(language, d.dayKey as TranslationKey)}
-              </span>
-              <span
-                className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-extrabold ${
-                  isSelected
-                    ? 'text-white'
-                    : d.isToday
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : d.isWeekend
-                    ? 'text-slate-400'
-                    : 'text-slate-800'
-                }`}
-              >
-                {d.dateNum}
-              </span>
+              <ChevronLeft className="w-5 h-5" />
             </button>
-          );
-        })}
-      </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black text-slate-800 uppercase tracking-wide">
+                {translate(language, activeDay.dayKey as TranslationKey)}, {activeDay.dateNum} Thg {activeDay.dateObj.getMonth() + 1} {activeDay.dateObj.getFullYear()}
+              </span>
+              {activeDay.isToday && (
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-700">
+                  Hôm nay
+                </span>
+              )}
+              {activeDay.isWeekend && !activeDay.isToday && (
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-200/70 text-slate-600">
+                  Cuối tuần
+                </span>
+              )}
+            </div>
+
+            <button
+              onClick={handleNextDay}
+              className="p-1.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+              title="Ngày sau"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{ gridTemplateColumns: `64px repeat(${weekDays.length}, minmax(0, 1fr))` }}
+          className="grid bg-slate-50/80 border-b border-slate-200/80 py-3 text-center"
+        >
+          <div className="flex items-center justify-center text-xs font-black text-slate-400">
+            GMT+7
+          </div>
+          {weekDays.map((d, index) => {
+            const isSelected = selectedDate
+              ? d.dateObj.toDateString() === selectedDate.toDateString()
+              : d.isToday;
+
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => onSelectDate?.(d.dateObj)}
+                className={`flex flex-col items-center gap-1 py-1.5 transition-all cursor-pointer rounded-xl mx-1 ${
+                  isSelected
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'hover:bg-slate-200/60'
+                }`}
+              >
+                <span
+                  className={`text-[11px] font-black uppercase tracking-wider ${
+                    isSelected
+                      ? 'text-indigo-100'
+                      : d.isWeekend
+                      ? 'text-slate-400'
+                      : 'text-slate-500'
+                  }`}
+                >
+                  {translate(language, d.dayKey as TranslationKey)}
+                </span>
+                <span
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-extrabold ${
+                    isSelected
+                      ? 'text-white'
+                      : d.isToday
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : d.isWeekend
+                      ? 'text-slate-400'
+                      : 'text-slate-800'
+                  }`}
+                >
+                  {d.dateNum}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Grid Body */}
       <div

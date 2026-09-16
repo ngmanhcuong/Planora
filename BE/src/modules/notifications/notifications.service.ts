@@ -35,6 +35,7 @@ function mapTypeString(typeStr?: string): NotificationType | undefined {
 }
 
 export class NotificationsService {
+  private static pendingGeneration = new Map<string, Promise<{ createdCount: number }>>();
   /**
    * Internal method to create a notification with duplicate prevention
    */
@@ -254,6 +255,14 @@ export class NotificationsService {
    * Manual reminder generation for testing / background triggers
    */
   static async generateDueNotifications(userId: string): Promise<{ createdCount: number }> {
+    const pending = this.pendingGeneration.get(userId);
+    if (pending) return pending;
+    const work = this.generateReminders(userId).finally(() => this.pendingGeneration.delete(userId));
+    this.pendingGeneration.set(userId, work);
+    return work;
+  }
+
+  private static async generateReminders(userId: string): Promise<{ createdCount: number }> {
     const now = new Date();
 
     // 1. Fetch user settings for deadlineReminderHours

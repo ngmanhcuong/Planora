@@ -46,6 +46,7 @@ export type TranslationKey =
   | 'sidebar.goals'
   | 'sidebar.notes'
   | 'sidebar.reports'
+  | 'sidebar.notifications'
   | 'sidebar.profile'
   | 'sidebar.settings'
   | 'sidebar.expand'
@@ -236,6 +237,7 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'sidebar.goals': 'Mục tiêu',
     'sidebar.notes': 'Ghi chú',
     'sidebar.reports': 'Báo cáo',
+    'sidebar.notifications': 'Thông báo',
     'sidebar.profile': 'Hồ sơ cá nhân',
     'sidebar.settings': 'Cài đặt',
     'sidebar.expand': 'Mở rộng menu',
@@ -425,6 +427,7 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'sidebar.goals': 'Goals',
     'sidebar.notes': 'Notes',
     'sidebar.reports': 'Reports',
+    'sidebar.notifications': 'Notifications',
     'sidebar.profile': 'Profile',
     'sidebar.settings': 'Settings',
     'sidebar.expand': 'Expand menu',
@@ -614,6 +617,7 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'sidebar.goals': '目標',
     'sidebar.notes': 'メモ',
     'sidebar.reports': 'レポート',
+    'sidebar.notifications': '通知',
     'sidebar.profile': 'プロフィール',
     'sidebar.settings': '設定',
     'sidebar.expand': 'メニューを開く',
