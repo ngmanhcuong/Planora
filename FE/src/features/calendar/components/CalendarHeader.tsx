@@ -33,6 +33,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onOpenCreatePanel,
 }) => {
   const language = useCurrentLanguage();
+  const isVietnamese = language === 'vi';
   const weekNum = getWeekNumber(currentDate);
   const monday = getStartOfWeek(currentDate);
 
@@ -93,7 +94,9 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 {translate(language, 'calendar.title')}
               </h1>
               <p className="text-xs sm:text-sm font-medium text-indigo-100/90 mt-0.5">
-                Quản lý lịch học, deadline và sự kiện trong một không gian đồng bộ.
+                {isVietnamese
+                  ? 'Quản lý lịch học, deadline và sự kiện trong một không gian đồng bộ.'
+                  : 'Manage classes, deadlines, and events in one synchronized workspace.'}
               </p>
             </div>
           </div>
@@ -112,14 +115,14 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               <button
                 onClick={onPrevWeek}
                 className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
-                title="Trước"
+                title={isVietnamese ? 'Trước' : 'Previous'}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={onNextWeek}
                 className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
-                title="Sau"
+                title={isVietnamese ? 'Sau' : 'Next'}
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

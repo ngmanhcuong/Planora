@@ -16,10 +16,13 @@ import {
   useMarkAllReadNotifications,
 } from '@/components/layout/hooks/useNotifications';
 import { clsx } from 'clsx';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 
 type FilterType = 'all' | 'unread' | 'tasks' | 'events' | 'system';
 
 export const NotificationsPage: React.FC = () => {
+  const language = useCurrentLanguage();
+  const isVietnamese = language === 'vi';
   const [filter, setFilter] = useState<FilterType>('all');
   const { data: notificationsData, isLoading, isError, refetch } = useNotifications();
   const { data: unreadData } = useUnreadCount();
@@ -32,6 +35,39 @@ export const NotificationsPage: React.FC = () => {
   }, [notificationsData]);
 
   const unreadCount = typeof unreadData === 'number' ? unreadData : 0;
+  const copy = {
+    title: isVietnamese ? 'Thông báo & Nhắc nhở' : 'Notifications & reminders',
+    subtitle: isVietnamese
+      ? 'Cập nhật tức thì về công việc, lịch trình học tập và nhắc nhở hệ thống.'
+      : 'Get instant updates about tasks, study schedules, and system reminders.',
+    unread: isVietnamese ? 'chưa đọc' : 'unread',
+    markAllRead: isVietnamese ? 'Đánh dấu tất cả đã đọc' : 'Mark all as read',
+    markRead: isVietnamese ? 'Đánh dấu đã đọc' : 'Mark as read',
+    loadError: isVietnamese ? 'Không tải được thông báo.' : 'Could not load notifications.',
+    retry: isVietnamese ? 'Thử lại' : 'Retry',
+    readError: isVietnamese ? 'Không thể đánh dấu đã đọc. Vui lòng thử lại.' : 'Could not mark notifications as read. Please try again.',
+    emptyTitle: isVietnamese ? 'Không có thông báo nào' : 'No notifications',
+    emptyUnread: isVietnamese ? 'Tuyệt vời! Bạn đã đọc hết tất cả thông báo.' : 'Great! You have read all notifications.',
+    emptyDefault: isVietnamese ? 'Hiện chưa có thông báo mới nào dành cho bạn.' : 'There are no new notifications for you yet.',
+    justNow: isVietnamese ? 'Vừa xong' : 'Just now',
+    minutesAgo: (value: number) => isVietnamese ? `${value} phút trước` : `${value} min ago`,
+    hoursAgo: (value: number) => isVietnamese ? `${value} giờ trước` : `${value} hr ago`,
+    daysAgo: (value: number) => isVietnamese ? `${value} ngày trước` : `${value} days ago`,
+    labels: {
+      task: isVietnamese ? 'Công việc' : 'Task',
+      event: isVietnamese ? 'Sự kiện' : 'Event',
+      timetable: isVietnamese ? 'Thời khóa biểu' : 'Timetable',
+      habit: isVietnamese ? 'Thói quen' : 'Habit',
+      system: isVietnamese ? 'Hệ thống' : 'System',
+    },
+    filters: {
+      all: isVietnamese ? 'Tất cả' : 'All',
+      unread: isVietnamese ? `Chưa đọc (${unreadCount})` : `Unread (${unreadCount})`,
+      tasks: isVietnamese ? 'Công việc & Deadline' : 'Tasks & deadlines',
+      events: isVietnamese ? 'Lịch trình' : 'Schedule',
+      system: isVietnamese ? 'Hệ thống' : 'System',
+    },
+  };
 
   const filteredNotifications = useMemo(() => {
     return notifications.filter((n) => {
@@ -53,7 +89,7 @@ export const NotificationsPage: React.FC = () => {
           icon: <CheckSquare className="w-5 h-5 text-rose-600" />,
           bgColor: 'bg-rose-50 border-rose-100',
           badgeColor: 'bg-rose-100 text-rose-700',
-          label: 'Công việc',
+          label: copy.labels.task,
         };
       case 'EVENT':
       case 'EVENT_REMINDER':
@@ -62,7 +98,7 @@ export const NotificationsPage: React.FC = () => {
           icon: <Calendar className="w-5 h-5 text-indigo-600" />,
           bgColor: 'bg-indigo-50 border-indigo-100',
           badgeColor: 'bg-indigo-100 text-indigo-700',
-          label: 'Sự kiện',
+          label: copy.labels.event,
         };
       case 'TIMETABLE':
       case 'TIMETABLE_REMINDER':
@@ -70,7 +106,7 @@ export const NotificationsPage: React.FC = () => {
           icon: <Clock className="w-5 h-5 text-emerald-600" />,
           bgColor: 'bg-emerald-50 border-emerald-100',
           badgeColor: 'bg-emerald-100 text-emerald-700',
-          label: 'Thời khóa biểu',
+          label: copy.labels.timetable,
         };
       case 'HABIT':
       case 'HABIT_REMINDER':
@@ -78,14 +114,14 @@ export const NotificationsPage: React.FC = () => {
           icon: <Zap className="w-5 h-5 text-amber-600" />,
           bgColor: 'bg-amber-50 border-amber-100',
           badgeColor: 'bg-amber-100 text-amber-700',
-          label: 'Thói quen',
+          label: copy.labels.habit,
         };
       default:
         return {
           icon: <Bell className="w-5 h-5 text-sky-600" />,
           bgColor: 'bg-sky-50 border-sky-100',
           badgeColor: 'bg-sky-100 text-sky-700',
-          label: 'Hệ thống',
+          label: copy.labels.system,
         };
     }
   };
@@ -93,26 +129,26 @@ export const NotificationsPage: React.FC = () => {
   const formatTimeAgo = (dateStr: string) => {
     try {
       const created = new Date(dateStr).getTime();
-      if (isNaN(created)) return 'Vừa xong';
+      if (isNaN(created)) return copy.justNow;
       const now = Date.now();
       const diffInSec = Math.floor((now - created) / 1000);
-      if (diffInSec < 60) return 'Vừa xong';
+      if (diffInSec < 60) return copy.justNow;
       const diffInMin = Math.floor(diffInSec / 60);
-      if (diffInMin < 60) return `${diffInMin} phút trước`;
+      if (diffInMin < 60) return copy.minutesAgo(diffInMin);
       const diffInHours = Math.floor(diffInMin / 60);
-      if (diffInHours < 24) return `${diffInHours} giờ trước`;
+      if (diffInHours < 24) return copy.hoursAgo(diffInHours);
       const diffInDays = Math.floor(diffInHours / 24);
-      if (diffInDays < 30) return `${diffInDays} ngày trước`;
-      return new Date(dateStr).toLocaleDateString('vi-VN');
+      if (diffInDays < 30) return copy.daysAgo(diffInDays);
+      return new Date(dateStr).toLocaleDateString(isVietnamese ? 'vi-VN' : 'en-US');
     } catch {
-      return 'Vừa xong';
+      return copy.justNow;
     }
   };
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
-      {isError && <p role="alert" className="text-sm text-red-600">Không tải được thông báo. <button onClick={() => void refetch()}>Thử lại</button></p>}
-      {(markRead.isError || markAllRead.isError) && <p role="alert" className="text-sm text-red-600">Không thể đánh dấu đã đọc. Vui lòng thử lại.</p>}
+      {isError && <p role="alert" className="text-sm text-red-600">{copy.loadError} <button onClick={() => void refetch()}>{copy.retry}</button></p>}
+      {(markRead.isError || markAllRead.isError) && <p role="alert" className="text-sm text-red-600">{copy.readError}</p>}
       {/* Header Section */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-6 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
         <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
@@ -127,15 +163,15 @@ export const NotificationsPage: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-heading">Thông báo & Nhắc nhở</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-heading">{copy.title}</h1>
               {unreadCount > 0 && (
                 <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-rose-500 text-white shadow-sm animate-pulse">
-                  {unreadCount} chưa đọc
+                  {unreadCount} {copy.unread}
                 </span>
               )}
             </div>
             <p className="text-sm text-indigo-100/90 mt-1">
-              Cập nhật tức thì về công việc, lịch trình học tập và nhắc nhở hệ thống.
+              {copy.subtitle}
             </p>
           </div>
         </div>
@@ -147,7 +183,7 @@ export const NotificationsPage: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 text-indigo-100 hover:bg-white/20 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-black/10 border border-white/15 backdrop-blur-md active:scale-95 disabled:opacity-50"
           >
             <CheckCheck className="w-4 h-4" />
-            <span>Đánh dấu tất cả đã đọc</span>
+            <span>{copy.markAllRead}</span>
           </button>
         )}
         </div>
@@ -158,11 +194,11 @@ export const NotificationsPage: React.FC = () => {
         <div className="flex w-full items-center gap-1.5 overflow-x-auto py-1">
           {(
             [
-              { id: 'all', label: 'Tất cả' },
-              { id: 'unread', label: `Chưa đọc (${unreadCount})` },
-              { id: 'tasks', label: 'Công việc & Deadline' },
-              { id: 'events', label: 'Lịch trình' },
-              { id: 'system', label: 'Hệ thống' },
+              { id: 'all', label: copy.filters.all },
+              { id: 'unread', label: copy.filters.unread },
+              { id: 'tasks', label: copy.filters.tasks },
+              { id: 'events', label: copy.filters.events },
+              { id: 'system', label: copy.filters.system },
             ] as const
           ).map((tab) => (
             <button
@@ -193,11 +229,11 @@ export const NotificationsPage: React.FC = () => {
           <div className="w-16 h-16 rounded-3xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 mb-4">
             <Inbox className="w-8 h-8" />
           </div>
-          <h3 className="text-base font-extrabold text-slate-900">Không có thông báo nào</h3>
+          <h3 className="text-base font-extrabold text-slate-900">{copy.emptyTitle}</h3>
           <p className="text-xs text-slate-500 max-w-xs mt-1">
             {filter === 'unread'
-              ? 'Tuyệt vời! Bạn đã đọc hết tất cả thông báo.'
-              : 'Hiện chưa có thông báo mới nào dành cho bạn.'}
+              ? copy.emptyUnread
+              : copy.emptyDefault}
           </p>
         </div>
       ) : (
@@ -260,7 +296,7 @@ export const NotificationsPage: React.FC = () => {
                         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-indigo-600 hover:bg-indigo-100/70 transition-colors"
                       >
                         <Check className="w-3.5 h-3.5" />
-                        <span>Đánh dấu đã đọc</span>
+                        <span>{copy.markRead}</span>
                       </button>
                     </div>
                   )}

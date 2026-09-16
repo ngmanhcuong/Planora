@@ -1,13 +1,13 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard,
+  LayoutGrid,
   Calendar as CalendarIcon,
-  Clock,
+  CalendarClock,
   CheckSquare,
   BarChart3,
-  Bot,
-  NotebookPen,
+  Sparkles,
+  StickyNote,
   Target,
   User,
   Settings,
@@ -30,14 +30,14 @@ interface NavItem {
 }
 
 const MAIN_NAV_ITEMS: NavItem[] = [
-  { to: '/dashboard', labelKey: 'sidebar.dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+  { to: '/dashboard', labelKey: 'sidebar.dashboard', icon: <LayoutGrid className="w-5 h-5" /> },
   { to: '/calendar', labelKey: 'sidebar.calendar', icon: <CalendarIcon className="w-5 h-5" /> },
-  { to: '/timetable', labelKey: 'sidebar.timetable', icon: <Clock className="w-5 h-5" /> },
+  { to: '/timetable', labelKey: 'sidebar.timetable', icon: <CalendarClock className="w-5 h-5" /> },
   { to: '/tasks', labelKey: 'sidebar.tasks', icon: <CheckSquare className="w-5 h-5" /> },
   { to: '/notifications', labelKey: 'sidebar.notifications', icon: <Bell className="w-5 h-5" /> },
-  { to: '/assistant', labelKey: 'sidebar.assistant', icon: <Bot className="w-5 h-5" /> },
+  { to: '/assistant', labelKey: 'sidebar.assistant', icon: <Sparkles className="w-5 h-5" /> },
   { to: '/goals', labelKey: 'sidebar.goals', icon: <Target className="w-5 h-5" /> },
-  { to: '/notes', labelKey: 'sidebar.notes', icon: <NotebookPen className="w-5 h-5" /> },
+  { to: '/notes', labelKey: 'sidebar.notes', icon: <StickyNote className="w-5 h-5" /> },
   { to: '/reports', labelKey: 'sidebar.reports', icon: <BarChart3 className="w-5 h-5" /> },
 ];
 
@@ -57,7 +57,7 @@ export const Sidebar: React.FC = () => {
   return (
     <aside
       className={clsx(
-        'fixed top-0 left-0 bottom-0 z-30 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col transition-all duration-300 ease-in-out select-none',
+        'fixed top-0 left-0 bottom-0 z-30 bg-[var(--color-surface)] flex flex-col transition-all duration-300 ease-in-out select-none',
         isSidebarCollapsed ? 'w-20' : 'w-64'
       )}
     >
@@ -72,19 +72,15 @@ export const Sidebar: React.FC = () => {
           <Logo size="md" theme="light" showText={!isSidebarCollapsed} />
         </div>
 
-        <button
-          onClick={toggleSidebar}
-          className={clsx(
-            'flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[#64748B] shadow-sm transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]',
-            isSidebarCollapsed
-              ? 'absolute -right-4 top-1/2 z-40 -translate-y-1/2'
-              : 'shrink-0'
-          )}
-          title={isSidebarCollapsed ? translate(language, 'sidebar.expand') : translate(language, 'sidebar.collapse')}
-        >
-          {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-        </button>
       </div>
+
+      <button
+        onClick={toggleSidebar}
+        className="absolute -right-4 top-1/2 z-40 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[#64748B] shadow-md shadow-slate-900/10 transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+        title={isSidebarCollapsed ? translate(language, 'sidebar.expand') : translate(language, 'sidebar.collapse')}
+      >
+        {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+      </button>
 
       {/* Navigation Menu */}
       <nav
@@ -150,8 +146,10 @@ const SidebarNavLink: React.FC<{
     >
       <span
         className={clsx(
-          'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-150',
-          isActive ? 'bg-white/70 text-[#4F46E5]' : 'text-current group-hover:bg-white/70'
+          'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border transition-all duration-150 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:stroke-[2]',
+          isActive
+            ? 'border-[#C7D2FE] bg-white text-[#4F46E5] shadow-sm'
+            : 'border-transparent bg-transparent text-[#64748B] group-hover:border-[#E2E8F0] group-hover:bg-white group-hover:text-[#4F46E5]'
         )}
       >
         {item.icon}

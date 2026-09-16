@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Send, Bot, User, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { useAiAssistant } from '../hooks/useAi';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
@@ -7,6 +7,7 @@ import { translate } from '@/lib/i18n';
 export interface AiAssistantPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  initialPrompt?: string;
 }
 
 interface ChatMessage {
@@ -16,7 +17,7 @@ interface ChatMessage {
   timestamp: string;
 }
 
-export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onClose }) => {
+export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onClose, initialPrompt }) => {
   const language = useCurrentLanguage();
   const samplePrompts = [
     translate(language, 'assistant.panel.prompt.one'),
@@ -35,8 +36,15 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
 
   const [inputMsg, setInputMsg] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(true);
 
   const assistantMutation = useAiAssistant();
+
+  useEffect(() => {
+    if (isOpen && initialPrompt) {
+      setInputMsg(initialPrompt);
+    }
+  }, [initialPrompt, isOpen]);
 
   if (!isOpen) return null;
 
@@ -59,6 +67,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
 
     setMessages((prev) => [...prev, userMsg]);
     setInputMsg('');
+    setShowSuggestions(false);
 
     assistantMutation.mutate(text, {
       onSuccess: (data) => {
@@ -78,45 +87,62 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white border-l border-[#E2E8F0] shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-200">
+    <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-hidden border-l border-white/70 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] animate-in slide-in-from-right duration-200 sm:w-[460px]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(79,70,229,0.16),transparent_34%),radial-gradient(circle_at_88%_22%,rgba(245,158,11,0.14),transparent_28%),linear-gradient(180deg,#F8FAFF_0%,#FFFFFF_42%,#F8FAFC_100%)]" />
+
       {/* Header */}
-      <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between bg-gradient-to-r from-[#EEF2FF] to-white">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#4F46E5] flex items-center justify-center text-white shadow-xs">
-            <Bot className="w-5 h-5" />
+      <div className="relative border-b border-white/70 bg-white/72 p-5 shadow-sm backdrop-blur-xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-slate-900 text-white shadow-lg shadow-indigo-500/25">
+            <Bot className="h-6 w-6" />
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[10px] text-slate-950 shadow-sm">
+              <Sparkles className="h-3 w-3 fill-slate-950" />
+            </span>
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[#131B2E] font-heading flex items-center gap-1.5">
+            <h3 className="font-heading text-lg font-black tracking-tight text-slate-950">
               {translate(language, 'assistant.title')}
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
             </h3>
-            <p className="text-[11px] text-[#64748B]">
+            <p className="mt-0.5 text-xs font-medium text-slate-500">
               {translate(language, 'assistant.panel.subtitle')}
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#131B2E] transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-900"
         >
-          <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
         </button>
+        </div>
+        <div className="mt-4 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-extrabold text-emerald-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Online
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[11px] font-extrabold text-indigo-700">
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            Context-aware
+          </span>
+        </div>
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-[#F8FAFC]/50">
+      <div className="relative flex-1 overflow-y-auto px-5 py-5">
+        <div className="flex flex-col gap-4">
         {messages.map((m) => (
           <div
             key={m.id}
-            className={`flex gap-2.5 max-w-[85%] ${
+              className={`flex max-w-[92%] gap-3 ${
               m.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'
             }`}
           >
             <div
-              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-xs font-bold shadow-sm ${
                 m.sender === 'user'
-                  ? 'bg-[#131B2E] text-white'
-                  : 'bg-[#4F46E5] text-white shadow-2xs'
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-indigo-500/20'
               }`}
             >
               {m.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -124,50 +150,55 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
 
             <div className="flex flex-col gap-1">
               <div
-                className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                  className={`rounded-[1.35rem] px-4 py-3 text-sm leading-relaxed shadow-sm ${
                   m.sender === 'user'
-                    ? 'bg-[#4F46E5] text-white rounded-tr-none'
-                    : 'bg-white border border-[#E2E8F0] text-[#131B2E] rounded-tl-none shadow-2xs'
+                      ? 'rounded-tr-md bg-gradient-to-br from-indigo-600 to-violet-600 text-white'
+                      : 'rounded-tl-md border border-slate-200/80 bg-white/92 text-slate-800'
                 }`}
               >
                 {m.text}
               </div>
-              <span className="text-[10px] text-[#94A3B8] px-1 font-mono">{m.timestamp}</span>
+                <span className={`px-1 text-[10px] font-bold text-slate-400 ${m.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                  {m.timestamp}
+                </span>
             </div>
           </div>
         ))}
 
         {assistantMutation.isPending && (
-          <div className="flex items-center gap-2 text-xs text-[#64748B] p-2 bg-white rounded-xl border border-[#E2E8F0] w-fit">
-            <Loader2 className="w-4 h-4 animate-spin text-[#4F46E5]" />
+            <div className="flex w-fit items-center gap-2 rounded-2xl border border-indigo-100 bg-white/90 px-3 py-2 text-xs font-bold text-slate-500 shadow-sm">
+              <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
             <span>{translate(language, 'assistant.panel.thinking')}</span>
           </div>
         )}
-      </div>
-
-      {/* Quick Sample Prompts */}
-      <div className="p-3 border-t border-[#E2E8F0] bg-white flex flex-col gap-2">
-        <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">
-          {translate(language, 'assistant.panel.suggestions')}
-        </span>
-        <div className="flex flex-wrap gap-1.5">
-          {samplePrompts.map((prompt, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleSend(prompt)}
-              disabled={assistantMutation.isPending}
-              className="text-[11px] px-2.5 py-1 rounded-full bg-[#F1F5F9] hover:bg-[#EEF2FF] hover:text-[#4F46E5] text-[#475569] font-medium transition-colors text-left border border-[#E2E8F0]"
-            >
-              {prompt}
-            </button>
-          ))}
         </div>
       </div>
 
+      {/* Quick Sample Prompts */}
+      {showSuggestions && (
+        <div className="relative border-t border-slate-200/80 bg-white/80 px-5 py-4 backdrop-blur-xl">
+          <span className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+            {translate(language, 'assistant.panel.suggestions')}
+          </span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {samplePrompts.map((prompt, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSend(prompt)}
+                disabled={assistantMutation.isPending}
+                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-[11px] font-bold text-slate-600 transition-all hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-60"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input Form */}
-      <div className="p-3 border-t border-[#E2E8F0] bg-white flex flex-col gap-2">
+      <div className="relative border-t border-slate-200/80 bg-white px-4 py-4">
         {errorMessage && (
-          <div className="text-[11px] font-semibold text-[#BA1A1A] bg-[#FFF1F2] p-2 rounded-lg border border-[#FFE4E6] flex items-center gap-1.5">
+          <div className="mb-3 flex items-center gap-1.5 rounded-2xl border border-rose-100 bg-rose-50 p-2.5 text-[11px] font-semibold text-rose-700">
             <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
             <span>{errorMessage}</span>
           </div>
@@ -178,7 +209,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 rounded-3xl border border-slate-200 bg-slate-50 p-2 shadow-[0_12px_34px_rgba(15,23,42,0.08)] transition-all focus-within:border-indigo-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100"
         >
           <input
             type="text"
@@ -186,12 +217,12 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             onChange={(e) => setInputMsg(e.target.value)}
             placeholder={translate(language, 'assistant.panel.placeholder')}
             disabled={assistantMutation.isPending}
-            className="flex-1 h-9 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs text-[#131B2E] placeholder-[#94A3B8] focus:outline-none focus:border-[#4F46E5] focus:bg-white transition-all"
+            className="h-10 flex-1 bg-transparent px-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none"
           />
           <button
             type="submit"
             disabled={assistantMutation.isPending || !inputMsg.trim()}
-            className="w-9 h-9 rounded-xl bg-[#4F46E5] text-white flex items-center justify-center hover:bg-[#4338CA] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xs shrink-0"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/35 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             <Send className="w-4 h-4" />
           </button>

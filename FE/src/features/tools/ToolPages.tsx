@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   CheckCircle2,
@@ -26,8 +27,22 @@ import {
   X,
   Tag,
   FolderPlus,
+  Bot,
+  Brain,
+  Clock3,
+  ListChecks,
+  Loader2,
+  ShieldCheck,
+  StickyNote,
+  Pin,
+  Edit2,
+  Copy,
+  ArrowUpRight,
 } from 'lucide-react';
-import { AiAssistantPanel } from '@/features/ai';
+import { AiAssistantPanel, SmartScheduleModal, useAiStatus, usePrioritizeTasks } from '@/features/ai';
+import type { TaskPriorityRecommendation } from '@/features/ai';
+import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
+import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate } from '@/lib/i18n';
 import { clsx } from 'clsx';
@@ -63,15 +78,116 @@ const COLOR_THEMES = [
 
 export const AssistantPage: React.FC = () => {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [assistantPrompt, setAssistantPrompt] = useState('');
+  const [priorityResults, setPriorityResults] = useState<TaskPriorityRecommendation[]>([]);
   const language = useCurrentLanguage();
+  const isVietnamese = language === 'vi';
+  const assistantCopy = {
+    systemTask: isVietnamese ? 'Công việc trong hệ thống' : 'Task in the system',
+    incompleteTasks: isVietnamese ? 'Task chưa xong' : 'Incomplete tasks',
+    highPriority: (value: number) => isVietnamese ? `${value} việc ưu tiên cao` : `${value} high-priority tasks`,
+    todayTasks: isVietnamese ? 'Việc hôm nay' : 'Today tasks',
+    completed: (done: number, total: number) => isVietnamese ? `${done}/${total} đã hoàn thành` : `${done}/${total} completed`,
+    upcomingSchedule: isVietnamese ? 'Lịch sắp tới' : 'Upcoming schedule',
+    checkConflicts: isVietnamese ? 'Dùng AI để kiểm tra trùng lịch' : 'Use AI to check schedule conflicts',
+    productivityScore: isVietnamese ? 'Điểm năng suất' : 'Productivity score',
+    explainScore: isVietnamese ? 'AI có thể giải thích nguyên nhân' : 'AI can explain what affects it',
+    centerTitle: isVietnamese ? 'Trung tâm chức năng AI' : 'AI action center',
+    centerSubtitle: isVietnamese
+      ? 'Dùng dữ liệu thật từ lịch và công việc của bạn để gợi ý hành động.'
+      : 'Use real calendar and task data to suggest your next actions.',
+    checking: isVietnamese ? 'Đang kiểm tra' : 'Checking',
+    disabled: isVietnamese ? 'AI chưa bật' : 'AI disabled',
+    prioritize: isVietnamese ? 'Phân tích ưu tiên' : 'Analyze priorities',
+    prioritizeDesc: isVietnamese
+      ? 'AI xếp hạng task nên làm trước dựa trên deadline và độ ưu tiên.'
+      : 'AI ranks which tasks should be handled first based on deadlines and priority.',
+    schedule: isVietnamese ? 'Lập lịch AI' : 'AI scheduling',
+    scheduleDesc: isVietnamese
+      ? 'Tạo buổi học/làm việc tự động rồi áp dụng vào lịch của tôi.'
+      : 'Generate study/work sessions and apply them to your calendar.',
+    dataAdvice: isVietnamese ? 'Tư vấn theo dữ liệu' : 'Data-based advice',
+    dataAdvicePrompt: isVietnamese
+      ? 'Hãy phân tích lịch, deadline và gợi ý kế hoạch tốt nhất cho hôm nay.'
+      : 'Analyze my schedule and deadlines, then suggest the best plan for today.',
+    dataAdviceDesc: isVietnamese
+      ? 'Hỏi AI về trùng lịch, deadline gấp hoặc vì sao năng suất thấp.'
+      : 'Ask AI about conflicts, urgent deadlines, or why productivity is low.',
+    resultTitle: isVietnamese ? 'Kết quả AI' : 'AI results',
+    resultSubtitle: isVietnamese ? 'Kết quả phân tích ưu tiên sẽ hiển thị tại đây.' : 'Priority analysis results will appear here.',
+    unavailable: isVietnamese ? 'Không thể gọi AI lúc này. Vui lòng kiểm tra cấu hình AI hoặc thử lại sau.' : 'AI is unavailable right now. Please check the AI configuration or try again later.',
+    priorityRank: (rank: number) => isVietnamese ? `Ưu tiên #${rank}` : `Priority #${rank}`,
+    emptyTitle: isVietnamese ? 'Chưa có phân tích nào' : 'No analysis yet',
+    emptyDesc: isVietnamese
+      ? 'Bấm “Phân tích ưu tiên” để AI đọc danh sách công việc chưa hoàn thành và đề xuất thứ tự xử lý.'
+      : 'Click “Analyze priorities” so AI can read unfinished tasks and suggest the best order.',
+  };
+  const { data: aiStatus, isLoading: isAiStatusLoading } = useAiStatus();
+  const { data: dashboardData } = useDashboard();
+  const { data: tasksData } = useTasks();
+  const prioritizeMutation = usePrioritizeTasks();
+
+  const allTasks = tasksData?.tasks || [];
+  const incompleteTasks = allTasks.filter((task) => task.status !== 'COMPLETED');
+  const urgentTasks = incompleteTasks.filter((task) => task.priority === 'URGENT' || task.priority === 'HIGH');
+  const todayCount = dashboardData?.summary.tasksToday || 0;
+  const upcomingEvents = dashboardData?.summary.upcomingEvents || 0;
+  const todayScore = dashboardData?.productivity.todayScore || 0;
+
   const promptCards = [
     translate(language, 'assistant.prompt.today'),
     translate(language, 'assistant.prompt.week'),
     translate(language, 'assistant.prompt.breakdown'),
   ];
 
+  const openAssistantWithPrompt = (prompt = '') => {
+    setAssistantPrompt(prompt);
+    setIsAssistantOpen(true);
+  };
+
+  const handlePrioritize = () => {
+    const taskIds = incompleteTasks.map((task) => task.id);
+    prioritizeMutation.mutate(taskIds.length ? taskIds : undefined, {
+      onSuccess: (data) => setPriorityResults(data.recommendations || []),
+    });
+  };
+
+  const getTaskTitle = (taskId: string) => allTasks.find((task) => task.id === taskId)?.title || assistantCopy.systemTask;
+
+  const insightCards = [
+    {
+      label: assistantCopy.incompleteTasks,
+      value: incompleteTasks.length,
+      hint: assistantCopy.highPriority(urgentTasks.length),
+      icon: ListChecks,
+      tone: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+    },
+    {
+      label: assistantCopy.todayTasks,
+      value: todayCount,
+      hint: assistantCopy.completed(dashboardData?.summary.tasksCompletedToday || 0, todayCount),
+      icon: CheckCircle2,
+      tone: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+    },
+    {
+      label: assistantCopy.upcomingSchedule,
+      value: upcomingEvents,
+      hint: assistantCopy.checkConflicts,
+      icon: Clock3,
+      tone: 'text-sky-600 bg-sky-50 border-sky-100',
+    },
+    {
+      label: assistantCopy.productivityScore,
+      value: todayScore,
+      hint: assistantCopy.explainScore,
+      icon: Zap,
+      tone: 'text-amber-600 bg-amber-50 border-amber-100',
+    },
+  ];
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+    <div className="flex w-full flex-col gap-6 pb-12">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white p-6 sm:p-10 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
         <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
@@ -89,7 +205,7 @@ export const AssistantPage: React.FC = () => {
             </p>
           </div>
           <button
-            onClick={() => setIsAssistantOpen(true)}
+            onClick={() => openAssistantWithPrompt()}
             className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3.5 text-xs sm:text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
           >
             <Send className="h-4 w-4 fill-slate-950" />
@@ -98,11 +214,123 @@ export const AssistantPage: React.FC = () => {
         </div>
       </section>
 
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {insightCards.map((item) => (
+          <article key={item.label} className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+            <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border ${item.tone}`}>
+              <item.icon className="h-5 w-5" />
+            </div>
+            <p className="font-heading text-3xl font-black text-slate-900">{item.value}</p>
+            <p className="mt-1 text-xs font-extrabold uppercase tracking-wide text-slate-500">{item.label}</p>
+            <p className="mt-2 text-xs font-medium text-slate-500">{item.hint}</p>
+          </article>
+        ))}
+      </div>
+
+      <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600">
+                <Brain className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-heading text-lg font-extrabold text-slate-900">{assistantCopy.centerTitle}</h2>
+                <p className="text-xs font-medium text-slate-500">{assistantCopy.centerSubtitle}</p>
+              </div>
+            </div>
+            <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-extrabold ${
+              aiStatus?.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-200'
+            }`}>
+              <ShieldCheck className="h-3.5 w-3.5" />
+              {isAiStatusLoading ? assistantCopy.checking : aiStatus?.enabled ? `AI ${aiStatus.provider}` : assistantCopy.disabled}
+            </span>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            <button
+              onClick={handlePrioritize}
+              disabled={prioritizeMutation.isPending}
+              className="group rounded-3xl border border-indigo-100 bg-indigo-50/70 p-5 text-left transition-all hover:-translate-y-1 hover:bg-indigo-50 hover:shadow-lg disabled:opacity-70"
+            >
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm">
+                {prioritizeMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <ListChecks className="h-5 w-5" />}
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900">{assistantCopy.prioritize}</h3>
+              <p className="mt-2 text-xs font-medium leading-relaxed text-slate-500">{assistantCopy.prioritizeDesc}</p>
+            </button>
+
+            <button
+              onClick={() => setIsScheduleOpen(true)}
+              className="group rounded-3xl border border-amber-100 bg-amber-50/70 p-5 text-left transition-all hover:-translate-y-1 hover:bg-amber-50 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-amber-600 shadow-sm">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900">{assistantCopy.schedule}</h3>
+              <p className="mt-2 text-xs font-medium leading-relaxed text-slate-500">{assistantCopy.scheduleDesc}</p>
+            </button>
+
+            <button
+              onClick={() => openAssistantWithPrompt(assistantCopy.dataAdvicePrompt)}
+              className="group rounded-3xl border border-emerald-100 bg-emerald-50/70 p-5 text-left transition-all hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-emerald-600 shadow-sm">
+                <Bot className="h-5 w-5" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900">{assistantCopy.dataAdvice}</h3>
+              <p className="mt-2 text-xs font-medium leading-relaxed text-slate-500">{assistantCopy.dataAdviceDesc}</p>
+            </button>
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-violet-100 bg-violet-50 text-violet-600">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-heading text-lg font-extrabold text-slate-900">{assistantCopy.resultTitle}</h2>
+              <p className="text-xs font-medium text-slate-500">{assistantCopy.resultSubtitle}</p>
+            </div>
+          </div>
+
+          {prioritizeMutation.isError ? (
+            <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+              {assistantCopy.unavailable}
+            </div>
+          ) : priorityResults.length > 0 ? (
+            <div className="space-y-3">
+              {priorityResults.slice(0, 5).map((item) => (
+                <article key={`${item.taskId}_${item.rank}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wide text-indigo-600">{assistantCopy.priorityRank(item.rank)}</p>
+                      <h3 className="mt-1 text-sm font-extrabold text-slate-900">{getTaskTitle(item.taskId)}</h3>
+                    </div>
+                    <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-slate-600 border border-slate-200">
+                      {item.suggestedPriority}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs font-medium leading-relaxed text-slate-500">{item.reason}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-56 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 p-6 text-center">
+              <Brain className="mb-3 h-9 w-9 text-slate-300" />
+              <p className="text-sm font-extrabold text-slate-900">{assistantCopy.emptyTitle}</p>
+              <p className="mt-1 max-w-sm text-xs font-medium text-slate-500">{assistantCopy.emptyDesc}</p>
+            </div>
+          )}
+        </div>
+      </section>
+
       <div className="grid gap-4 md:grid-cols-3">
         {promptCards.map((text) => (
           <button
             key={text}
-            onClick={() => setIsAssistantOpen(true)}
+            onClick={() => openAssistantWithPrompt(text)}
             className={`${cardClass} flex items-start gap-4 p-5 text-left transition-all hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md cursor-pointer group`}
           >
             <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
@@ -115,22 +343,41 @@ export const AssistantPage: React.FC = () => {
         ))}
       </div>
 
-      <AiAssistantPanel isOpen={isAssistantOpen} onClose={() => setIsAssistantOpen(false)} />
+      <SmartScheduleModal isOpen={isScheduleOpen} onClose={() => setIsScheduleOpen(false)} />
+      <AiAssistantPanel
+        isOpen={isAssistantOpen}
+        initialPrompt={assistantPrompt}
+        onClose={() => setIsAssistantOpen(false)}
+      />
     </div>
   );
 };
 
 export const GoalsPage: React.FC = () => {
   const language = useCurrentLanguage();
+  const isVietnamese = language === 'vi';
+  const goalsCopy = {
+    all: isVietnamese ? 'Tất cả' : 'All',
+    study: isVietnamese ? 'Học tập' : 'Study',
+    work: isVietnamese ? 'Công việc' : 'Work',
+    personal: isVietnamese ? 'Cá nhân' : 'Personal',
+    health: isVietnamese ? 'Sức khỏe' : 'Health',
+    search: isVietnamese ? 'Tìm mục tiêu...' : 'Search goals...',
+    cancel: isVietnamese ? 'Hủy' : 'Cancel',
+    create: isVietnamese ? 'Tạo mục tiêu mới' : 'Create new goal',
+    completed: isVietnamese ? 'Đã hoàn thành' : 'Completed',
+    streak: isVietnamese ? 'Chuỗi duy trì' : 'Streak',
+    days: isVietnamese ? 'ngày' : 'days',
+  };
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isAddingGoal, setIsAddingGoal] = useState<boolean>(false);
 
   const [categories, setCategories] = useState<CategoryOption[]>([
-    { id: 'study', label: 'Học tập', color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-100', icon: BookOpen },
-    { id: 'work', label: 'Công việc', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100', icon: Briefcase },
-    { id: 'personal', label: 'Cá nhân', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100', icon: User },
-    { id: 'health', label: 'Sức khỏe', color: 'text-rose-600', bg: 'bg-rose-50 border-rose-100', icon: HeartPulse },
+    { id: 'study', label: goalsCopy.study, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-100', icon: BookOpen },
+    { id: 'work', label: goalsCopy.work, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100', icon: Briefcase },
+    { id: 'personal', label: goalsCopy.personal, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100', icon: User },
+    { id: 'health', label: goalsCopy.health, color: 'text-rose-600', bg: 'bg-rose-50 border-rose-100', icon: HeartPulse },
   ]);
 
   const [isCreatingCategory, setIsCreatingCategory] = useState<boolean>(false);
@@ -274,15 +521,15 @@ export const GoalsPage: React.FC = () => {
               <span className="text-2xl font-black text-amber-300 font-heading">{averageProgress}%</span>
             </div>
             <div className="px-4 py-2 text-center border-r border-white/15">
-              <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">Đã hoàn thành</span>
+              <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">{goalsCopy.completed}</span>
               <span className="text-2xl font-black text-emerald-400 font-heading">
                 {completedCount}/{goals.length}
               </span>
             </div>
             <div className="px-4 py-2 text-center">
-              <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">Chuỗi duy trì</span>
+              <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">{goalsCopy.streak}</span>
               <span className="text-2xl font-black text-rose-400 font-heading flex items-center justify-center gap-1">
-                <Flame className="w-5 h-5 fill-rose-400 inline" /> 7 ngày
+                <Flame className="w-5 h-5 fill-rose-400 inline" /> 7 {goalsCopy.days}
               </span>
             </div>
           </div>
@@ -302,7 +549,7 @@ export const GoalsPage: React.FC = () => {
                 : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900'
             )}
           >
-            Tất cả
+            {goalsCopy.all}
           </button>
           {categories.map((cat) => (
             <button
@@ -328,7 +575,7 @@ export const GoalsPage: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm mục tiêu..."
+              placeholder={goalsCopy.search}
               className="w-full h-10 pl-9 pr-4 bg-white border border-slate-200/80 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
             />
           </div>
@@ -337,7 +584,7 @@ export const GoalsPage: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-2xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer active:scale-95 shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>{isAddingGoal ? 'Hủy' : 'Tạo mục tiêu mới'}</span>
+            <span>{isAddingGoal ? goalsCopy.cancel : goalsCopy.create}</span>
           </button>
         </div>
       </div>
@@ -692,98 +939,559 @@ export const GoalsPage: React.FC = () => {
 
 export const NotesPage: React.FC = () => {
   const language = useCurrentLanguage();
-  const [notes, setNotes] = useState([
-    { id: 1, text: translate(language, 'notes.sample.one'), done: false, tag: 'Học tập' },
-    { id: 2, text: translate(language, 'notes.sample.two'), done: true, tag: 'Công việc' },
-  ]);
+  const navigate = useNavigate();
+  const isVietnamese = language === 'vi';
+
+  const COLOR_MAP: Record<string, { bg: string; border: string; badge: string; text: string }> = {
+    white: { bg: 'bg-white', border: 'border-slate-200/80', badge: 'bg-slate-100 text-slate-700', text: 'text-slate-900' },
+    amber: { bg: 'bg-amber-50/90', border: 'border-amber-200/90', badge: 'bg-amber-100 text-amber-800', text: 'text-amber-950' },
+    sky: { bg: 'bg-sky-50/90', border: 'border-sky-200/90', badge: 'bg-sky-100 text-sky-800', text: 'text-sky-950' },
+    emerald: { bg: 'bg-emerald-50/90', border: 'border-emerald-200/90', badge: 'bg-emerald-100 text-emerald-800', text: 'text-emerald-950' },
+    violet: { bg: 'bg-violet-50/90', border: 'border-violet-200/90', badge: 'bg-violet-100 text-violet-800', text: 'text-violet-950' },
+    rose: { bg: 'bg-rose-50/90', border: 'border-rose-200/90', badge: 'bg-rose-100 text-rose-800', text: 'text-rose-950' },
+  };
+
+  interface NoteItem {
+    id: number;
+    text: string;
+    done: boolean;
+    tag: string;
+    isPinned?: boolean;
+    color?: string;
+    createdAt?: string;
+  }
+
+  const initialNotes: NoteItem[] = [
+    {
+      id: 1,
+      text: 'Chuẩn bị slide thuyết trình cho môn Lịch sử tư tưởng triết học',
+      done: false,
+      tag: isVietnamese ? 'Học tập' : 'Study',
+      isPinned: true,
+      color: 'sky',
+      createdAt: 'Hôm nay',
+    },
+    {
+      id: 2,
+      text: 'Kiểm tra lại deadline báo cáo tiến độ đồ án với giảng viên hướng dẫn',
+      done: false,
+      tag: isVietnamese ? 'Công việc' : 'Work',
+      isPinned: true,
+      color: 'amber',
+      createdAt: 'Hôm nay',
+    },
+    {
+      id: 3,
+      text: 'Mua thêm sổ ghi chép và bút highlight màu pastel',
+      done: true,
+      tag: isVietnamese ? 'Cá nhân' : 'Personal',
+      isPinned: false,
+      color: 'white',
+      createdAt: 'Hôm qua',
+    },
+    {
+      id: 4,
+      text: 'Ý tưởng tối ưu giao diện Dashboard với Widget theo dõi năng suất',
+      done: false,
+      tag: isVietnamese ? 'Ý tưởng' : 'Idea',
+      isPinned: false,
+      color: 'violet',
+      createdAt: '2 ngày trước',
+    },
+  ];
+
+  const [notes, setNotes] = useState<NoteItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('planora_quick_notes_v3');
+      return saved ? JSON.parse(saved) : initialNotes;
+    } catch {
+      return initialNotes;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('planora_quick_notes_v3', JSON.stringify(notes));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [notes]);
+
   const [text, setText] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string>(isVietnamese ? 'Ghi chú' : 'Note');
+  const [selectedColor, setSelectedColor] = useState<string>('white');
+  const [isPinnedInput, setIsPinnedInput] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeFilterTag, setActiveFilterTag] = useState<string>('all');
+  const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState<string>('');
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  const availableTags = [
+    isVietnamese ? 'Học tập' : 'Study',
+    isVietnamese ? 'Công việc' : 'Work',
+    isVietnamese ? 'Cá nhân' : 'Personal',
+    isVietnamese ? 'Ý tưởng' : 'Idea',
+    isVietnamese ? 'Quan trọng' : 'Important',
+    isVietnamese ? 'Ghi chú' : 'Note',
+  ];
 
   const addNote = () => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
-    setNotes((prev) => [{ id: Date.now(), text: trimmedText, done: false, tag: 'Ghi chú' }, ...prev]);
+    const newNote: NoteItem = {
+      id: Date.now(),
+      text: trimmedText,
+      done: false,
+      tag: selectedTag,
+      isPinned: isPinnedInput,
+      color: selectedColor,
+      createdAt: isVietnamese ? 'Vừa xong' : 'Just now',
+    };
+    setNotes((prev) => [newNote, ...prev]);
     setText('');
+    setIsPinnedInput(false);
+  };
+
+  const toggleDone = (id: number) => {
+    setNotes((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
+    );
+  };
+
+  const togglePin = (id: number) => {
+    setNotes((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, isPinned: !item.isPinned } : item))
+    );
+  };
+
+  const deleteNote = (id: number) => {
+    setNotes((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const copyNoteText = (id: number, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const convertToTask = (note: NoteItem) => {
+    navigate('/tasks', { state: { createTitle: note.text } });
+  };
+
+  const startEdit = (note: NoteItem) => {
+    setEditingNoteId(note.id);
+    setEditingText(note.text);
+  };
+
+  const saveEdit = (id: number) => {
+    if (editingText.trim()) {
+      setNotes((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, text: editingText.trim() } : item))
+      );
+    }
+    setEditingNoteId(null);
+  };
+
+  const filteredNotes = useMemo(() => {
+    return notes.filter((n) => {
+      const matchSearch =
+        n.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        n.tag.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchSearch) return false;
+      if (activeFilterTag === 'all') return true;
+      if (activeFilterTag === 'pinned') return n.isPinned;
+      if (activeFilterTag === 'completed') return n.done;
+      return n.tag === activeFilterTag;
+    });
+  }, [notes, searchQuery, activeFilterTag]);
+
+  const pinnedNotes = useMemo(() => filteredNotes.filter((n) => n.isPinned), [filteredNotes]);
+  const otherNotes = useMemo(() => filteredNotes.filter((n) => !n.isPinned), [filteredNotes]);
+
+  const completedCount = notes.filter((n) => n.done).length;
+  const pinnedCount = notes.filter((n) => n.isPinned).length;
+
+  const renderNoteCard = (note: NoteItem) => {
+    const colorStyle = COLOR_MAP[note.color || 'white'] || COLOR_MAP.white;
+    const isEditing = editingNoteId === note.id;
+
+    return (
+      <article
+        key={note.id}
+        className={clsx(
+          'group relative flex flex-col justify-between p-5 rounded-3xl border transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1',
+          colorStyle.bg,
+          colorStyle.border,
+          note.done && 'opacity-70 bg-slate-50 border-slate-200'
+        )}
+      >
+        <div>
+          {/* Card Top Header */}
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleDone(note.id)}
+                className={clsx(
+                  'cursor-pointer transition-transform active:scale-95',
+                  note.done ? 'text-emerald-600' : 'text-slate-400 hover:text-indigo-600'
+                )}
+                title={note.done ? 'Đánh dấu chưa xong' : 'Đánh dấu hoàn thành'}
+              >
+                {note.done ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
+              </button>
+              <span
+                className={clsx(
+                  'inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-black/5',
+                  colorStyle.badge
+                )}
+              >
+                {note.tag}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => togglePin(note.id)}
+                className={clsx(
+                  'p-1.5 rounded-xl transition-all cursor-pointer',
+                  note.isPinned
+                    ? 'text-amber-500 bg-amber-100/80 hover:bg-amber-200'
+                    : 'text-slate-400 opacity-0 group-hover:opacity-100 hover:text-amber-500 hover:bg-black/5'
+                )}
+                title={note.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}
+              >
+                <Pin className="h-3.5 w-3.5 fill-current" />
+              </button>
+
+              <button
+                onClick={() => copyNoteText(note.id, note.text)}
+                className="p-1.5 rounded-xl text-slate-400 opacity-0 group-hover:opacity-100 hover:text-slate-700 hover:bg-black/5 transition-all cursor-pointer"
+                title="Sao chép ghi chú"
+              >
+                {copiedId === note.id ? (
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+              </button>
+
+              <button
+                onClick={() => startEdit(note)}
+                className="p-1.5 rounded-xl text-slate-400 opacity-0 group-hover:opacity-100 hover:text-indigo-600 hover:bg-black/5 transition-all cursor-pointer"
+                title="Sửa ghi chú"
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+              </button>
+
+              <button
+                onClick={() => deleteNote(note.id)}
+                className="p-1.5 rounded-xl text-slate-400 opacity-0 group-hover:opacity-100 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
+                title="Xóa ghi chú"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Content / Inline Edit */}
+          {isEditing ? (
+            <div className="space-y-2 mb-3">
+              <textarea
+                value={editingText}
+                onChange={(e) => setEditingText(e.target.value)}
+                rows={2}
+                className="w-full p-2 text-xs font-medium bg-white rounded-xl border border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-100 resize-none"
+                autoFocus
+              />
+              <div className="flex justify-end gap-1.5">
+                <button
+                  onClick={() => setEditingNoteId(null)}
+                  className="px-2.5 py-1 text-[11px] font-bold text-slate-500 hover:bg-slate-100 rounded-lg"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => saveEdit(note.id)}
+                  className="px-3 py-1 text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm"
+                >
+                  Lưu
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p
+              className={clsx(
+                'text-xs sm:text-sm font-medium leading-relaxed mb-4 whitespace-pre-line',
+                note.done ? 'text-slate-400 line-through' : colorStyle.text
+              )}
+            >
+              {note.text}
+            </p>
+          )}
+        </div>
+
+        {/* Bottom Footer Bar */}
+        <div className="flex items-center justify-between pt-3 border-t border-black/5 text-[11px] font-medium text-slate-400">
+          <span>{note.createdAt || 'Ghi chú'}</span>
+          <button
+            onClick={() => convertToTask(note)}
+            className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-bold transition-colors cursor-pointer group-hover:underline"
+          >
+            <span>Tạo công việc</span>
+            <ArrowUpRight className="w-3 h-3" />
+          </button>
+        </div>
+      </article>
+    );
   };
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-6 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
+      {/* Hero Header */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-7 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
         <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-        <div className="relative z-10 flex items-center justify-between gap-5">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 text-indigo-200 border border-white/15 flex items-center justify-center shrink-0 backdrop-blur-md shadow-lg shadow-black/10">
-            <Sparkles className="w-6 h-6" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="flex items-center gap-3.5">
+            <div className="w-13 h-13 rounded-2xl bg-white/10 text-indigo-200 border border-white/15 flex items-center justify-center shrink-0 backdrop-blur-md shadow-lg shadow-black/10">
+              <StickyNote className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                {translate(language, 'notes.title')}
+              </h1>
+              <p className="text-xs sm:text-sm text-indigo-100/90 font-medium mt-0.5">
+                {translate(language, 'notes.subtitle')}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white">
-              {translate(language, 'notes.title')}
-            </h1>
-            <p className="text-sm text-indigo-100/90 font-medium">{translate(language, 'notes.subtitle')}</p>
+
+          {/* Quick Stats Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <span className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-3.5 py-2 text-xs font-extrabold text-indigo-100 border border-white/15 backdrop-blur-md shrink-0">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              {completedCount}/{notes.length} {isVietnamese ? 'hoàn thành' : 'completed'}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-3.5 py-2 text-xs font-extrabold text-amber-300 border border-white/15 backdrop-blur-md shrink-0">
+              <Pin className="h-4 w-4 text-amber-400 fill-amber-400" />
+              {pinnedCount} {isVietnamese ? 'đã ghim' : 'pinned'}
+            </span>
           </div>
-        </div>
-        <span className="hidden sm:inline-flex items-center gap-2 rounded-2xl bg-white/10 px-3 py-2 text-xs font-extrabold text-indigo-100 border border-white/15 backdrop-blur-md">
-          <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-          {notes.filter((note) => note.done).length}/{notes.length} hoàn thành
-        </span>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-sm">
-        <div className="flex gap-3">
-          <input
+      {/* Note Creator Input Form */}
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <textarea
             value={text}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter') addNote();
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                addNote();
+              }
             }}
-            placeholder={translate(language, 'notes.placeholder')}
-            className="h-12 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-xs sm:text-sm font-medium outline-none transition focus:border-indigo-500 focus:bg-white"
+            rows={2}
+            placeholder={translate(language, 'notes.placeholder') + ' (Bấm Enter để lưu)...'}
+            className="flex-1 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 text-xs sm:text-sm font-medium outline-none transition focus:border-indigo-500 focus:bg-white resize-none"
           />
           <button
             onClick={addNote}
-            className="inline-flex h-12 items-center gap-2 rounded-2xl bg-indigo-600 px-6 text-xs sm:text-sm font-extrabold text-white transition hover:bg-indigo-500 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95"
+            disabled={!text.trim()}
+            className="inline-flex h-12 sm:h-auto items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 text-xs sm:text-sm font-extrabold text-white transition hover:bg-indigo-500 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95 disabled:opacity-50 shrink-0"
           >
             <Plus className="h-4 w-4" />
-            {translate(language, 'notes.save')}
+            <span>{translate(language, 'notes.save')}</span>
           </button>
+        </div>
+
+        {/* Options Toolbar: Tag, Color, Pin */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              {isVietnamese ? 'Danh mục:' : 'Tag:'}
+            </span>
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              {availableTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setSelectedTag(tag)}
+                  className={clsx(
+                    'px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap',
+                    selectedTag === tag
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  )}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Color Selector Swatches */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                {isVietnamese ? 'Màu:' : 'Color:'}
+              </span>
+              {[
+                { id: 'white', bg: 'bg-white border-slate-300', label: 'Trắng' },
+                { id: 'amber', bg: 'bg-amber-200 border-amber-300', label: 'Vàng' },
+                { id: 'sky', bg: 'bg-sky-200 border-sky-300', label: 'Xanh dương' },
+                { id: 'emerald', bg: 'bg-emerald-200 border-emerald-300', label: 'Xanh lá' },
+                { id: 'violet', bg: 'bg-violet-200 border-violet-300', label: 'Tím' },
+                { id: 'rose', bg: 'bg-rose-200 border-rose-300', label: 'Hồng' },
+              ].map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setSelectedColor(c.id)}
+                  className={clsx(
+                    'w-5 h-5 rounded-full border transition-all cursor-pointer',
+                    c.bg,
+                    selectedColor === c.id ? 'ring-2 ring-indigo-600 ring-offset-1 scale-110' : ''
+                  )}
+                  title={c.label}
+                />
+              ))}
+            </div>
+
+            {/* Pin Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsPinnedInput(!isPinnedInput)}
+              className={clsx(
+                'flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border',
+                isPinnedInput
+                  ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-sm'
+                  : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+              )}
+            >
+              <Pin className={clsx('w-3.5 h-3.5', isPinnedInput && 'fill-current')} />
+              <span>{isPinnedInput ? (isVietnamese ? 'Đã ghim' : 'Pinned') : (isVietnamese ? 'Ghim' : 'Pin')}</span>
+            </button>
+          </div>
         </div>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {notes.map((note) => (
-          <article
-            key={note.id}
+      {/* Filter Tabs & Real-time Search Bar */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        {/* Category / Tag Filter Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+          <button
+            onClick={() => setActiveFilterTag('all')}
             className={clsx(
-              'group relative flex items-start gap-3.5 p-5 rounded-3xl border transition-all duration-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5',
-              note.done ? 'bg-slate-50/80 border-slate-200/60' : 'bg-white border-slate-200/80 hover:border-indigo-200'
+              'px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer',
+              activeFilterTag === 'all'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             )}
           >
+            {isVietnamese ? 'Tất cả' : 'All'} ({notes.length})
+          </button>
+          <button
+            onClick={() => setActiveFilterTag('pinned')}
+            className={clsx(
+              'px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1',
+              activeFilterTag === 'pinned'
+                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            )}
+          >
+            <Pin className="w-3.5 h-3.5 fill-current" />
+            <span>{isVietnamese ? 'Ghim' : 'Pinned'} ({pinnedCount})</span>
+          </button>
+          {availableTags.map((tag) => {
+            const count = notes.filter((n) => n.tag === tag).length;
+            if (count === 0 && activeFilterTag !== tag) return null;
+            return (
+              <button
+                key={tag}
+                onClick={() => setActiveFilterTag(tag)}
+                className={clsx(
+                  'px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer',
+                  activeFilterTag === tag
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                )}
+              >
+                {tag} ({count})
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Real-time Search Box */}
+        <div className="relative md:w-64">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isVietnamese ? 'Tìm ghi chú...' : 'Search notes...'}
+            className="w-full h-10 pl-9 pr-8 bg-white border border-slate-200/80 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+          />
+          {searchQuery && (
             <button
-              onClick={() => setNotes((prev) => prev.map((item) => item.id === note.id ? { ...item, done: !item.done } : item))}
-              className={`mt-0.5 cursor-pointer transition-colors ${note.done ? 'text-emerald-600' : 'text-slate-400 hover:text-indigo-600'}`}
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
-              {note.done ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
+              <X className="w-3.5 h-3.5" />
             </button>
-            <div className="flex-1 min-w-0">
-              <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 mb-1.5">
-                {note.tag}
-              </span>
-              <p className={`text-xs sm:text-sm font-medium leading-relaxed ${note.done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
-                {note.text}
-              </p>
-            </div>
-            <button
-              onClick={() => setNotes((prev) => prev.filter((item) => item.id !== note.id))}
-              className="rounded-xl p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 cursor-pointer opacity-0 group-hover:opacity-100"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </article>
-        ))}
+          )}
+        </div>
       </div>
+
+      {/* Grid Display: Pinned Notes & Regular Notes */}
+      {filteredNotes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-dashed border-slate-200 bg-white text-center">
+          <StickyNote className="w-12 h-12 text-slate-300 mb-3" />
+          <p className="text-sm font-bold text-slate-700">
+            {isVietnamese ? 'Không tìm thấy ghi chú nào' : 'No notes found'}
+          </p>
+          <p className="text-xs text-slate-400 mt-1">
+            {isVietnamese ? 'Hãy tạo ghi chú mới bằng ô nhập phía trên' : 'Create a new note using the box above'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Pinned Section */}
+          {pinnedNotes.length > 0 && activeFilterTag !== 'pinned' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-amber-600">
+                <Pin className="w-4 h-4 fill-amber-500 text-amber-500" />
+                <span>{isVietnamese ? 'Đã ghim lên đầu' : 'Pinned Notes'}</span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {pinnedNotes.map((note) => renderNoteCard(note))}
+              </div>
+            </div>
+          )}
+
+          {/* Regular Notes Section */}
+          {otherNotes.length > 0 && (
+            <div className="space-y-3">
+              {pinnedNotes.length > 0 && activeFilterTag === 'all' && (
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-400 pt-2">
+                  <StickyNote className="w-4 h-4" />
+                  <span>{isVietnamese ? 'Tất cả ghi chú khác' : 'Other Notes'}</span>
+                </div>
+              )}
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {(activeFilterTag === 'pinned' ? pinnedNotes : otherNotes).map((note) =>
+                  renderNoteCard(note)
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -800,6 +1508,8 @@ const weeklyData = [
 
 export const ReportsPage: React.FC = () => {
   const language = useCurrentLanguage();
+  const isVietnamese = language === 'vi';
+  const averageLabel = isVietnamese ? 'Trung bình: 72 điểm' : 'Average: 72 pts';
   const bestDay = useMemo(() => weeklyData.reduce((best, day) => day.value > best.value ? day : best), []);
 
   return (
@@ -823,7 +1533,7 @@ export const ReportsPage: React.FC = () => {
         </div>
         <span className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-3 py-2 text-xs font-extrabold text-indigo-100 border border-white/15 backdrop-blur-md">
           <TrendingUp className="h-4 w-4 text-emerald-300" />
-          Trung bình: 72 điểm
+          {averageLabel}
         </span>
         </div>
       </section>
@@ -855,7 +1565,7 @@ export const ReportsPage: React.FC = () => {
             </h2>
           </div>
           <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
-            Trung bình: 72 điểm
+            {averageLabel}
           </span>
         </div>
 
