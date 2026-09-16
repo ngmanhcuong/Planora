@@ -9,6 +9,11 @@ import { Loader2 } from 'lucide-react';
 export const ProfilePage: React.FC = () => {
   const { data: profileData, isLoading, isError } = useProfile();
   const updateProfileMutation = useUpdateProfile();
+  const normalizeProfileField = (value?: string) => {
+    const trimmedValue = value?.trim();
+    if (!trimmedValue || trimmedValue === 'Chưa cập nhật') return null;
+    return trimmedValue;
+  };
 
   if (isLoading) {
     return (
@@ -31,7 +36,7 @@ export const ProfilePage: React.FC = () => {
     id: profileData.userId,
     name: profileData.name || 'Người dùng Planora',
     email: profileData.email || '',
-    avatarUrl: profileData.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    avatarUrl: profileData.avatarUrl || '',
     studentId: profileData.studentId || 'Chưa cập nhật',
     major: profileData.major || 'Chưa cập nhật',
     university: profileData.university || 'Trường Đại học Công nghệ',
@@ -44,20 +49,29 @@ export const ProfilePage: React.FC = () => {
 
   const handleSaveProfile = (updated: Partial<UserProfileData>) => {
     updateProfileMutation.mutate({
-      name: updated.name,
-      studentId: updated.studentId,
-      major: updated.major,
-      university: updated.university,
-      bio: updated.bio,
+      name: updated.name?.trim(),
+      email: updated.email?.trim(),
+      studentId: normalizeProfileField(updated.studentId),
+      major: normalizeProfileField(updated.major),
+      university: normalizeProfileField(updated.university),
+      gpa: updated.gpa,
+      completedCredits: updated.completedCredits,
+      totalCredits: updated.totalCredits,
+      bio: normalizeProfileField(updated.bio),
     });
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full min-h-screen pb-10">
+    <div className="flex w-full flex-col gap-5 pb-10">
       <ProfileCard profile={profile} />
       <AcademicSummaryCard profile={profile} />
-      <ProfileEditForm profile={profile} onSaveProfile={handleSaveProfile} />
+      <ProfileEditForm
+        profile={profile}
+        onSaveProfile={handleSaveProfile}
+        isSaving={updateProfileMutation.isPending}
+        saveError={(updateProfileMutation.error as any)?.response?.data?.message || null}
+        saveSuccess={updateProfileMutation.isSuccess}
+      />
     </div>
   );
 };
-

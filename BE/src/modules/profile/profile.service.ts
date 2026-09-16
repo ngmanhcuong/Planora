@@ -36,7 +36,7 @@ export class ProfileService {
   async updateProfile(userId: string, input: UpdateProfileInput): Promise<UserProfileResponse> {
     const existingUser = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, profile: true },
+      select: { id: true, email: true, name: true, profile: true },
     });
 
     if (!existingUser || !existingUser.profile) {
@@ -53,14 +53,36 @@ export class ProfileService {
       throw new Error('Số tín chỉ đã hoàn thành không được vượt quá tổng số tín chỉ');
     }
 
-    const { name, ...profileFields } = input;
+    const { name, email, ...profileFields } = input;
+
+    if (email !== undefined) {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (normalizedEmail !== existingUser.email) {
+        const emailOwner = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+          select: { id: true },
+        });
+
+        if (emailOwner && emailOwner.id !== userId) {
+          throw new Error('Email này đã được sử dụng bởi tài khoản khác');
+        }
+      }
+    }
 
     await prisma.$transaction(async (tx) => {
-      // Update User table if name is provided
+      // Update User table if identity fields are provided
+      const userData: { name?: string; email?: string } = {};
       if (name !== undefined) {
+        userData.name = name.trim();
+      }
+      if (email !== undefined) {
+        userData.email = email.trim().toLowerCase();
+      }
+
+      if (Object.keys(userData).length > 0) {
         await tx.user.update({
           where: { id: userId },
-          data: { name: name.trim() },
+          data: userData,
         });
       }
 

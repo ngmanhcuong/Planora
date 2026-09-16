@@ -7,6 +7,8 @@ import {
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import type { ApiTimetableItem, ApiEvent } from '@/types';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface TodayTimelineProps {
   timetableToday?: ApiTimetableItem[];
@@ -14,6 +16,7 @@ export interface TodayTimelineProps {
 }
 
 export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [], eventsToday = [] }) => {
+  const language = useCurrentLanguage();
   const hasItems = timetableToday.length > 0 || eventsToday.length > 0;
   const totalCount = timetableToday.length + eventsToday.length;
 
@@ -22,9 +25,9 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <h2 className="text-lg font-bold text-[#131B2E] font-heading">Lịch trình hôm nay</h2>
+          <h2 className="text-lg font-bold text-[#131B2E] font-heading">{translate(language, 'dashboard.todaySchedule')}</h2>
           <Badge customBg="#D8E2FF" customColor="#001A42" size="sm">
-            {totalCount} tiết/sự kiện
+            {totalCount} {translate(language, 'dashboard.itemsEvents')}
           </Badge>
         </div>
       </div>
@@ -32,7 +35,7 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
       {!hasItems ? (
         <div className="py-8 text-center text-xs text-[#64748B] flex flex-col items-center gap-2">
           <Calendar className="w-8 h-8 text-slate-300" />
-          <span>Hôm nay bạn không có lịch học hoặc sự kiện nào.</span>
+          <span>{translate(language, 'dashboard.noScheduleToday')}</span>
         </div>
       ) : (
         /* Timeline List */
@@ -59,7 +62,7 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
                     </span>
                     <span className="w-1 h-1 rounded-full bg-[#C7C4D8]" />
                     <Badge size="sm" customBg="#D8E2FF" customColor="#001A42">
-                      Tiết học
+                      {translate(language, 'dashboard.classPeriod')}
                     </Badge>
                   </div>
                 </div>
@@ -74,13 +77,13 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
                     {item.room && (
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5 text-[#94A3B8]" />
-                        Phòng {item.room}
+                        {translate(language, 'dashboard.room')} {item.room}
                       </span>
                     )}
                     {item.lecturer && (
                       <span className="flex items-center gap-1">
                         <UserIcon className="w-3.5 h-3.5 text-[#94A3B8]" />
-                        GV: {item.lecturer}
+                        {translate(language, 'dashboard.lecturer')}: {item.lecturer}
                       </span>
                     )}
                   </div>
@@ -104,11 +107,11 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold" style={{ color: event.color || '#3525CD' }}>
-                      {event.allDay ? 'Cả ngày' : `${new Date(event.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.endAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                      {event.allDay ? translate(language, 'dashboard.allDay') : `${new Date(event.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.endAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
                     </span>
                     <span className="w-1 h-1 rounded-full bg-[#C7C4D8]" />
                     <Badge size="sm" customBg="#E2DFFF" customColor="#3525CD">
-                      Sự kiện
+                      {translate(language, 'dashboard.event')}
                     </Badge>
                   </div>
                 </div>

@@ -1,110 +1,158 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Calendar as CalendarIcon,
   Clock,
   CheckSquare,
+  BarChart3,
+  Bot,
+  NotebookPen,
+  Target,
   User,
   Settings,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/useUIStore';
 import { clsx } from 'clsx';
+import { Logo } from '@/components/ui/Logo';
+import { useSettings } from '@/features/settings/hooks/useSettings';
+import { normalizeLanguage, translate, type TranslationKey } from '@/lib/i18n';
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: TranslationKey;
   icon: React.ReactNode;
-  badge?: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { to: '/dashboard', label: 'Tổng quan', icon: <LayoutDashboard className="w-5 h-5" /> },
-  { to: '/calendar', label: 'Lịch của tôi', icon: <CalendarIcon className="w-5 h-5" /> },
-  { to: '/timetable', label: 'Thời khóa biểu', icon: <Clock className="w-5 h-5" /> },
-  { to: '/tasks', label: 'Công việc', icon: <CheckSquare className="w-5 h-5" /> },
-  { to: '/profile', label: 'Hồ sơ cá nhân', icon: <User className="w-5 h-5" /> },
-  { to: '/settings', label: 'Cài đặt', icon: <Settings className="w-5 h-5" /> },
+const MAIN_NAV_ITEMS: NavItem[] = [
+  { to: '/dashboard', labelKey: 'sidebar.dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+  { to: '/calendar', labelKey: 'sidebar.calendar', icon: <CalendarIcon className="w-5 h-5" /> },
+  { to: '/timetable', labelKey: 'sidebar.timetable', icon: <Clock className="w-5 h-5" /> },
+  { to: '/tasks', labelKey: 'sidebar.tasks', icon: <CheckSquare className="w-5 h-5" /> },
+  { to: '/assistant', labelKey: 'sidebar.assistant', icon: <Bot className="w-5 h-5" /> },
+  { to: '/goals', labelKey: 'sidebar.goals', icon: <Target className="w-5 h-5" /> },
+  { to: '/notes', labelKey: 'sidebar.notes', icon: <NotebookPen className="w-5 h-5" /> },
+  { to: '/reports', labelKey: 'sidebar.reports', icon: <BarChart3 className="w-5 h-5" /> },
+];
+
+const ACCOUNT_NAV_ITEMS: NavItem[] = [
+  { to: '/profile', labelKey: 'sidebar.profile', icon: <User className="w-5 h-5" /> },
+  { to: '/settings', labelKey: 'sidebar.settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
 export const Sidebar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
+  const { data: settings } = useSettings();
+  const language = normalizeLanguage(settings?.language);
 
   return (
     <aside
       className={clsx(
-        'fixed top-0 left-0 bottom-0 z-30 bg-white border-r border-[#E2E8F0] flex flex-col transition-all duration-300 ease-in-out select-none',
+        'fixed top-0 left-0 bottom-0 z-30 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col transition-all duration-300 ease-in-out select-none',
         isSidebarCollapsed ? 'w-20' : 'w-64'
       )}
     >
       {/* Brand Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-[#E2E8F0]">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#4F46E5] to-[#3B82F6] flex items-center justify-center text-white font-bold text-xl shadow-md shrink-0">
-            P
-          </div>
-          {!isSidebarCollapsed && (
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg text-[#131B2E] tracking-tight leading-none font-heading">
-                Planora
-              </span>
-              <span className="text-[11px] text-[#4F46E5] font-semibold tracking-wide flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Schedule AI
-              </span>
-            </div>
-          )}
+      <div
+        className={clsx(
+          'relative h-16 flex items-center border-b border-[var(--color-border)]',
+          isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-4'
+        )}
+      >
+        <div className={clsx('flex items-center gap-3 overflow-hidden', isSidebarCollapsed && 'justify-center')}>
+          <Logo size="md" theme="light" showText={!isSidebarCollapsed} />
         </div>
 
         <button
           onClick={toggleSidebar}
-          className="p-1.5 rounded-lg text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A] transition-colors"
-          title={isSidebarCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+          className={clsx(
+            'flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[#64748B] shadow-sm transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]',
+            isSidebarCollapsed
+              ? 'absolute -right-4 top-1/2 z-40 -translate-y-1/2'
+              : 'shrink-0'
+          )}
+          title={isSidebarCollapsed ? translate(language, 'sidebar.expand') : translate(language, 'sidebar.collapse')}
         >
           {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
         </button>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 py-4 px-3 flex flex-col gap-1.5 overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              clsx(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 relative group',
-                isActive
-                  ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
-                  : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#131B2E]'
-              )
-            }
-            title={isSidebarCollapsed ? item.label : undefined}
-          >
-            {({ isActive }) => (
-              <>
-                <span className={clsx('shrink-0 transition-transform duration-150', isActive && 'scale-110')}>
-                  {item.icon}
-                </span>
-                {!isSidebarCollapsed && <span className="truncate">{item.label}</span>}
-                {isActive && (
-                  <span className="absolute right-0 top-2 bottom-2 w-1 bg-[#4F46E5] rounded-l-full" />
-                )}
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+      <nav
+        className={clsx(
+          'flex-1 overflow-y-auto py-4',
+          isSidebarCollapsed ? 'px-2' : 'px-3'
+        )}
+      >
+        <div className="flex min-h-full flex-col justify-between gap-6">
+          <div className="flex flex-col gap-1">
+            {MAIN_NAV_ITEMS.map((item) => (
+              <SidebarNavLink
+                key={item.to}
+                item={item}
+                language={language}
+                collapsed={isSidebarCollapsed}
+              />
+            ))}
+          </div>
 
-      {/* Footer Banner */}
-      {!isSidebarCollapsed && (
-        <div className="p-4 m-3 bg-gradient-to-br from-[#EEF2FF] to-[#E0E7FF] rounded-xl border border-[#C7D2FE]/50 text-xs text-[#3730A3]">
-          <p className="font-semibold text-sm mb-1 text-[#1E1B4B]">Planora Pro</p>
-          <p className="text-[#4338CA] mb-2 leading-relaxed">Tự động tối ưu hóa lịch học & công việc của bạn.</p>
+          <div className="flex flex-col gap-1 border-t border-[var(--color-border)] pt-3">
+            {ACCOUNT_NAV_ITEMS.map((item) => (
+              <SidebarNavLink
+                key={item.to}
+                item={item}
+                language={language}
+                collapsed={isSidebarCollapsed}
+              />
+            ))}
+          </div>
         </div>
-      )}
+      </nav>
     </aside>
+  );
+};
+
+const SidebarNavLink: React.FC<{
+  item: NavItem;
+  language: string;
+  collapsed: boolean;
+}> = ({ item, language, collapsed }) => {
+  const label = translate(language, item.labelKey);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isActive = location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(item.to)}
+      aria-label={label}
+      aria-current={isActive ? 'page' : undefined}
+      className={clsx(
+        'relative flex w-full items-center rounded-2xl text-sm font-semibold transition-all duration-150 group cursor-pointer',
+        collapsed ? 'h-11 justify-center px-0' : 'h-11 gap-3 px-3 text-left',
+        isActive
+          ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-[inset_0_0_0_1px_rgba(79,70,229,0.08)]'
+          : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#131B2E]'
+      )}
+    >
+      <span
+        className={clsx(
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-150',
+          isActive ? 'bg-white/70 text-[#4F46E5]' : 'text-current group-hover:bg-white/70'
+        )}
+      >
+        {item.icon}
+      </span>
+      {!collapsed && <span className="truncate">{label}</span>}
+      {isActive && !collapsed && (
+        <span className="absolute right-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#4F46E5]" />
+      )}
+      {isActive && collapsed && (
+        <span className="absolute right-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-l-full bg-[#4F46E5]" />
+      )}
+    </button>
   );
 };

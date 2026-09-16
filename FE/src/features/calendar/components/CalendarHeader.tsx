@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/Badge';
 import type { CategoryType } from '@/types';
 import { CATEGORY_MAP } from '@/utils/categories';
 import type { CalendarViewMode } from '../types';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate, type TranslationKey } from '@/lib/i18n';
 
 export interface CalendarHeaderProps {
   viewMode: CalendarViewMode;
@@ -21,6 +23,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onCategoryChange,
   onOpenCreatePanel,
 }) => {
+  const language = useCurrentLanguage();
   const categories: (CategoryType | 'all')[] = [
     'all',
     'study',
@@ -37,33 +40,33 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-[#131B2E] tracking-tight font-heading">
-              Lịch của tôi
+              {translate(language, 'calendar.title')}
             </h1>
             <Badge customBg="#D8E2FF" customColor="#001A42" size="sm">
-              Tuần 38
+              {translate(language, 'calendar.week')} 38
             </Badge>
           </div>
 
           <div className="flex items-center gap-2">
             <Button variant="secondary" size="sm" className="h-8 text-xs bg-[#F8FAFC]">
-              Hôm nay
+              {translate(language, 'calendar.today')}
             </Button>
             <div className="flex items-center bg-[#F8FAFC] rounded-lg p-0.5 border border-[#E2E8F0]">
               <button
                 className="p-1 rounded-md text-[#64748B] hover:bg-white hover:text-[#131B2E] transition-colors"
-                title="Tuần trước"
+                title={translate(language, 'calendar.previousWeek')}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 className="p-1 rounded-md text-[#64748B] hover:bg-white hover:text-[#131B2E] transition-colors"
-                title="Tuần tới"
+                title={translate(language, 'calendar.nextWeek')}
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             <span className="text-base font-bold text-[#131B2E] ml-1 font-heading">
-              Tháng 9, 2026
+              {translate(language, 'calendar.monthYear').replace('{month}', '9').replace('{year}', '2026')}
             </span>
           </div>
         </div>
@@ -74,9 +77,9 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           <div className="flex items-center bg-[#F8FAFC] p-1 rounded-lg border border-[#E2E8F0]">
             {(['day', 'week', 'month'] as CalendarViewMode[]).map((mode) => {
               const labelMap: Record<CalendarViewMode, string> = {
-                day: 'Ngày',
-                week: 'Tuần',
-                month: 'Tháng',
+                day: translate(language, 'calendar.day'),
+                week: translate(language, 'calendar.week'),
+                month: translate(language, 'calendar.month'),
               };
               const isActive = viewMode === mode;
               return (
@@ -97,7 +100,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
           <Button variant="primary" size="sm" onClick={onOpenCreatePanel}>
             <PlusCircle className="w-4 h-4" />
-            <span>Lên lịch mới</span>
+            <span>{translate(language, 'calendar.newSchedule')}</span>
           </Button>
         </div>
       </div>
@@ -105,7 +108,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       {/* Category Filter Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pt-1 pb-0.5 border-t border-[#F1F5F9]">
         <span className="text-[11px] text-[#64748B] uppercase tracking-wider font-bold shrink-0 mr-1">
-          Lọc theo:
+          {translate(language, 'calendar.filterBy')}:
         </span>
         {categories.map((cat) => {
           const isActive = activeCategory === cat;
@@ -121,7 +124,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 }`}
               >
                 {isActive && <Check className="w-3 h-3" />}
-                <span>Tất cả</span>
+                <span>{translate(language, 'tasks.filter.all')}</span>
               </button>
             );
           }
@@ -140,7 +143,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: info.color }}
               />
-              <span>{info.label}</span>
+              <span>{translate(language, `category.${cat}` as TranslationKey) || info.label}</span>
             </button>
           );
         })}

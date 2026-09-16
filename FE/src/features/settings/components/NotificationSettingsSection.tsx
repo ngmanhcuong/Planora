@@ -12,7 +12,7 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
   onUpdate,
 }) => {
   return (
-    <div className="flex flex-col gap-6 bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-xs">
+    <section className="flex flex-col gap-6 p-6 border-b border-[#E2E8F0]">
       <div className="border-b border-[#F1F5F9] pb-4">
         <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
           <Bell className="w-5 h-5 text-[#4F46E5]" />
@@ -136,6 +136,6 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
           />
         </button>
       </div>
-    </div>
+    </section>
   );
 };

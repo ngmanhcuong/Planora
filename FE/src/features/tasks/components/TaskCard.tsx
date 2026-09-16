@@ -1,6 +1,8 @@
 import React from 'react';
 import { Check, Calendar, CheckSquare, Trash2, BookOpen } from 'lucide-react';
 import type { ApiTask } from '@/types';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface TaskCardProps {
   task: ApiTask;
@@ -13,14 +15,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onToggleComplete,
   onDeleteTask,
 }) => {
+  const language = useCurrentLanguage();
   const isCompleted = task.status === 'COMPLETED';
   const isOverdue = task.isOverdue || task.displayStatus === 'OVERDUE';
 
   const priorityStyles: Record<string, { bg: string; text: string; label: string }> = {
-    URGENT: { bg: '#FFDAD6', text: '#93000A', label: 'Khẩn cấp' },
-    HIGH: { bg: '#FFDAD6', text: '#93000A', label: 'Gấp' },
-    MEDIUM: { bg: '#E2DFFF', text: '#3323CC', label: 'Trung bình' },
-    LOW: { bg: '#D7E8CD', text: '#002113', label: 'Thấp' },
+    URGENT: { bg: '#FFDAD6', text: '#93000A', label: translate(language, 'tasks.card.urgent') },
+    HIGH: { bg: '#FFDAD6', text: '#93000A', label: translate(language, 'tasks.card.high') },
+    MEDIUM: { bg: '#E2DFFF', text: '#3323CC', label: translate(language, 'tasks.card.medium') },
+    LOW: { bg: '#D7E8CD', text: '#002113', label: translate(language, 'tasks.card.low') },
   };
 
   const prio = priorityStyles[task.priority] || priorityStyles.MEDIUM;
@@ -52,7 +55,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               ? 'bg-[#4F46E5] border-[#4F46E5] text-white shadow-2xs'
               : 'border-[#CBD5E1] bg-white hover:border-[#4F46E5]'
           }`}
-          aria-label={isCompleted ? 'Đánh dấu chưa hoàn thành' : 'Đánh dấu hoàn thành'}
+          aria-label={
+            isCompleted
+              ? translate(language, 'tasks.card.markIncomplete')
+              : translate(language, 'tasks.card.markComplete')
+          }
         >
           {isCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
         </button>
@@ -106,16 +113,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Hạn: {dueDateStr}</span>
+              <span>{translate(language, 'tasks.card.due')}: {dueDateStr}</span>
               {task.dueTime && <span>({task.dueTime})</span>}
-              {isOverdue && <span className="font-bold ml-1 text-[#BA1A1A]">(Quá hạn)</span>}
+              {isOverdue && (
+                <span className="font-bold ml-1 text-[#BA1A1A]">
+                  ({translate(language, 'tasks.overdue')})
+                </span>
+              )}
             </span>
 
             {task.subtasksCountTotal ? (
               <span className="flex items-center gap-1">
                 <CheckSquare className="w-3.5 h-3.5 text-[#4F46E5]" />
                 <span>
-                  {task.subtasksCountCompleted || 0}/{task.subtasksCountTotal} việc con
+                  {task.subtasksCountCompleted || 0}/{task.subtasksCountTotal}{' '}
+                  {translate(language, 'tasks.card.subtasks')}
                 </span>
               </span>
             ) : null}
@@ -127,7 +139,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       <button
         onClick={() => onDeleteTask(task.id)}
         className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#BA1A1A] hover:bg-[#FFF1F2] opacity-0 group-hover:opacity-100 transition-all shrink-0 cursor-pointer"
-        title="Xóa công việc"
+        title={translate(language, 'tasks.card.delete')}
       >
         <Trash2 className="w-4 h-4" />
       </button>

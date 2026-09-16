@@ -4,12 +4,15 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import type { ApiHabit } from '@/types';
 import { useCheckInHabit, useUndoCheckInHabit } from '../hooks/useHabits';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface HabitTrackerWidgetProps {
   habits?: ApiHabit[];
 }
 
 export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits = [] }) => {
+  const language = useCurrentLanguage();
   const checkInMutation = useCheckInHabit();
   const undoMutation = useUndoCheckInHabit();
 
@@ -31,11 +34,11 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <h2 className="text-base font-bold text-[#131B2E] font-heading">Thói quen hôm nay</h2>
+          <h2 className="text-base font-bold text-[#131B2E] font-heading">{translate(language, 'dashboard.todayHabits')}</h2>
           <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
         </div>
         <span className="text-xs font-bold text-[#10B981]">
-          {completedCount} / {habits.length} hoàn thành
+          {completedCount} / {habits.length} {translate(language, 'dashboard.completed')}
         </span>
       </div>
 
@@ -43,12 +46,12 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
       <div className="flex flex-col gap-3">
         {habits.length === 0 ? (
           <div className="py-4 text-center text-xs text-[#64748B]">
-            Chưa có thói quen nào.
+            {translate(language, 'dashboard.noHabits')}
           </div>
         ) : (
           habits.map((habit) => {
             const isDone = habit.completedToday || habit.isCompletedToday;
-            const title = habit.title || (habit as any).name || 'Thói quen';
+            const title = habit.title || (habit as any).name || translate(language, 'dashboard.habitFallback');
             const streak = habit.currentStreak || 0;
 
             return (
@@ -86,7 +89,7 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
                   {isDone ? (
                     <>
                       <Check className="w-3.5 h-3.5" />
-                      Đã xong
+                      {translate(language, 'dashboard.done')}
                     </>
                   ) : (
                     'Check-in'

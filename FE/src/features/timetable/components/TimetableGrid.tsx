@@ -1,6 +1,8 @@
 import React from 'react';
 import { MapPin, User, Sparkles } from 'lucide-react';
 import type { TimetableClassItem } from '../types';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate, type TranslationKey } from '@/lib/i18n';
 
 export interface TimetableGridProps {
   classes: TimetableClassItem[];
@@ -8,13 +10,13 @@ export interface TimetableGridProps {
 }
 
 const DAYS = [
-  { label: 'Thứ 2', short: 'T2' },
-  { label: 'Thứ 3', short: 'T3' },
-  { label: 'Thứ 4', short: 'T4' },
-  { label: 'Thứ 5', short: 'T5' },
-  { label: 'Thứ 6', short: 'T6' },
-  { label: 'Thứ 7', short: 'T7' },
-  { label: 'Chủ Nhật', short: 'CN' },
+  { labelKey: 'weekday.mon' },
+  { labelKey: 'weekday.tue' },
+  { labelKey: 'weekday.wed' },
+  { labelKey: 'weekday.thu' },
+  { labelKey: 'weekday.fri' },
+  { labelKey: 'weekday.sat' },
+  { labelKey: 'weekday.sun' },
 ];
 
 const SLOTS = [
@@ -32,17 +34,20 @@ const SLOTS = [
 
 export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectClass }) => {
   const slotHeightPx = 68;
+  const language = useCurrentLanguage();
 
   return (
     <div className="w-full bg-white rounded-xl border border-[#E2E8F0] shadow-xs overflow-hidden flex flex-col min-w-[800px]">
       {/* Table Days Header */}
       <div className="grid grid-cols-8 bg-[#F8FAFC] border-b border-[#E2E8F0] py-3 text-center">
         <div className="flex flex-col items-center justify-center text-xs font-bold text-[#64748B] uppercase tracking-wider">
-          Tiết học
+          {translate(language, 'timetable.periodHeader')}
         </div>
         {DAYS.map((d, i) => (
           <div key={i} className="flex flex-col items-center justify-center gap-0.5">
-            <span className="text-xs font-bold text-[#131B2E] font-heading">{d.label}</span>
+            <span className="text-xs font-bold text-[#131B2E] font-heading">
+              {translate(language, d.labelKey as TranslationKey)}
+            </span>
           </div>
         ))}
       </div>
@@ -57,7 +62,9 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
               style={{ height: `${slotHeightPx}px` }}
               className="flex flex-col justify-center items-center px-2 border-b border-[#E2E8F0]/60 last:border-b-0 text-center"
             >
-              <span className="text-xs font-bold text-[#131B2E]">Tiết {slot.num}</span>
+              <span className="text-xs font-bold text-[#131B2E]">
+                {translate(language, 'timetable.period')} {slot.num}
+              </span>
               <span className="text-[10px] text-[#64748B] font-medium">{slot.time}</span>
             </div>
           ))}

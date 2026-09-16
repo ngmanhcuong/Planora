@@ -1,6 +1,8 @@
 import React from 'react';
 import { Calendar as CalendarIcon, CheckSquare, Clock, Flame, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface SummaryMetricsProps {
   summary?: {
@@ -16,6 +18,7 @@ export interface SummaryMetricsProps {
 }
 
 export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, productivityScore = 0 }) => {
+  const language = useCurrentLanguage();
   const completedTasks = summary?.tasksCompletedToday || 0;
   const totalTasks = summary?.tasksToday || 0;
   const taskPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -29,7 +32,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
       {/* Card 1: Today Schedule / Upcoming Events */}
       <Card padding="md" className="flex flex-col justify-between gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">Lịch trình & Sự kiện</span>
+          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.scheduleEvents')}</span>
           <div className="w-8 h-8 rounded-lg bg-[#D8E2FF] flex items-center justify-center text-[#001A42]">
             <CalendarIcon className="w-4 h-4" />
           </div>
@@ -40,7 +43,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
           </span>
           <span className="text-[11px] text-[#464555] flex items-center gap-1.5 font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-[#2170E4]" />
-            Sự kiện trong 7 ngày tới
+            {translate(language, 'dashboard.eventsNext7Days')}
           </span>
         </div>
       </Card>
@@ -48,7 +51,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
       {/* Card 2: Tasks Progress */}
       <Card padding="md" className="flex flex-col justify-between gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">Công việc hôm nay</span>
+          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.todayTasks')}</span>
           <div className="w-8 h-8 rounded-lg bg-[#E2DFFF] flex items-center justify-center text-[#3525CD]">
             <CheckSquare className="w-4 h-4" />
           </div>
@@ -59,7 +62,9 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
               {completedTasks}
               <span className="text-lg font-normal text-[#464555]">/{totalTasks}</span>
             </span>
-            <span className="text-xs text-[#464555] font-medium">{taskPercent}% hoàn thành</span>
+            <span className="text-xs text-[#464555] font-medium">
+              {translate(language, 'dashboard.completedPercent').replace('{percent}', String(taskPercent))}
+            </span>
           </div>
           <div className="w-full h-1.5 bg-[#E2E7FF] rounded-full overflow-hidden">
             <div
@@ -73,7 +78,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
       {/* Card 3: Overdue Tasks */}
       <Card padding="md" className="flex flex-col justify-between gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">Công việc quá hạn</span>
+          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.overdueTasks')}</span>
           <div className="w-8 h-8 rounded-lg bg-[#FFDAD6] flex items-center justify-center text-[#BA1A1A]">
             <Clock className="w-4 h-4" />
           </div>
@@ -84,7 +89,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
           </span>
           <span className="text-[11px] text-[#BA1A1A] flex items-center gap-1 font-semibold">
             <AlertTriangle className="w-3.5 h-3.5" />
-            {overdueCount > 0 ? 'Cần xử lý ngay' : 'Không có việc quá hạn'}
+            {overdueCount > 0 ? translate(language, 'dashboard.needsAction') : translate(language, 'dashboard.noOverdue')}
           </span>
         </div>
       </Card>
@@ -92,7 +97,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
       {/* Card 4: Habit Tracker & Productivity */}
       <Card padding="md" className="flex flex-col justify-between gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">Thói quen & Điểm Năng suất</span>
+          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.habitsScore')}</span>
           <div className="w-8 h-8 rounded-lg bg-[#6FFBBE] flex items-center justify-center text-[#002113]">
             <Flame className="w-4 h-4 text-[#005338]" />
           </div>
@@ -104,7 +109,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
           </span>
           <span className="text-[11px] text-[#005338] flex items-center gap-1 font-semibold">
             <TrendingUp className="w-3.5 h-3.5" />
-            Điểm: {productivityScore}/100
+            {translate(language, 'dashboard.score')}: {productivityScore}/100
           </span>
         </div>
       </Card>

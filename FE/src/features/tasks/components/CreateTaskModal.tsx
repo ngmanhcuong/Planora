@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/Input';
 import { BookmarkPlus, Calendar, Clock, BookOpen, Loader2 } from 'lucide-react';
 import { createTaskSchema, type CreateTaskInput } from '../validations/taskSchemas';
 import { useCreateTask } from '../hooks/useTasks';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface CreateTaskModalProps {
   isOpen: boolean;
@@ -18,6 +20,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   onClose,
 }) => {
   const createTaskMutation = useCreateTask();
+  const language = useCurrentLanguage();
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -66,12 +69,12 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Tạo công việc / Deadline mới" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={translate(language, 'tasks.modal.title')} maxWidth="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {/* Title */}
         <Input
-          label="Tên công việc / Hạn chót *"
-          placeholder="VD: Hoàn thành bài tập Lab 4"
+          label={translate(language, 'tasks.modal.name')}
+          placeholder={translate(language, 'tasks.modal.namePlaceholder')}
           {...register('title')}
           error={errors.title?.message}
         />
@@ -79,29 +82,33 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         {/* Category & Priority */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[#131B2E]">Danh mục</label>
+            <label className="text-xs font-semibold text-[#131B2E]">
+              {translate(language, 'tasks.modal.category')}
+            </label>
             <select
               {...register('category')}
               className="w-full p-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#131B2E] focus:outline-none focus:border-[#4F46E5]"
             >
-              <option value="study">Học tập</option>
-              <option value="deadline">Sắp đến hạn (Deadline)</option>
-              <option value="meeting">Cuộc họp</option>
-              <option value="work">Công việc</option>
-              <option value="personal">Cá nhân</option>
-              <option value="habit">Thói quen</option>
+              <option value="study">{translate(language, 'category.study')}</option>
+              <option value="deadline">{translate(language, 'category.deadline')}</option>
+              <option value="meeting">{translate(language, 'category.meeting')}</option>
+              <option value="work">{translate(language, 'category.work')}</option>
+              <option value="personal">{translate(language, 'category.personal')}</option>
+              <option value="habit">{translate(language, 'category.habit')}</option>
             </select>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[#131B2E]">Độ ưu tiên</label>
+            <label className="text-xs font-semibold text-[#131B2E]">
+              {translate(language, 'tasks.modal.priority')}
+            </label>
             <select
               {...register('priority')}
               className="w-full p-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#131B2E] focus:outline-none focus:border-[#4F46E5]"
             >
-              <option value="high">Gấp / Cao</option>
-              <option value="medium">Trung bình</option>
-              <option value="low">Thấp</option>
+              <option value="high">{translate(language, 'tasks.priority.high')}</option>
+              <option value="medium">{translate(language, 'tasks.priority.medium')}</option>
+              <option value="low">{translate(language, 'tasks.priority.low')}</option>
             </select>
           </div>
         </div>
@@ -109,14 +116,14 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         {/* Dates */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
-            label="Ngày hết hạn *"
+            label={translate(language, 'tasks.modal.dueDate')}
             type="date"
             leftIcon={<Calendar className="w-4 h-4" />}
             {...register('dueDate')}
             error={errors.dueDate?.message}
           />
           <Input
-            label="Giờ hết hạn"
+            label={translate(language, 'tasks.modal.dueTime')}
             type="time"
             leftIcon={<Clock className="w-4 h-4" />}
             {...register('dueTime')}
@@ -125,19 +132,21 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
         {/* Course Code */}
         <Input
-          label="Mã môn học liên quan (nếu có)"
-          placeholder="VD: IT4010"
+          label={translate(language, 'tasks.modal.courseCode')}
+          placeholder={translate(language, 'tasks.modal.courseCodePlaceholder')}
           leftIcon={<BookOpen className="w-4 h-4" />}
           {...register('courseCode')}
         />
 
         {/* Description */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-[#131B2E]">Mô tả chi tiết</label>
+          <label className="text-xs font-semibold text-[#131B2E]">
+            {translate(language, 'tasks.modal.description')}
+          </label>
           <textarea
             {...register('description')}
             rows={3}
-            placeholder="Thêm chi tiết hoặc ghi chú bài tập..."
+            placeholder={translate(language, 'tasks.modal.descriptionPlaceholder')}
             className="w-full p-2.5 rounded-lg bg-white border border-[#E2E8F0] text-xs text-[#131B2E] placeholder-[#94A3B8] focus:outline-none focus:border-[#4F46E5] resize-none"
           />
         </div>
@@ -145,7 +154,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8F0] mt-2">
           <Button type="button" variant="secondary" onClick={onClose} disabled={createTaskMutation.isPending}>
-            Hủy bỏ
+            {translate(language, 'tasks.modal.cancel')}
           </Button>
           <Button type="submit" variant="primary" disabled={createTaskMutation.isPending}>
             {createTaskMutation.isPending ? (
@@ -153,7 +162,11 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             ) : (
               <BookmarkPlus className="w-4 h-4" />
             )}
-            <span>{createTaskMutation.isPending ? 'Đang lưu...' : 'Lưu công việc'}</span>
+            <span>
+              {createTaskMutation.isPending
+                ? translate(language, 'tasks.modal.saving')
+                : translate(language, 'tasks.modal.save')}
+            </span>
           </Button>
         </div>
       </form>

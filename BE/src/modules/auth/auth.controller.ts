@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from './auth.service';
-import { registerSchema, loginSchema } from './auth.schemas';
+import { registerSchema, loginSchema, googleLoginSchema } from './auth.schemas';
 import { sendSuccess, sendError } from '../../utils/response';
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -42,6 +42,23 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     next(err);
   }
 };
+
+export const googleLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const parseResult = googleLoginSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.issues[0]?.message || 'Dữ liệu không hợp lệ';
+      sendError(res, firstError, parseResult.error.format(), 400);
+      return;
+    }
+
+    const result = await authService.googleLogin(parseResult.data);
+    sendSuccess(res, 'Đăng nhập Google thành công', result, 200);
+  } catch (err: any) {
+    sendError(res, err.message || 'Đăng nhập Google thất bại', undefined, 400);
+  }
+};
+
 
 export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

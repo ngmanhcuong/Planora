@@ -36,7 +36,10 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
     const profile = await profileService.updateProfile(userId, parseResult.data);
     sendSuccess(res, 'Cập nhật hồ sơ thành công', { profile }, 200);
   } catch (err: any) {
-    if (err.message === 'Số tín chỉ đã hoàn thành không được vượt quá tổng số tín chỉ') {
+    if (
+      err.message === 'Số tín chỉ đã hoàn thành không được vượt quá tổng số tín chỉ' ||
+      err.message === 'Email này đã được sử dụng bởi tài khoản khác'
+    ) {
       sendError(res, err.message, undefined, 400);
       return;
     }

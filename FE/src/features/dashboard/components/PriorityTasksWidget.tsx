@@ -5,6 +5,8 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import type { ApiTask } from '@/types';
 import { useChangeTaskStatus } from '@/features/tasks/hooks/useTasks';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface PriorityTasksWidgetProps {
   tasks?: ApiTask[];
@@ -12,6 +14,7 @@ export interface PriorityTasksWidgetProps {
 }
 
 export const PriorityTasksWidget: React.FC<PriorityTasksWidgetProps> = ({ tasks = [], overdueTasks = [] }) => {
+  const language = useCurrentLanguage();
   const changeStatusMutation = useChangeTaskStatus();
 
   const allDisplayTasks = [...overdueTasks, ...tasks];
@@ -27,19 +30,19 @@ export const PriorityTasksWidget: React.FC<PriorityTasksWidgetProps> = ({ tasks 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-bold text-[#131B2E] font-heading">Công việc ưu tiên</h2>
+          <h2 className="text-base font-bold text-[#131B2E] font-heading">{translate(language, 'dashboard.priorityTasks')}</h2>
           <span className="w-5 h-5 rounded-full bg-[#E2E7FF] text-[#131B2E] flex items-center justify-center text-xs font-bold">
             {pendingCount}
           </span>
         </div>
-        <span className="text-xs text-[#64748B]">Hôm nay & Quá hạn</span>
+        <span className="text-xs text-[#64748B]">{translate(language, 'dashboard.todayAndOverdue')}</span>
       </div>
 
       {/* Task List */}
       <div className="flex flex-col gap-2">
         {allDisplayTasks.length === 0 ? (
           <div className="py-6 text-center text-xs text-[#64748B]">
-            Không có công việc nào cần làm hôm nay.
+            {translate(language, 'dashboard.noPriorityTasks')}
           </div>
         ) : (
           allDisplayTasks.slice(0, 6).map((task) => {
@@ -76,17 +79,17 @@ export const PriorityTasksWidget: React.FC<PriorityTasksWidgetProps> = ({ tasks 
                     {isCompleted ? (
                       <span className="text-[#10B981] font-semibold flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Đã xong
+                        {translate(language, 'dashboard.done')}
                       </span>
                     ) : isOverdue ? (
                       <span className="text-red-600 font-semibold flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
-                        Quá hạn
+                        {translate(language, 'dashboard.overdueTasks')}
                       </span>
                     ) : (
                       <>
                         <span className={task.priority === 'HIGH' || task.priority === 'URGENT' ? 'text-[#F43F5E] font-semibold' : ''}>
-                          {task.dueTime || 'Hạn hôm nay'}
+                          {task.dueTime || translate(language, 'dashboard.dueToday')}
                         </span>
                         <span className="w-1 h-1 rounded-full bg-[#94A3B8]" />
                         <Badge
@@ -94,7 +97,7 @@ export const PriorityTasksWidget: React.FC<PriorityTasksWidgetProps> = ({ tasks 
                           customBg={task.priority === 'HIGH' || task.priority === 'URGENT' ? '#FFDAD6' : '#D8E2FF'}
                           customColor={task.priority === 'HIGH' || task.priority === 'URGENT' ? '#BA1A1A' : '#001A42'}
                         >
-                          {task.priority === 'URGENT' ? 'Khẩn cấp' : task.priority === 'HIGH' ? 'Cao' : task.priority === 'LOW' ? 'Thấp' : 'Trung bình'}
+                          {task.priority === 'URGENT' ? translate(language, 'dashboard.urgent') : task.priority === 'HIGH' ? translate(language, 'dashboard.high') : task.priority === 'LOW' ? translate(language, 'dashboard.low') : translate(language, 'dashboard.medium')}
                         </Badge>
                       </>
                     )}
@@ -111,7 +114,7 @@ export const PriorityTasksWidget: React.FC<PriorityTasksWidgetProps> = ({ tasks 
         to="/tasks"
         className="inline-flex items-center justify-between pt-2 text-xs font-bold text-[#4F46E5] hover:text-[#3525CD] group transition-colors border-t border-[#E2E8F0]"
       >
-        <span>Xem tất cả danh sách công việc</span>
+        <span>{translate(language, 'dashboard.viewAllTasks')}</span>
         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
       </Link>
     </Card>

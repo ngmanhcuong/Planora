@@ -3,6 +3,7 @@ import type { ApiProfile, ApiResponse } from '@/types';
 
 export interface UpdateProfilePayload {
   name?: string;
+  email?: string;
   studentId?: string | null;
   major?: string | null;
   university?: string | null;

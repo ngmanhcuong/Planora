@@ -1,5 +1,13 @@
 import { apiClient } from '@/lib/axios';
 import type { ApiUserSettings, ApiResponse } from '@/types';
+import { toBackendLanguage } from '@/lib/i18n';
+
+const toBackendTheme = (theme?: string) => {
+  const normalized = theme?.toLowerCase();
+  if (normalized === 'dark') return 'DARK';
+  if (normalized === 'system') return 'SYSTEM';
+  return normalized === 'light' ? 'LIGHT' : theme;
+};
 
 export interface UpdateSettingsPayload {
   theme?: string;
@@ -28,7 +36,12 @@ export const settingsApi = {
   },
 
   updateSettings: async (payload: UpdateSettingsPayload): Promise<ApiUserSettings> => {
-    const response = await apiClient.patch<ApiResponse<{ settings: ApiUserSettings }>>('/settings', payload);
+    const normalizedPayload = {
+      ...payload,
+      ...(payload.language ? { language: toBackendLanguage(payload.language) } : {}),
+      ...(payload.theme ? { theme: toBackendTheme(payload.theme) } : {}),
+    };
+    const response = await apiClient.patch<ApiResponse<{ settings: ApiUserSettings }>>('/settings', normalizedPayload);
     return response.data.data.settings;
   },
 

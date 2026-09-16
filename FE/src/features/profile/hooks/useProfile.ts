@@ -27,6 +27,7 @@ export const useUpdateProfile = () => {
         setUser({
           ...currentUser,
           name: updatedProfile.name,
+          email: updatedProfile.email,
           studentId: updatedProfile.studentId || undefined,
           major: updatedProfile.major || undefined,
           university: updatedProfile.university || undefined,

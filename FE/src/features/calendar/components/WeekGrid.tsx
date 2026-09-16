@@ -1,6 +1,8 @@
 import React from 'react';
 import { MapPin, Video, AlertTriangle } from 'lucide-react';
 import type { CalendarEventItem } from '../types';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate, type TranslationKey } from '@/lib/i18n';
 
 export interface WeekGridProps {
   events: CalendarEventItem[];
@@ -8,13 +10,13 @@ export interface WeekGridProps {
 }
 
 const DAYS_HEADER = [
-  { dayName: 'Thứ 2', dateNum: 14, isToday: true },
-  { dayName: 'Thứ 3', dateNum: 15, isToday: false },
-  { dayName: 'Thứ 4', dateNum: 16, isToday: false },
-  { dayName: 'Thứ 5', dateNum: 17, isToday: false },
-  { dayName: 'Thứ 6', dateNum: 18, isToday: false },
-  { dayName: 'Thứ 7', dateNum: 19, isToday: false, isWeekend: true },
-  { dayName: 'Chủ Nhật', dateNum: 20, isToday: false, isWeekend: true },
+  { dayKey: 'weekday.mon', dateNum: 14, isToday: true },
+  { dayKey: 'weekday.tue', dateNum: 15, isToday: false },
+  { dayKey: 'weekday.wed', dateNum: 16, isToday: false },
+  { dayKey: 'weekday.thu', dateNum: 17, isToday: false },
+  { dayKey: 'weekday.fri', dateNum: 18, isToday: false },
+  { dayKey: 'weekday.sat', dateNum: 19, isToday: false, isWeekend: true },
+  { dayKey: 'weekday.sun', dateNum: 20, isToday: false, isWeekend: true },
 ];
 
 const TIME_SLOTS = [
@@ -23,6 +25,8 @@ const TIME_SLOTS = [
 ];
 
 export const WeekGrid: React.FC<WeekGridProps> = ({ events, onSelectEvent }) => {
+  const language = useCurrentLanguage();
+
   return (
     <div className="flex-1 w-full bg-white rounded-xl border border-[#E2E8F0] shadow-xs overflow-hidden flex flex-col min-w-0">
       {/* Week Days Header Row */}
@@ -46,7 +50,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({ events, onSelectEvent }) => 
                   : 'text-[#64748B]'
               }`}
             >
-              {d.dayName}
+              {translate(language, d.dayKey as TranslationKey)}
             </span>
             <span
               className={`w-7 h-7 flex items-center justify-center rounded-full text-sm font-bold ${
@@ -123,7 +127,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({ events, onSelectEvent }) => 
               {dayEvents.length === 0 && (
                 <div className="flex h-full items-center justify-center">
                   <span className="text-[11px] text-[#94A3B8] select-none">
-                    {day.isWeekend ? 'Nghỉ ngơi' : 'Khung giờ trống'}
+                    {day.isWeekend ? translate(language, 'calendar.rest') : translate(language, 'calendar.emptySlot')}
                   </span>
                 </div>
               )}

@@ -7,6 +7,10 @@ export const updateProfileSchema = z
       .min(2, { message: 'Họ và tên phải có ít nhất 2 ký tự' })
       .max(50, { message: 'Họ và tên tối đa 50 ký tự' })
       .optional(),
+    email: z
+      .string()
+      .email({ message: 'Địa chỉ email không hợp lệ' })
+      .optional(),
     studentId: z
       .string()
       .max(30, { message: 'Mã số sinh viên tối đa 30 ký tự' })

@@ -18,7 +18,7 @@ export const AppearanceSettingsSection: React.FC<AppearanceSettingsProps> = ({
   ];
 
   return (
-    <div className="flex flex-col gap-6 bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-xs">
+    <section className="flex flex-col gap-6 p-6">
       <div className="border-b border-[#F1F5F9] pb-4">
         <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
           <Palette className="w-5 h-5 text-[#4F46E5]" />
@@ -44,7 +44,7 @@ export const AppearanceSettingsSection: React.FC<AppearanceSettingsProps> = ({
                 onClick={() => onUpdate({ theme: t.id })}
                 className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border text-xs font-bold transition-all ${
                   isSelected
-                    ? 'bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5] shadow-xs ring-2 ring-[#4F46E5]/20'
+                    ? 'theme-option-selected bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5] shadow-xs ring-2 ring-[#4F46E5]/20'
                     : 'bg-[#F8FAFC] border-[#E2E8F0] text-[#64748B] hover:bg-white hover:text-[#131B2E]'
                 }`}
               >
@@ -73,6 +73,6 @@ export const AppearanceSettingsSection: React.FC<AppearanceSettingsProps> = ({
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };

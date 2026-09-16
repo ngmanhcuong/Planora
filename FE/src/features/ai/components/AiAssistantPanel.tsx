@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Send, Bot, User, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { useAiAssistant } from '../hooks/useAi';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface AiAssistantPanelProps {
   isOpen: boolean;
@@ -14,19 +16,19 @@ interface ChatMessage {
   timestamp: string;
 }
 
-const SAMPLE_PROMPTS = [
-  'Hôm nay tôi nên ưu tiên làm gì trước?',
-  'Tuần này tôi có deadline nào gấp?',
-  'Lịch học hôm nay có bị trùng không?',
-  'Tại sao điểm năng suất hôm nay thấp?',
-];
-
 export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onClose }) => {
+  const language = useCurrentLanguage();
+  const samplePrompts = [
+    translate(language, 'assistant.panel.prompt.one'),
+    translate(language, 'assistant.panel.prompt.two'),
+    translate(language, 'assistant.panel.prompt.three'),
+    translate(language, 'assistant.panel.prompt.four'),
+  ];
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'msg_welcome',
       sender: 'assistant',
-      text: 'Xin chào! Tôi là Trợ lý AI Planora. Tôi có thể hỗ trợ bạn tư vấn thứ tự ưu tiên công việc, giải đáp lịch học và nhắc nhở hạn chót hôm nay.',
+      text: translate(language, 'assistant.panel.welcome'),
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -43,7 +45,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
     if (!text) return;
 
     if (text.length > 2000) {
-      setErrorMessage('Nội dung câu hỏi quá dài (tối đa 2000 ký tự).');
+      setErrorMessage(translate(language, 'assistant.panel.tooLong'));
       return;
     }
 
@@ -69,7 +71,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
         setMessages((prev) => [...prev, botMsg]);
       },
       onError: (err: any) => {
-        const msg = err.response?.data?.message || 'Tính năng AI hiện không khả dụng. Vui lòng thử lại sau.';
+        const msg = err.response?.data?.message || translate(language, 'assistant.panel.unavailable');
         setErrorMessage(msg);
       },
     });
@@ -85,10 +87,12 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
           </div>
           <div>
             <h3 className="text-sm font-bold text-[#131B2E] font-heading flex items-center gap-1.5">
-              Trợ lý AI Planora
+              {translate(language, 'assistant.title')}
               <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
             </h3>
-            <p className="text-[11px] text-[#64748B]">Tư vấn năng suất & lịch học cá nhân</p>
+            <p className="text-[11px] text-[#64748B]">
+              {translate(language, 'assistant.panel.subtitle')}
+            </p>
           </div>
         </div>
         <button
@@ -136,16 +140,18 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
         {assistantMutation.isPending && (
           <div className="flex items-center gap-2 text-xs text-[#64748B] p-2 bg-white rounded-xl border border-[#E2E8F0] w-fit">
             <Loader2 className="w-4 h-4 animate-spin text-[#4F46E5]" />
-            <span>Planora Assistant đang suy nghĩ...</span>
+            <span>{translate(language, 'assistant.panel.thinking')}</span>
           </div>
         )}
       </div>
 
       {/* Quick Sample Prompts */}
       <div className="p-3 border-t border-[#E2E8F0] bg-white flex flex-col gap-2">
-        <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">Gợi ý câu hỏi</span>
+        <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">
+          {translate(language, 'assistant.panel.suggestions')}
+        </span>
         <div className="flex flex-wrap gap-1.5">
-          {SAMPLE_PROMPTS.map((prompt, idx) => (
+          {samplePrompts.map((prompt, idx) => (
             <button
               key={idx}
               onClick={() => handleSend(prompt)}
@@ -178,7 +184,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             type="text"
             value={inputMsg}
             onChange={(e) => setInputMsg(e.target.value)}
-            placeholder="Hỏi Trợ lý Planora..."
+            placeholder={translate(language, 'assistant.panel.placeholder')}
             disabled={assistantMutation.isPending}
             className="flex-1 h-9 px-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs text-[#131B2E] placeholder-[#94A3B8] focus:outline-none focus:border-[#4F46E5] focus:bg-white transition-all"
           />

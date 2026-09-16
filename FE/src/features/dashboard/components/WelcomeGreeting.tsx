@@ -3,6 +3,8 @@ import { Plus, Sparkles, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export interface WelcomeGreetingProps {
   summary?: {
@@ -21,8 +23,9 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
 }) => {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+  const language = useCurrentLanguage();
 
-  const todayStr = new Date().toLocaleDateString('vi-VN', {
+  const todayStr = new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'vi-VN', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -36,12 +39,16 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-1">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#131B2E] tracking-tight font-heading">
-          Xin chào, {user?.name || 'Người dùng'} 👋
+          {translate(language, 'dashboard.hello')}, {user?.name || translate(language, 'dashboard.userFallback')} 👋
         </h1>
         <p className="text-xs sm:text-sm text-[#464555] flex flex-wrap items-center gap-2">
-          <span className="font-medium text-[#131B2E]">Hôm nay, {todayStr}</span>
+          <span className="font-medium text-[#131B2E]">{translate(language, 'dashboard.today')}, {todayStr}</span>
           <span className="w-1 h-1 rounded-full bg-[#777587]" />
-          <span>Bạn có {eventsCount} sự kiện sắp tới và {tasksToday} công việc cần thực hiện hôm nay.</span>
+          <span>
+            {translate(language, 'dashboard.summaryLine')
+              .replace('{events}', String(eventsCount))
+              .replace('{tasks}', String(tasksToday))}
+          </span>
         </p>
       </div>
 
@@ -51,7 +58,7 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#EEF2FF] border border-[#E2DFFF] text-xs font-bold text-[#4F46E5] hover:bg-[#E2DFFF] transition-all cursor-pointer shadow-2xs"
         >
           <Bot className="w-4 h-4 text-[#4F46E5]" />
-          <span>Trợ lý AI</span>
+          <span>{translate(language, 'dashboard.assistant')}</span>
         </button>
 
         <button
@@ -59,15 +66,14 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#3B82F6] text-xs font-bold text-white hover:opacity-95 transition-all cursor-pointer shadow-xs"
         >
           <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300" />
-          <span>Lập lịch AI</span>
+          <span>{translate(language, 'dashboard.aiSchedule')}</span>
         </button>
 
         <Button variant="secondary" size="sm" onClick={() => navigate('/tasks')} className="cursor-pointer">
           <Plus className="w-4 h-4" />
-          <span>Tạo công việc</span>
+          <span>{translate(language, 'dashboard.createTask')}</span>
         </Button>
       </div>
     </div>
   );
 };
-

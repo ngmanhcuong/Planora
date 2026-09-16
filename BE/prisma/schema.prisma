@@ -59,6 +59,12 @@ enum ThemeMode {
 enum Language {
   VI
   EN
+  JA
+  KO
+  ZH
+  FR
+  DE
+  ES
 }
 
 enum NotificationType {

@@ -29,5 +29,12 @@ export const loginSchema = z.object({
     .min(1, { message: 'Mật khẩu không được để trống' }),
 });
 
+export const googleLoginSchema = z.object({
+  credential: z
+    .string()
+    .min(1, { message: 'Thiếu mã xác thực Google' }),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;

@@ -10,7 +10,7 @@ export const AppLayout: React.FC = () => {
   const { isSidebarCollapsed } = useUIStore();
 
   return (
-    <div className="min-h-screen bg-[#FAF8FF] text-[#131B2E]">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-main)] transition-colors duration-200">
       {/* Sidebar */}
       <Sidebar />
 

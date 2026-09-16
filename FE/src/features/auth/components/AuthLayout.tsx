@@ -1,6 +1,7 @@
 import React from 'react';
-import { HelpCircle, Sparkles } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import type { HTMLAttributes } from 'react';
+import { Logo } from '@/components/ui/Logo';
 
 export interface AuthLayoutProps extends HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -13,22 +14,14 @@ export interface AuthLayoutProps extends HTMLAttributes<HTMLDivElement> {
 
 export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, topRightLink }) => {
   return (
-    <div className="min-h-screen lg:h-screen lg:max-h-screen w-full overflow-y-auto lg:overflow-hidden bg-[#FAFAFA] text-slate-800 font-sans flex flex-col justify-between antialiased selection:bg-indigo-100 selection:text-indigo-900 relative">
+    <div className="min-h-screen lg:h-screen w-full overflow-y-auto bg-[#FAFAFA] text-slate-800 font-sans flex flex-col justify-between antialiased selection:bg-indigo-100 selection:text-indigo-900 relative">
       {/* Background Texture & Soft Ambient Illumination */}
       <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-60"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-indigo-100/30 via-indigo-50/10 to-blue-100/30 rounded-full blur-3xl pointer-events-none"></div>
 
       {/* Top Header */}
       <header className="w-full max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between relative z-10 shrink-0 border-b border-slate-200/50 sm:border-none">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-700 flex items-center justify-center text-white font-bold text-base shadow-sm shadow-indigo-600/20">
-            P
-          </div>
-          <span className="font-heading font-bold text-lg tracking-tight text-slate-900">Planora</span>
-          <span className="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100 uppercase tracking-wider flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-indigo-600" /> Beta
-          </span>
-        </div>
+        <Logo size="md" theme="light" />
 
         <div className="flex items-center gap-4 text-xs font-medium text-slate-500">
           {topRightLink && (
