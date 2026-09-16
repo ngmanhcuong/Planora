@@ -34,12 +34,12 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         </div>
         <button
           onClick={() => onUpdate({ emailNotifications: !settings.emailNotifications })}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.emailNotifications ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
               settings.emailNotifications ? 'translate-x-5' : 'translate-x-0'
             }`}
           />
@@ -57,12 +57,12 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         </div>
         <button
           onClick={() => onUpdate({ pushNotifications: !settings.pushNotifications })}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.pushNotifications ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
               settings.pushNotifications ? 'translate-x-5' : 'translate-x-0'
             }`}
           />
@@ -102,12 +102,12 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         </div>
         <button
           onClick={() => onUpdate({ timetableAlerts: !settings.timetableAlerts })}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.timetableAlerts ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
               settings.timetableAlerts ? 'translate-x-5' : 'translate-x-0'
             }`}
           />
@@ -125,12 +125,12 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         </div>
         <button
           onClick={() => onUpdate({ soundEffects: !settings.soundEffects })}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.soundEffects ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
               settings.soundEffects ? 'translate-x-5' : 'translate-x-0'
             }`}
           />

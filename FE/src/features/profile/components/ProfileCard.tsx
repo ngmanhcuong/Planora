@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { Award, Building2, Calendar, Camera, CheckCircle2, GraduationCap, Mail } from 'lucide-react';
 import type { UserProfileData } from '../types';
+import { useUpdateProfile } from '../hooks/useProfile';
+import { prepareAvatar } from '../utils/prepareAvatar';
 
 export interface ProfileCardProps {
   profile: UserProfileData;
 }
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
-  const [avatarPreview, setAvatarPreview] = useState(profile.avatarUrl);
-  const [isAvatarBroken, setIsAvatarBroken] = useState(false);
+  const [brokenAvatar, setBrokenAvatar] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState('');
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+  const updateProfile = useUpdateProfile();
   const initials = profile.name
     .split(' ')
     .filter(Boolean)
@@ -16,12 +20,20 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
     .map((part) => part[0]?.toUpperCase())
     .join('') || 'P';
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setAvatarPreview(url);
-      setIsAvatarBroken(false);
+    e.target.value = '';
+    if (!file) return;
+    setAvatarError('');
+    setIsSavingAvatar(true);
+    try {
+      const avatarUrl = await prepareAvatar(file);
+      await updateProfile.mutateAsync({ avatarUrl });
+      setBrokenAvatar(null);
+    } catch {
+      setAvatarError('Không thể lưu ảnh. Hãy chọn ảnh hợp lệ (tối đa 5 MB) và thử lại.');
+    } finally {
+      setIsSavingAvatar(false);
     }
   };
 
@@ -39,11 +51,11 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
         <div className="-mt-12 flex flex-col gap-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-3xl border-4 border-white bg-gradient-to-br from-[#EEF2FF] to-[#DBEAFE] shadow-lg">
-              {avatarPreview && !isAvatarBroken ? (
+              {profile.avatarUrl && brokenAvatar !== profile.avatarUrl ? (
                 <img
-                  src={avatarPreview}
+                  src={profile.avatarUrl}
                   alt={profile.name}
-                  onError={() => setIsAvatarBroken(true)}
+                  onError={() => setBrokenAvatar(profile.avatarUrl)}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -62,6 +74,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarChange}
+                  disabled={isSavingAvatar}
                   className="hidden"
                 />
               </label>
@@ -84,6 +97,8 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
             </div>
           </div>
 
+          {isSavingAvatar && <p role="status" className="text-sm text-[#64748B]">Đang lưu ảnh đại diện...</p>}
+          {avatarError && <p role="alert" className="text-sm text-red-600">{avatarError}</p>}
           <div className="grid gap-3 sm:grid-cols-3">
             {[
               { label: 'MSSV', value: profile.studentId, icon: GraduationCap },

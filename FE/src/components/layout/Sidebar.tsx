@@ -131,11 +131,11 @@ const SidebarNavLink: React.FC<{
       aria-label={label}
       aria-current={isActive ? 'page' : undefined}
       className={clsx(
-        'relative flex w-full items-center rounded-2xl text-sm font-semibold transition-all duration-150 group cursor-pointer',
+        'relative flex w-full items-center rounded-2xl text-[13px] leading-5 tracking-[0.01em] transition-all duration-150 group cursor-pointer',
         collapsed ? 'h-11 justify-center px-0' : 'h-11 gap-3 px-3 text-left',
         isActive
-          ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-[inset_0_0_0_1px_rgba(79,70,229,0.08)]'
-          : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#131B2E]'
+          ? 'font-semibold bg-[#EEF2FF] text-[#4F46E5] shadow-[inset_0_0_0_1px_rgba(79,70,229,0.08)]'
+          : 'font-medium text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#131B2E]'
       )}
     >
       <span
@@ -146,7 +146,7 @@ const SidebarNavLink: React.FC<{
       >
         {item.icon}
       </span>
-      {!collapsed && <span className="truncate">{label}</span>}
+      {!collapsed && <span className="truncate font-[family-name:var(--font-heading)]">{label}</span>}
       {isActive && !collapsed && (
         <span className="absolute right-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-[#4F46E5]" />
       )}

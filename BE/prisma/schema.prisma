@@ -108,7 +108,7 @@ model Profile {
   completedCredits Int      @default(0)
   totalCredits     Int      @default(135)
   bio              String?  @db.Text
-  avatarUrl        String?
+  avatarUrl        String?  @db.Text
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

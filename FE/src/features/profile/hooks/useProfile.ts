@@ -22,6 +22,7 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: (data: UpdateProfilePayload) => profileApi.updateProfile(data),
     onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(profileKeys.profile, updatedProfile);
       queryClient.invalidateQueries({ queryKey: profileKeys.profile });
       if (currentUser) {
         setUser({

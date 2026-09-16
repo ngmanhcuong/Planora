@@ -8,6 +8,8 @@ export const UserMenu: React.FC = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user, openLogoutModal } = useAuthStore();
+  const [brokenAvatar, setBrokenAvatar] = useState<string | null>(null);
+  const initials = user?.name.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || 'P';
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -25,11 +27,12 @@ export const UserMenu: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#F1F5F9] transition-colors focus:outline-none"
       >
-        <img
-          src={user?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'}
+        {user?.avatarUrl && brokenAvatar !== user.avatarUrl ? <img
+          src={user.avatarUrl}
           alt={user?.name || 'User Avatar'}
           className="w-9 h-9 rounded-full object-cover border border-[#E2E8F0]"
-        />
+          onError={() => setBrokenAvatar(user.avatarUrl || null)}
+        /> : <span className="flex w-9 h-9 items-center justify-center rounded-full bg-[#EEF2FF] text-xs font-bold text-[#4F46E5]">{initials}</span>}
         <div className="hidden sm:flex flex-col text-left">
           <span className="text-xs font-bold text-[#131B2E] truncate max-w-[120px]">{user?.name || 'Tài khoản'}</span>
           <span className="text-[10px] text-[#64748B] truncate max-w-[120px]">{user?.email || 'user@planora.vn'}</span>

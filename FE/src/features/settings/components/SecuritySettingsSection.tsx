@@ -125,12 +125,12 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
         </div>
         <button
           onClick={() => onUpdate({ twoFactorAuth: !settings.twoFactorAuth })}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.twoFactorAuth ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
               settings.twoFactorAuth ? 'translate-x-5' : 'translate-x-0'
             }`}
           />
@@ -145,12 +145,12 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
         </div>
         <button
           onClick={() => onUpdate({ loginAlerts: !settings.loginAlerts })}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.loginAlerts ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}
         >
           <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
               settings.loginAlerts ? 'translate-x-5' : 'translate-x-0'
             }`}
           />

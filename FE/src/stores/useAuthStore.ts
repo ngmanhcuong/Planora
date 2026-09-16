@@ -8,7 +8,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isInitializing: boolean;
   isLogoutModalOpen: boolean;
-  setAuth: (token: string, user: User) => void;
+  setAuth: (token: string, user: User & { profile?: { avatarUrl?: string | null } }) => void;
   setUser: (user: User) => void;
   clearAuth: () => void;
   initializeAuth: () => Promise<void>;
@@ -33,9 +33,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
     isInitializing: !!initialToken,
     isLogoutModalOpen: false,
 
-    setAuth: (token: string, user: User) => {
+    setAuth: (token, user) => {
       localStorage.setItem('planora_token', token);
-      set({ token, user, isAuthenticated: true, isInitializing: false });
+      set({ token, user: { ...user, avatarUrl: user.profile?.avatarUrl ?? user.avatarUrl }, isAuthenticated: true, isInitializing: false });
+      void get().initializeAuth();
     },
 
     setUser: (user: User) => {

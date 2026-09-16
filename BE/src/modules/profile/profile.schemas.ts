@@ -48,7 +48,8 @@ export const updateProfileSchema = z
       .nullable(),
     avatarUrl: z
       .string()
-      .url({ message: 'URL ảnh đại diện không hợp lệ' })
+      .max(60000)
+      .refine((value) => /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value) || /^https?:\/\//.test(value) && z.url().safeParse(value).success, { message: 'URL ảnh đại diện không hợp lệ' })
       .optional()
       .nullable()
       .or(z.literal('')),

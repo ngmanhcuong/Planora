@@ -49,9 +49,10 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <span
-      style={styleObj}
+      style={{ ...styleObj, '--badge-color': catInfo?.color || customColor || '#94A3B8' } as React.CSSProperties}
       className={twMerge(
         'inline-flex items-center justify-center select-none font-sans',
+        (catInfo || customColor) && 'theme-badge',
         !catInfo && !customColor && 'bg-[#F1F5F9] text-[#475569] border border-[#E2E8F0]',
         shapeStyles[variant],
         sizeStyles[size],
