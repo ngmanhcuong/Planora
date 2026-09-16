@@ -42,20 +42,20 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
   ];
 
   return (
-    <div className="flex flex-col gap-3 bg-white p-4 rounded-xl border border-[#E2E8F0] shadow-xs">
+    <div className="flex flex-col gap-3.5 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Status Tabs */}
-        <div className="flex items-center bg-[#F8FAFC] p-1 rounded-lg border border-[#E2E8F0] overflow-x-auto">
+        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 overflow-x-auto">
           {tabs.map((tab) => {
             const isActive = activeStatusTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => onStatusTabChange(tab.id)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-white text-[#4F46E5] shadow-xs font-bold'
-                    : 'text-[#64748B] hover:text-[#131B2E]'
+                    ? 'bg-white text-indigo-600 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {translate(language, tab.labelKey)}
@@ -66,14 +66,14 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
 
         {/* Priority Selector */}
         <div className="flex items-center gap-2">
-          <Filter className="w-3.5 h-3.5 text-[#64748B]" />
-          <span className="text-xs font-semibold text-[#64748B]">
+          <Filter className="w-3.5 h-3.5 text-slate-500" />
+          <span className="text-xs font-bold text-slate-600">
             {translate(language, 'tasks.priority.label')}:
           </span>
           <select
             value={activePriority}
             onChange={(e) => onPriorityChange(e.target.value as PriorityType | 'all')}
-            className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#131B2E] focus:outline-none focus:border-[#4F46E5]"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer"
           >
             <option value="all">{translate(language, 'tasks.priority.all')}</option>
             <option value="high">{translate(language, 'tasks.priority.high')}</option>
@@ -84,8 +84,8 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
       </div>
 
       {/* Category Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-[#F1F5F9]">
-        <span className="text-[11px] text-[#64748B] uppercase tracking-wider font-bold shrink-0 mr-1">
+      <div className="flex items-center gap-2 overflow-x-auto pt-3 border-t border-slate-100">
+        <span className="text-[11px] text-slate-400 uppercase tracking-wider font-extrabold shrink-0 mr-1">
           {translate(language, 'tasks.category.label')}:
         </span>
         {categories.map((cat) => {
@@ -95,13 +95,13 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
               <button
                 key="all"
                 onClick={() => onCategoryChange('all')}
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#4F46E5] text-white shadow-2xs'
-                    : 'bg-[#F8FAFC] text-[#464555] hover:bg-[#EEF2FF]'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                {isActive && <Check className="w-3 h-3" />}
+                {isActive && <Check className="w-3.5 h-3.5" />}
                 <span>{translate(language, 'tasks.filter.all')}</span>
               </button>
             );
@@ -111,14 +111,14 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
             <button
               key={cat}
               onClick={() => onCategoryChange(cat)}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-[#4F46E5] text-white font-semibold shadow-2xs'
-                  : 'bg-[#F8FAFC] text-[#131B2E] hover:bg-[#EEF2FF]'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
               }`}
             >
               <span
-                className="w-2 h-2 rounded-full shrink-0"
+                className="w-2.5 h-2.5 rounded-full shrink-0"
                 style={{ backgroundColor: info.color }}
               />
               <span>{translate(language, `category.${cat}` as TranslationKey) || info.label}</span>
@@ -129,3 +129,4 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
     </div>
   );
 };
+

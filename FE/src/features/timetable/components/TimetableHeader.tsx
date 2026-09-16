@@ -1,7 +1,5 @@
 import React from 'react';
-import { PlusCircle, Printer, Download, BookOpen, Award } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { PlusCircle, Printer, Download, BookOpen, Award, Calendar } from 'lucide-react';
 import type { TermSemesterInfo } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate } from '@/lib/i18n';
@@ -18,27 +16,32 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
   const language = useCurrentLanguage();
 
   return (
-    <div className="flex flex-col gap-4 bg-white p-5 rounded-xl border border-[#E2E8F0] shadow-xs">
+    <div className="flex flex-col gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Title & Semester Selector */}
         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-[#131B2E] tracking-tight font-heading">
-              {translate(language, 'timetable.title')}
-            </h1>
-            <Badge customBg="#D8E2FF" customColor="#001A42" size="md">
-              {semesterInfo.termName} ({semesterInfo.academicYear})
-            </Badge>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight font-heading">
+                {translate(language, 'timetable.title')}
+              </h1>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800">
+                {semesterInfo.termName} ({semesterInfo.academicYear})
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-[#F8FAFC] px-3 py-1.5 rounded-lg border border-[#E2E8F0] text-xs font-semibold text-[#64748B]">
-            <span className="flex items-center gap-1.5 text-[#131B2E]">
-              <BookOpen className="w-3.5 h-3.5 text-[#4F46E5]" />
+          <div className="flex items-center gap-3 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200/80 text-xs font-bold text-slate-600 sm:ml-2">
+            <span className="flex items-center gap-1.5 text-slate-900">
+              <BookOpen className="w-4 h-4 text-indigo-600" />
               {semesterInfo.totalSubjects} {translate(language, 'timetable.subjects')}
             </span>
-            <span className="w-1 h-1 rounded-full bg-[#CBD5E1]" />
-            <span className="flex items-center gap-1.5 text-[#131B2E]">
-              <Award className="w-3.5 h-3.5 text-[#006E4B]" />
+            <span className="w-1 h-1 rounded-full bg-slate-300" />
+            <span className="flex items-center gap-1.5 text-slate-900">
+              <Award className="w-4 h-4 text-emerald-600" />
               {semesterInfo.totalCredits} {translate(language, 'timetable.credits')}
             </span>
           </div>
@@ -46,31 +49,31 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
 
         {/* Quick Actions */}
         <div className="flex items-center gap-2.5">
-          <Button
-            variant="secondary"
-            size="sm"
+          <button
             onClick={() => window.print()}
-            className="bg-[#F8FAFC] border-[#E2E8F0]"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-[#64748B]" />
+            <Printer className="w-4 h-4 text-slate-600" />
             <span className="hidden sm:inline">{translate(language, 'timetable.print')}</span>
-          </Button>
+          </button>
 
-          <Button
-            variant="secondary"
-            size="sm"
-            className="bg-[#F8FAFC] border-[#E2E8F0]"
+          <button
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4 text-[#64748B]" />
+            <Download className="w-4 h-4 text-slate-600" />
             <span className="hidden sm:inline">{translate(language, 'timetable.export')}</span>
-          </Button>
+          </button>
 
-          <Button variant="primary" size="sm" onClick={onOpenAddModal}>
+          <button
+            onClick={onOpenAddModal}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+          >
             <PlusCircle className="w-4 h-4" />
             <span>{translate(language, 'timetable.addSubject')}</span>
-          </Button>
+          </button>
         </div>
       </div>
     </div>
   );
 };
+

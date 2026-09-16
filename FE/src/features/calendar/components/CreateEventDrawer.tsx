@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { X, AlertTriangle, Calendar, Clock, MapPin, BookmarkPlus } from 'lucide-react';
+import { AlertTriangle, Clock, MapPin, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
-import type { CategoryType } from '@/types';
-import { CATEGORY_MAP } from '@/utils/categories';
+
+import { useQuery } from '@tanstack/react-query';
+import { calendarApi, type CreateEventPayload } from '../api/calendarApi';
+import { apiClient } from '@/lib/axios';
+import type { ApiCategory } from '@/types';
 
 export interface CreateEventDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave?: (eventData: any) => void;
+  onSave: (eventData: CreateEventPayload) => Promise<unknown>; initialDate: Date;
   isPending?: boolean;
 }
 
@@ -16,88 +20,51 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
   isOpen,
   onClose,
   onSave,
-  isPending,
+  isPending, initialDate,
 }) => {
-  const [title, setTitle] = useState('Họp bổ sung đồ án tốt nghiệp');
-  const [category, setCategory] = useState<CategoryType>('meeting');
-  const [startTime, setStartTime] = useState('14:00');
-  const [endTime, setEndTime] = useState('15:00');
-  const [location, setLocation] = useState('Phòng họp trực tuyến Google Meet');
-  const [notes, setNotes] = useState('Thảo luận về module Database & Timeline bàn giao sprint 4.');
-  const [showConflictWarning, setShowConflictWarning] = useState(true);
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave?.({
-      title,
-      category,
-      startTime,
-      endTime,
-      location,
-      notes,
-    });
-    onClose();
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [location, setLocation] = useState('');
+  const [notes, setNotes] = useState('');
+  const [date, setDate] = useState(`${initialDate.getFullYear()}-${String(initialDate.getMonth()+1).padStart(2,'0')}-${String(initialDate.getDate()).padStart(2,'0')}`);
+  const [error, setError] = useState('');
+  const [allowConflict, setAllowConflict] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const start = new Date(`${date}T${startTime}`);
+  const end = new Date(`${date}T${endTime}`);
+  const valid = Number.isFinite(start.getTime()) && Number.isFinite(end.getTime()) && end > start;
+  const startAt = valid ? start.toISOString() : '';
+  const endAt = valid ? end.toISOString() : '';
+  const categories = useQuery({ queryKey: ['event-categories'], queryFn: async () => {
+    const response = await apiClient.get('/events/categories');
+    return response.data.data.categories as ApiCategory[];
+  }});
+  const check = useQuery({ queryKey: ['calendar-conflicts', startAt, endAt], enabled: valid,
+    queryFn: () => calendarApi.getCalendarRange({start: startAt, end: endAt}) });
+  const conflicts = (check.data || []).filter(item => item.sourceType === 'EVENT' && item.end && new Date(item.start) < end && new Date(item.end) > start);
+  const close = () => { if (!saving && !isPending) onClose(); };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); setError('');
+    if (!valid || title.trim().length < 2) { setError('Nhập tên từ 2 ký tự và giờ kết thúc sau giờ bắt đầu.'); return; }
+    setSaving(true);
+    try {
+      const result = await check.refetch();
+      if (result.error || !result.data) throw new Error('Không kiểm tra được lịch. Vui lòng thử lại.');
+      if (result.data.some(item => item.sourceType === 'EVENT' && item.end && new Date(item.start) < end && new Date(item.end) > start) && !allowConflict) {
+        setError('Lịch bị trùng. Hãy đổi giờ hoặc xác nhận vẫn lưu.'); return;
+      }
+      await onSave({title: title.trim(), startAt, endAt, categoryId: category || null, location: location.trim() || undefined, description: notes.trim() || undefined});
+      onClose();
+    } catch { setError('Không thể lưu hoặc kiểm tra lịch. Vui lòng thử lại.'); }
+    finally { setSaving(false); }
   };
-
   return (
-    <div className="w-full xl:w-[410px] shrink-0 bg-white rounded-xl border border-[#E2E8F0] shadow-md p-6 flex flex-col gap-5 animate-in slide-in-from-right-4 duration-200">
-      {/* Panel Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#4F46E5]" />
-          <h2 className="text-base font-bold text-[#131B2E] font-heading">Thêm lịch trình mới</h2>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded-lg text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#131B2E] transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Schedule Conflict Warning Callout */}
-      {showConflictWarning && (
-        <div className="p-4 rounded-xl bg-[#FFF1F2] border border-[#FFE4E6] text-[#131B2E] flex flex-col gap-3 shadow-2xs">
-          <div className="flex items-start gap-2.5">
-            <AlertTriangle className="w-5 h-5 text-[#F43F5E] shrink-0 mt-0.5" />
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-[#93000A]">Phát hiện xung đột lịch trình</span>
-              <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed">
-                Khung giờ này đang trùng với{' '}
-                <span className="font-semibold text-[#131B2E] underline decoration-[#F43F5E] underline-offset-2">
-                  "Họp nhóm đồ án"
-                </span>{' '}
-                từ 14:00 – 15:30.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center justify-end gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => {
-                setStartTime('16:00');
-                setEndTime('17:00');
-                setShowConflictWarning(false);
-              }}
-              className="px-2.5 py-1 rounded-md bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#131B2E] transition-colors"
-            >
-              Gợi ý giờ khác
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowConflictWarning(false)}
-              className="px-2.5 py-1 rounded-md bg-[#FFDAD6] text-[#93000A] hover:bg-[#F43F5E] hover:text-white text-xs font-semibold transition-colors"
-            >
-              Vẫn giữ giờ này
-            </button>
-          </div>
-        </div>
-      )}
-
+    <Modal isOpen={isOpen} onClose={close} title="Thêm lịch trình mới" maxWidth="xl">
+    <div className="max-h-[70dvh] overflow-y-auto pr-1 flex flex-col gap-5">
       {/* Form Inputs */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4"><fieldset disabled={saving || isPending} className="flex flex-col gap-4">
         {/* Title Input */}
         <Input
           label="Tên lịch trình"
@@ -107,58 +74,30 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
           required
         />
 
-        {/* Category Selector */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-[#131B2E]">Phân loại danh mục</label>
-          <div className="grid grid-cols-3 gap-1.5">
-            {(['study', 'work', 'meeting', 'personal', 'habit'] as CategoryType[]).map((cat) => {
-              const info = CATEGORY_MAP[cat];
-              const isSelected = category === cat;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setCategory(cat)}
-                  className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all border ${
-                    isSelected
-                      ? 'bg-[#4F46E5] text-white border-[#4F46E5] font-semibold shadow-xs'
-                      : 'bg-[#F8FAFC] text-[#464555] border-[#E2E8F0] hover:bg-[#EEF2FF]'
-                  }`}
-                >
-                  <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: isSelected ? '#FFFFFF' : info.color }}
-                  />
-                  <span>{info.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
+        <label className="text-xs font-semibold text-[#131B2E]">Danh mục
+          <select className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white p-2" value={category} onChange={e => setCategory(e.target.value)}>
+            <option value="">Không phân loại</option>
+            {categories.data?.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select>
+        </label>
+        {categories.isError && <p role="alert">Không tải được danh mục; có thể lưu không phân loại.</p>}
         {/* Date & Time */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-semibold text-[#131B2E]">Thời gian diễn ra</label>
-          <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-medium text-[#131B2E]">
-            <span className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#64748B]" />
-              Thứ Hai, 14/09/2026
-            </span>
-          </div>
-
+          <Input label="Ngày" type="date" value={date} required onChange={e => {setDate(e.target.value); setAllowConflict(false);}} />
           <div className="grid grid-cols-2 gap-2">
             <Input
               label="Bắt đầu"
               type="time"
               value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+              onChange={(e) => {setStartTime(e.target.value); setAllowConflict(false);}}
               rightIcon={<Clock className="w-4 h-4" />}
             />
             <Input
               label="Kết thúc"
               type="time"
               value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
+              onChange={(e) => {setEndTime(e.target.value); setAllowConflict(false);}}
               rightIcon={<Clock className="w-4 h-4" />}
             />
           </div>
@@ -185,17 +124,25 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
           />
         </div>
 
-        {/* Form Actions */}
+        {valid && check.isFetching && <p role="status">Đang kiểm tra lịch đã lưu...</p>}
+        {check.isError && <p role="alert">Không tải được lịch để kiểm tra trùng giờ.</p>}
+        {conflicts.length > 0 && <div className="bg-[#FFF1F2] text-[#BA1A1A] rounded-lg p-3 text-xs">
+          <p className="font-semibold flex gap-2"><AlertTriangle size={16} />Trùng với lịch đã lưu:</p>
+          {conflicts.map((item, index) => <p key={`${item.id}-${index}`}>{item.title} · {new Date(item.start).toLocaleString('vi-VN')} – {new Date(item.end!).toLocaleString('vi-VN')}</p>)}
+          <label className="flex gap-2 mt-2"><input type="checkbox" checked={allowConflict} onChange={e => setAllowConflict(e.target.checked)} />Vẫn lưu trong khung giờ này</label>
+        </div>}
+        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
-          <Button type="button" variant="secondary" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="secondary" onClick={close} disabled={isPending}>
             Hủy bỏ
           </Button>
           <Button type="submit" variant="primary" disabled={isPending}>
             <BookmarkPlus className="w-4 h-4" />
-            <span>{isPending ? 'Đang lưu...' : 'Lưu lịch trình'}</span>
+            <span>{saving || isPending ? 'Đang lưu...' : 'Lưu lịch trình'}</span>
           </Button>
         </div>
-      </form>
+      </fieldset></form>
     </div>
+    </Modal>
   );
 };

@@ -1,25 +1,55 @@
 import React, { useState } from 'react';
 import { CalendarHeader } from './components/CalendarHeader';
 import { WeekGrid } from './components/WeekGrid';
+import { MonthGrid } from './components/MonthGrid';
 import { CreateEventDrawer } from './components/CreateEventDrawer';
 import { useCalendarRange, useCreateEvent } from './hooks/useCalendar';
 import type { CalendarEventItem, CalendarViewMode } from './types';
 import type { CategoryType, ApiCalendarItem } from '@/types';
 import { Loader2 } from 'lucide-react';
+import { getStartOfWeek, getEndOfWeek, getWeekDays } from '@/utils/dateUtils';
 
 export const CalendarPage: React.FC = () => {
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<CalendarViewMode>('week');
   const [activeCategory, setActiveCategory] = useState<CategoryType | 'all'>('all');
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
 
-  // Default to current week range: 2026-09-14 to 2026-09-20
+  // Compute dynamic week range based on currentDate
+  const monday = getStartOfWeek(currentDate);
+  const weekDays = getWeekDays(monday).filter(day => viewMode !== 'day' || day.dateObj.toDateString() === currentDate.toDateString());
+  const rangeStart = viewMode === 'month' ? getStartOfWeek(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)) : viewMode === 'day' ? new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()) : monday;
+  const rangeEnd = viewMode === 'month' ? getEndOfWeek(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)) : viewMode === 'day' ? new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 23, 59, 59, 999) : getEndOfWeek(currentDate);
+
   const rangeParams = {
-    start: '2026-09-14T00:00:00.000Z',
-    end: '2026-09-20T23:59:59.999Z',
+    start: rangeStart.toISOString(),
+    end: rangeEnd.toISOString(),
   };
 
   const { data: calendarData, isLoading, isError } = useCalendarRange(rangeParams);
   const createEventMutation = useCreateEvent();
+
+  const handlePrevWeek = () => {
+    setCurrentDate((prev) => {
+      const d = new Date(prev);
+      if (viewMode === 'month') { d.setDate(1); d.setMonth(d.getMonth() - 1); }
+      else d.setDate(d.getDate() - (viewMode === 'day' ? 1 : 7));
+      return d;
+    });
+  };
+
+  const handleNextWeek = () => {
+    setCurrentDate((prev) => {
+      const d = new Date(prev);
+      if (viewMode === 'month') { d.setDate(1); d.setMonth(d.getMonth() + 1); }
+      else d.setDate(d.getDate() + (viewMode === 'day' ? 1 : 7));
+      return d;
+    });
+  };
+
+  const handleToday = () => {
+    setCurrentDate(new Date());
+  };
 
   // Convert ApiCalendarItem to CalendarEventItem for WeekGrid
   const rawItems: ApiCalendarItem[] = calendarData || [];
@@ -55,18 +85,19 @@ export const CalendarPage: React.FC = () => {
     }
 
     const catName = item.category?.name || (item.sourceType === 'TASK' ? 'Deadline' : 'Sự kiện');
-    const catBg = item.category?.bgColor || (item.sourceType === 'TASK' ? '#FFDAD6' : '#EEF2FF');
-    const catText = item.category?.textColor || (item.sourceType === 'TASK' ? '#93000A' : '#3323CC');
-    const catColor = item.category?.color || (item.sourceType === 'TASK' ? '#BA1A1A' : '#4F46E5');
+    const catBg = item.category?.bgColor || (item.sourceType === 'TASK' ? '#FFE4E6' : '#EEF2FF');
+    const catText = item.category?.textColor || (item.sourceType === 'TASK' ? '#991B1B' : '#312E81');
+    const catColor = item.category?.color || (item.sourceType === 'TASK' ? '#E11D48' : '#4F46E5');
 
     return {
       id: item.id || `evt_${idx}`,
       title: item.title,
+      dateKey: new Date(item.start).toDateString(),
       timeRange,
       dayIndex,
       startTopPx,
       heightPx,
-      category: (item.category?.name?.toLowerCase() || 'study') as CategoryType,
+      category: (item.category?.type?.toLowerCase() || 'study') as CategoryType,
       categoryLabel: catName,
       location: item.location || undefined,
       color: catColor,
@@ -80,26 +111,13 @@ export const CalendarPage: React.FC = () => {
     return evt.category === activeCategory;
   });
 
-  const handleSaveNewEvent = (newEventData: any) => {
-    createEventMutation.mutate(
-      {
-        title: newEventData.title,
-        startAt: `2026-09-14T${newEventData.startTime || '14:00'}:00.000Z`,
-        endAt: `2026-09-14T${newEventData.endTime || '15:00'}:00.000Z`,
-        location: newEventData.location || undefined,
-        description: newEventData.notes || undefined,
-      },
-      {
-        onSuccess: () => {
-          setIsCreateOpen(false);
-        },
-      }
-    );
-  };
-
   return (
     <div className="flex flex-col gap-5 w-full min-h-screen pb-10">
       <CalendarHeader
+        currentDate={currentDate}
+        onPrevWeek={handlePrevWeek}
+        onNextWeek={handleNextWeek}
+        onToday={handleToday}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         activeCategory={activeCategory}
@@ -108,28 +126,45 @@ export const CalendarPage: React.FC = () => {
       />
 
       {isLoading ? (
-        <div className="flex items-center justify-center p-12 bg-white rounded-xl border border-[#E2E8F0] shadow-xs">
-          <Loader2 className="w-6 h-6 animate-spin text-[#4F46E5]" />
-          <span className="ml-2 text-xs font-semibold text-[#64748B]">Đang tải lịch trình...</span>
+        <div className="flex items-center justify-center p-12 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+          <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+          <span className="ml-2 text-xs font-bold text-slate-500">Đang tải lịch trình thời gian thực...</span>
         </div>
       ) : isError ? (
-        <div className="p-4 bg-[#FFF1F2] border border-[#FFE4E6] rounded-xl text-xs text-[#BA1A1A]">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-bold text-rose-700">
           Đã xảy ra lỗi khi tải lịch trình. Vui lòng thử lại sau.
         </div>
       ) : (
         <div className="flex flex-col xl:flex-row gap-5 items-start">
-          <WeekGrid
-            events={filteredEvents}
-            onSelectEvent={() => {
-              setIsCreateOpen(true);
-            }}
-          />
+          {viewMode === 'month' ? (
+            <MonthGrid
+              currentDate={currentDate}
+              events={filteredEvents}
+              onSelectDay={(date) => {
+                setCurrentDate(date);
+                setViewMode('day');
+              }}
+            />
+          ) : (
+            <WeekGrid
+              weekDays={weekDays}
+              fullWeekDays={getWeekDays(monday)}
+              selectedDate={currentDate}
+              events={filteredEvents}
+              onSelectEvent={() => {
+                setIsCreateOpen(true);
+              }}
+              onSelectDate={(date) => {
+                setCurrentDate(date);
+              }}
+            />
+          )}
 
           {isCreateOpen && (
             <CreateEventDrawer
               isOpen={isCreateOpen}
               onClose={() => setIsCreateOpen(false)}
-              onSave={handleSaveNewEvent}
+              onSave={createEventMutation.mutateAsync} initialDate={currentDate}
               isPending={createEventMutation.isPending}
             />
           )}

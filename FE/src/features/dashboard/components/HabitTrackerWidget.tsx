@@ -1,7 +1,5 @@
 import React from 'react';
-import { Flame, Check, CheckCircle2 } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Flame, Check, Sparkles } from 'lucide-react';
 import type { ApiHabit } from '@/types';
 import { useCheckInHabit, useUndoCheckInHabit } from '../hooks/useHabits';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
@@ -30,14 +28,18 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
   const isPending = checkInMutation.isPending || undoMutation.isPending;
 
   return (
-    <Card padding="lg" className="flex flex-col gap-4">
+    <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-sm flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <h2 className="text-base font-bold text-[#131B2E] font-heading">{translate(language, 'dashboard.todayHabits')}</h2>
-          <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <Flame className="w-4 h-4 fill-amber-500" />
+          </div>
+          <h2 className="text-base font-bold text-slate-900 font-heading">
+            {translate(language, 'dashboard.todayHabits')}
+          </h2>
         </div>
-        <span className="text-xs font-bold text-[#10B981]">
+        <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-xs font-bold">
           {completedCount} / {habits.length} {translate(language, 'dashboard.completed')}
         </span>
       </div>
@@ -45,8 +47,14 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
       {/* Habits List */}
       <div className="flex flex-col gap-3">
         {habits.length === 0 ? (
-          <div className="py-4 text-center text-xs text-[#64748B]">
-            {translate(language, 'dashboard.noHabits')}
+          <div className="py-6 px-4 rounded-xl bg-slate-50/70 border border-dashed border-slate-200 text-center flex flex-col items-center justify-center gap-2">
+            <Sparkles className="w-6 h-6 text-amber-500" />
+            <p className="text-xs font-bold text-slate-700">
+              {translate(language, 'dashboard.noHabits')}
+            </p>
+            <p className="text-[11px] text-slate-500">
+              Thiết lập thói quen hằng ngày để rèn luyện tính kỷ luật và tăng điểm năng suất!
+            </p>
           </div>
         ) : (
           habits.map((habit) => {
@@ -59,32 +67,30 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
                 key={habit.id}
                 className={`p-3.5 rounded-xl flex items-center justify-between gap-3 border transition-all ${
                   isDone
-                    ? 'bg-[#ECFDF5] border-[#D1FAE5]'
-                    : 'bg-white border-[#E2E8F0] shadow-2xs'
+                    ? 'bg-emerald-50/60 border-emerald-200/80'
+                    : 'bg-white border-slate-200/80 hover:border-amber-200 hover:shadow-xs'
                 }`}
               >
-                <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex flex-col gap-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#131B2E] truncate">{title}</span>
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-bold bg-[#6FFBBE] text-[#002113]">
-                      <Flame className="w-3 h-3 text-[#005338]" /> {streak}d
+                    <span className="text-xs font-bold text-slate-900 truncate">{title}</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-2xs">
+                      <Flame className="w-3 h-3 fill-slate-950" /> {streak} ngày
                     </span>
                   </div>
                   {habit.description && (
-                    <span className="text-[11px] text-[#64748B]">{habit.description}</span>
+                    <span className="text-[11px] text-slate-500">{habit.description}</span>
                   )}
                 </div>
 
-                <Button
-                  size="sm"
-                  variant={isDone ? 'primary' : 'secondary'}
+                <button
                   onClick={() => toggleCheckIn(habit)}
                   disabled={isPending}
-                  className={
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isDone
-                      ? 'bg-[#10B981] hover:bg-[#059669] text-white shrink-0 h-8 text-xs cursor-pointer'
-                      : 'shrink-0 h-8 text-xs hover:bg-[#4F46E5] hover:text-white cursor-pointer'
-                  }
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                      : 'bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700'
+                  }`}
                 >
                   {isDone ? (
                     <>
@@ -92,14 +98,15 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
                       {translate(language, 'dashboard.done')}
                     </>
                   ) : (
-                    'Check-in'
+                    'Điểm danh'
                   )}
-                </Button>
+                </button>
               </div>
             );
           })
         )}
       </div>
-    </Card>
+    </div>
   );
 };
+

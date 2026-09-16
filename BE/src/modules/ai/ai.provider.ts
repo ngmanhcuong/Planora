@@ -46,7 +46,7 @@ export class ExternalAiProvider implements AiProvider {
 
   isConfigured(): boolean {
     if (this.isTestEnvironment) return true;
-    return !!this.apiKey && this.apiKey.trim().length > 0 && this.providerName !== 'none';
+    return !!this.apiKey.trim() && this.providerName === 'gemini' && this.modelName !== 'none';
   }
 
   getProviderName(): string {
@@ -75,8 +75,26 @@ export class ExternalAiProvider implements AiProvider {
     }
 
     try {
-      // In production, invoke real LLM endpoint (e.g. OpenAI/Gemini)
-      return fallbackValue;
+      // Gemini explains the deterministic plan; IDs, ranks and time slots stay authoritative.
+      const response = await this.requestGemini(
+        `${systemPrompt}\nReturn JSON matching the supplied plan. Only improve reason strings; preserve all other fields.`,
+        `${userPrompt}\nPlan: ${JSON.stringify(fallbackValue)}`,
+        true
+      );
+      const parsed = JSON.parse(response);
+      const plan = fallbackValue as Record<string, unknown>;
+      const result = { ...plan };
+      for (const key of ['recommendations', 'suggestions']) {
+        const rows = plan[key];
+        if (!Array.isArray(rows)) continue;
+        const explanations = parsed?.[key];
+        if (!Array.isArray(explanations)) return fallbackValue;
+        result[key] = rows.map((row) => {
+          const explanation = explanations.find((item: any) => item?.taskId === row.taskId);
+          return { ...row, reason: typeof explanation?.reason === 'string' && explanation.reason.length <= 2000 ? explanation.reason : row.reason };
+        });
+      }
+      return result as T;
     } catch {
       const err: any = new Error('Tính năng AI hiện không khả dụng. Vui lòng thử lại sau.');
       err.statusCode = 503;
@@ -96,12 +114,35 @@ export class ExternalAiProvider implements AiProvider {
     }
 
     try {
-      return `[Planora AI] ${userMessage}`;
+      return await this.requestGemini(systemPrompt, userMessage);
     } catch {
       const err: any = new Error('Tính năng AI hiện không khả dụng. Vui lòng thử lại sau.');
       err.statusCode = 503;
       throw err;
     }
+  }
+  private async requestGemini(systemPrompt: string, message: string, json = false): Promise<string> {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.modelName)}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
+        signal: AbortSignal.timeout(30000),
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts: [{ text: message }] }],
+          generationConfig: { maxOutputTokens: 4096, ...(json ? { responseMimeType: 'application/json' } : {}) },
+        }),
+      }
+    );
+    if (!response.ok) throw new Error(`Gemini HTTP ${response.status}`);
+    const data = await response.json() as {
+      candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[];
+    };
+    const candidate = data.candidates?.[0];
+    const text = candidate?.content?.parts?.filter(part => !part.thought).map(part => part.text || '').join('').trim();
+    if (!text || candidate?.finishReason !== 'STOP') throw new Error('Gemini response incomplete');
+    return text;
   }
 }
 

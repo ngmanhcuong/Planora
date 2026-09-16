@@ -1,6 +1,5 @@
 import React from 'react';
-import { Calendar as CalendarIcon, CheckSquare, Clock, Flame, TrendingUp, AlertTriangle } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
+import { Calendar as CalendarIcon, CheckSquare, Clock, Flame, TrendingUp, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate } from '@/lib/i18n';
 
@@ -28,91 +27,125 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
   const upcomingEventsCount = summary?.upcomingEvents || 0;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
       {/* Card 1: Today Schedule / Upcoming Events */}
-      <Card padding="md" className="flex flex-col justify-between gap-3">
+      <div className="group relative overflow-hidden rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.scheduleEvents')}</span>
-          <div className="w-8 h-8 rounded-lg bg-[#D8E2FF] flex items-center justify-center text-[#001A42]">
-            <CalendarIcon className="w-4 h-4" />
+          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            {translate(language, 'dashboard.scheduleEvents')}
+          </span>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform">
+            <CalendarIcon className="w-5 h-5" />
           </div>
         </div>
-        <div className="flex items-baseline justify-between">
-          <span className="text-3xl font-extrabold text-[#131B2E] font-heading">
-            {upcomingEventsCount}
-          </span>
-          <span className="text-[11px] text-[#464555] flex items-center gap-1.5 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2170E4]" />
-            {translate(language, 'dashboard.eventsNext7Days')}
-          </span>
+        <div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl sm:text-4xl font-black text-slate-900 font-heading">
+              {upcomingEventsCount}
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              {translate(language, 'dashboard.eventsNext7Days')}
+            </span>
+          </div>
         </div>
-      </Card>
+      </div>
 
       {/* Card 2: Tasks Progress */}
-      <Card padding="md" className="flex flex-col justify-between gap-3">
+      <div className="group relative overflow-hidden rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-600" />
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.todayTasks')}</span>
-          <div className="w-8 h-8 rounded-lg bg-[#E2DFFF] flex items-center justify-center text-[#3525CD]">
-            <CheckSquare className="w-4 h-4" />
+          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            {translate(language, 'dashboard.todayTasks')}
+          </span>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+            <CheckSquare className="w-5 h-5" />
           </div>
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-[#131B2E] font-heading">
+            <span className="text-3xl sm:text-4xl font-black text-slate-900 font-heading">
               {completedTasks}
-              <span className="text-lg font-normal text-[#464555]">/{totalTasks}</span>
+              <span className="text-lg font-semibold text-slate-400">/{totalTasks}</span>
             </span>
-            <span className="text-xs text-[#464555] font-medium">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700">
               {translate(language, 'dashboard.completedPercent').replace('{percent}', String(taskPercent))}
             </span>
           </div>
-          <div className="w-full h-1.5 bg-[#E2E7FF] rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#4F46E5] rounded-full transition-all duration-300"
+              className="h-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full transition-all duration-500"
               style={{ width: `${taskPercent}%` }}
             />
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Card 3: Overdue Tasks */}
-      <Card padding="md" className="flex flex-col justify-between gap-3">
+      <div className={`group relative overflow-hidden rounded-2xl bg-white p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4 ${
+        overdueCount > 0 ? 'border-red-200 bg-red-50/20' : 'border-slate-200/80'
+      }`}>
+        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
+          overdueCount > 0 ? 'from-rose-500 to-red-600' : 'from-emerald-400 to-teal-500'
+        }`} />
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.overdueTasks')}</span>
-          <div className="w-8 h-8 rounded-lg bg-[#FFDAD6] flex items-center justify-center text-[#BA1A1A]">
-            <Clock className="w-4 h-4" />
+          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            {translate(language, 'dashboard.overdueTasks')}
+          </span>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform bg-gradient-to-br ${
+            overdueCount > 0 ? 'from-rose-500 to-red-600 shadow-rose-500/20' : 'from-emerald-500 to-teal-600 shadow-emerald-500/20'
+          }`}>
+            <Clock className="w-5 h-5" />
           </div>
         </div>
-        <div className="flex items-baseline justify-between">
-          <span className="text-3xl font-extrabold text-[#BA1A1A] font-heading">
-            {overdueCount}
-          </span>
-          <span className="text-[11px] text-[#BA1A1A] flex items-center gap-1 font-semibold">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            {overdueCount > 0 ? translate(language, 'dashboard.needsAction') : translate(language, 'dashboard.noOverdue')}
-          </span>
+        <div>
+          <div className="flex items-baseline justify-between">
+            <span className={`text-3xl sm:text-4xl font-black font-heading ${
+              overdueCount > 0 ? 'text-red-600' : 'text-slate-900'
+            }`}>
+              {overdueCount}
+            </span>
+            {overdueCount > 0 ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                {translate(language, 'dashboard.needsAction')}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                {translate(language, 'dashboard.noOverdue')}
+              </span>
+            )}
+          </div>
         </div>
-      </Card>
+      </div>
 
       {/* Card 4: Habit Tracker & Productivity */}
-      <Card padding="md" className="flex flex-col justify-between gap-3">
+      <div className="group relative overflow-hidden rounded-2xl bg-white p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#464555]">{translate(language, 'dashboard.habitsScore')}</span>
-          <div className="w-8 h-8 rounded-lg bg-[#6FFBBE] flex items-center justify-center text-[#002113]">
-            <Flame className="w-4 h-4 text-[#005338]" />
+          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+            {translate(language, 'dashboard.habitsScore')}
+          </span>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 shadow-md shadow-orange-500/20 group-hover:scale-110 transition-transform">
+            <Flame className="w-5 h-5 fill-slate-950" />
           </div>
         </div>
-        <div className="flex items-baseline justify-between">
-          <span className="text-3xl font-extrabold text-[#131B2E] font-heading">
-            {habitsCompleted}
-            <span className="text-lg font-normal text-[#464555]">/{habitsTotal}</span>
-          </span>
-          <span className="text-[11px] text-[#005338] flex items-center gap-1 font-semibold">
-            <TrendingUp className="w-3.5 h-3.5" />
-            {translate(language, 'dashboard.score')}: {productivityScore}/100
-          </span>
+        <div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl sm:text-4xl font-black text-slate-900 font-heading">
+              {habitsCompleted}
+              <span className="text-lg font-semibold text-slate-400">/{habitsTotal}</span>
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/60">
+              <TrendingUp className="w-3.5 h-3.5 text-amber-600" />
+              {translate(language, 'dashboard.score')}: {productivityScore}/100
+            </span>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
+
