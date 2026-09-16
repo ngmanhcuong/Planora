@@ -110,25 +110,31 @@ export const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12">
+    <div className="flex w-full flex-col gap-6 pb-12">
       {isError && <p role="alert" className="text-sm text-red-600">Không tải được thông báo. <button onClick={() => void refetch()}>Thử lại</button></p>}
       {(markRead.isError || markAllRead.isError) && <p role="alert" className="text-sm text-red-600">Không thể đánh dấu đã đọc. Vui lòng thử lại.</p>}
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-6 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
+        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-inner">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-indigo-200 shadow-lg shadow-black/10 backdrop-blur-md">
             <Bell className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Thông báo & Nhắc nhở</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-heading">Thông báo & Nhắc nhở</h1>
               {unreadCount > 0 && (
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-rose-500 text-white shadow-sm animate-pulse">
+                <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-rose-500 text-white shadow-sm animate-pulse">
                   {unreadCount} chưa đọc
                 </span>
               )}
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <p className="text-sm text-indigo-100/90 mt-1">
               Cập nhật tức thì về công việc, lịch trình học tập và nhắc nhở hệ thống.
             </p>
           </div>
@@ -138,17 +144,18 @@ export const NotificationsPage: React.FC = () => {
           <button
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-2xl text-sm font-semibold transition-all shadow-sm active:scale-95 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 text-indigo-100 hover:bg-white/20 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-black/10 border border-white/15 backdrop-blur-md active:scale-95 disabled:opacity-50"
           >
             <CheckCheck className="w-4 h-4" />
             <span>Đánh dấu tất cả đã đọc</span>
           </button>
         )}
+        </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between gap-4 flex-wrap border-b border-slate-200 pb-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-white rounded-3xl border border-slate-200/80 p-4 shadow-sm">
+        <div className="flex w-full items-center gap-1.5 overflow-x-auto py-1">
           {(
             [
               { id: 'all', label: 'Tất cả' },
@@ -162,9 +169,9 @@ export const NotificationsPage: React.FC = () => {
               key={tab.id}
               onClick={() => setFilter(tab.id)}
               className={clsx(
-                'px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap',
+                'px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap',
                 filter === tab.id
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-105'
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               )}
             >
@@ -182,11 +189,11 @@ export const NotificationsPage: React.FC = () => {
           ))}
         </div>
       ) : filteredNotifications.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-slate-100 p-12 text-center shadow-sm flex flex-col items-center justify-center">
-          <div className="w-16 h-16 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-4">
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center shadow-sm flex min-h-[280px] flex-col items-center justify-center">
+          <div className="w-16 h-16 rounded-3xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 mb-4">
             <Inbox className="w-8 h-8" />
           </div>
-          <h3 className="text-base font-semibold text-slate-800">Không có thông báo nào</h3>
+          <h3 className="text-base font-extrabold text-slate-900">Không có thông báo nào</h3>
           <p className="text-xs text-slate-500 max-w-xs mt-1">
             {filter === 'unread'
               ? 'Tuyệt vời! Bạn đã đọc hết tất cả thông báo.'
@@ -201,10 +208,10 @@ export const NotificationsPage: React.FC = () => {
               <div
                 key={notification.id}
                 className={clsx(
-                  'group relative flex items-start gap-4 p-4 md:p-5 rounded-2xl border transition-all duration-200 shadow-sm hover:shadow-md',
+                  'group relative flex items-start gap-4 p-4 md:p-5 rounded-3xl border transition-all duration-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5',
                   notification.isRead
-                    ? 'bg-white border-slate-100 hover:border-slate-200'
-                    : 'bg-indigo-50/40 border-indigo-100/80 hover:border-indigo-200'
+                    ? 'bg-white border-slate-200/80 hover:border-slate-300'
+                    : 'bg-indigo-50/60 border-indigo-100/80 hover:border-indigo-200'
                 )}
               >
                 {/* Status Dot */}
@@ -215,7 +222,7 @@ export const NotificationsPage: React.FC = () => {
                 {/* Icon Box */}
                 <div
                   className={clsx(
-                    'w-11 h-11 rounded-2xl border flex items-center justify-center shrink-0 shadow-sm mt-0.5',
+                    'w-11 h-11 rounded-2xl border flex items-center justify-center shrink-0 shadow-sm mt-0.5 ring-1 ring-black/5',
                     config.bgColor
                   )}
                 >

@@ -42,10 +42,10 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
   ];
 
   return (
-    <div className="flex flex-col gap-3.5 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+    <div className="flex flex-col gap-3.5 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Status Tabs */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 overflow-x-auto">
+        <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200/80 overflow-x-auto">
           {tabs.map((tab) => {
             const isActive = activeStatusTab === tab.id;
             return (
@@ -54,7 +54,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
                 onClick={() => onStatusTabChange(tab.id)}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-white text-indigo-600 shadow-xs'
+                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -73,7 +73,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
           <select
             value={activePriority}
             onChange={(e) => onPriorityChange(e.target.value as PriorityType | 'all')}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer"
+            className="px-3 py-1.5 rounded-2xl bg-slate-100 border border-slate-200/80 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500 cursor-pointer"
           >
             <option value="all">{translate(language, 'tasks.priority.all')}</option>
             <option value="high">{translate(language, 'tasks.priority.high')}</option>
@@ -129,4 +129,3 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
     </div>
   );
 };
-

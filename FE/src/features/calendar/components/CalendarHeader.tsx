@@ -17,6 +17,8 @@ export interface CalendarHeaderProps {
   activeCategory: CategoryType | 'all';
   onCategoryChange: (category: CategoryType | 'all') => void;
   onOpenCreatePanel: () => void;
+  totalItems?: number;
+  todayItems?: number;
 }
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
@@ -43,7 +45,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         month: 'long',
         year: 'numeric',
       });
-      // Capitalize first letter (e.g. "thứ tư..." -> "Thứ Tư...")
       return formatted.charAt(0).toUpperCase() + formatted.slice(1);
     }
     const displayDate = viewMode === 'week' ? monday : currentDate;
@@ -74,137 +75,150 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   ];
 
   return (
-    <div className="flex flex-col gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        {/* Title & Date Navigation */}
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <CalendarIcon className="w-5 h-5" />
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white border border-indigo-800/40 p-5 sm:p-6 shadow-xl shadow-indigo-950/20">
+      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col gap-5">
+        {/* Top Row: Page Title & Main Actions */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/10 text-indigo-200 flex items-center justify-center border border-white/15 backdrop-blur-md shadow-lg shadow-black/10 shrink-0">
+              <CalendarIcon className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight font-heading">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading text-white">
                 {translate(language, 'calendar.title')}
               </h1>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-indigo-100 text-indigo-800">
-                {formatBadgeText()}
-              </span>
+              <p className="text-xs sm:text-sm font-medium text-indigo-100/90 mt-0.5">
+                Quản lý lịch học, deadline và sự kiện trong một không gian đồng bộ.
+              </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:ml-4">
-            <button
-              onClick={onToday}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-            >
-              {translate(language, 'calendar.today')}
-            </button>
-
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80">
+          {/* Action Controls Group */}
+          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+            {/* Today & Arrow Nav */}
+            <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
+              <button
+                onClick={onToday}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/20 transition-colors cursor-pointer"
+              >
+                {translate(language, 'calendar.today')}
+              </button>
+              <div className="h-4 w-px bg-white/20 mx-0.5" />
               <button
                 onClick={onPrevWeek}
-                className="p-1.5 rounded-lg text-slate-600 hover:bg-white hover:text-slate-900 transition-all cursor-pointer"
-                aria-label={`← ${translate(language, `calendar.${viewMode}` as TranslationKey)}`}
+                className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
+                title="Trước"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={onNextWeek}
-                className="p-1.5 rounded-lg text-slate-600 hover:bg-white hover:text-slate-900 transition-all cursor-pointer"
-                aria-label={`${translate(language, `calendar.${viewMode}` as TranslationKey)} →`}
+                className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
+                title="Sau"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
-            <span className="text-base sm:text-lg font-extrabold text-slate-900 font-heading">
-              {formatDateTitle()}
-            </span>
+            {/* View Switcher Tabs */}
+            <div className="flex items-center bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
+              {(['day', 'week', 'month'] as CalendarViewMode[]).map((mode) => {
+                const labelMap: Record<CalendarViewMode, string> = {
+                  day: translate(language, 'calendar.day'),
+                  week: translate(language, 'calendar.week'),
+                  month: translate(language, 'calendar.month'),
+                };
+                const isActive = viewMode === mode;
+                return (
+                  <button
+                    key={mode}
+                    aria-pressed={isActive}
+                    onClick={() => onViewModeChange(mode)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-white text-indigo-700 shadow-md shadow-black/10'
+                        : 'text-indigo-100 hover:text-white'
+                    }`}
+                  >
+                    {labelMap[mode]}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Create Button */}
+            <button
+              onClick={onOpenCreatePanel}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>{translate(language, 'calendar.newSchedule')}</span>
+            </button>
           </div>
         </div>
 
-        {/* View Switcher & Action Button */}
-        <div className="flex items-center gap-3">
-          {/* Segment Tabs */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
-            {(['day', 'week', 'month'] as CalendarViewMode[]).map((mode) => {
-              const labelMap: Record<CalendarViewMode, string> = {
-                day: translate(language, 'calendar.day'),
-                week: translate(language, 'calendar.week'),
-                month: translate(language, 'calendar.month'),
-              };
-              const isActive = viewMode === mode;
+        {/* Bottom Row: Active Date Banner & Category Filters */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-white/10">
+          {/* Active Date Title */}
+          <div className="flex items-center gap-3">
+            <span className="text-base sm:text-xl font-black text-white tracking-tight font-heading">
+              {formatDateTitle()}
+            </span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-white/10 text-indigo-200 border border-white/15 backdrop-blur-md">
+              {formatBadgeText()}
+            </span>
+          </div>
+
+          {/* Category Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <span className="text-[11px] text-indigo-200 uppercase tracking-wider font-extrabold shrink-0 mr-1">
+              {translate(language, 'calendar.filterBy')}:
+            </span>
+            {categories.map((cat) => {
+              const isActive = activeCategory === cat;
+              if (cat === 'all') {
+                return (
+                  <button
+                    key="all"
+                    onClick={() => onCategoryChange('all')}
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? 'bg-white text-indigo-700 shadow-md shadow-black/10'
+                        : 'bg-white/10 text-indigo-100 hover:bg-white/20 border border-white/10'
+                    }`}
+                  >
+                    {isActive && <Check className="w-3.5 h-3.5" />}
+                    <span>{translate(language, 'tasks.filter.all')}</span>
+                  </button>
+                );
+              }
+              const info = CATEGORY_MAP[cat];
               return (
                 <button
-                  key={mode}
-                  aria-pressed={isActive}
-                  onClick={() => onViewModeChange(mode)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  key={cat}
+                  onClick={() => onCategoryChange(cat)}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     isActive
-                      ? 'bg-white text-indigo-600 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white text-indigo-700 shadow-md shadow-black/10'
+                      : 'bg-white/10 text-indigo-100 hover:bg-white/20 border border-white/10'
                   }`}
                 >
-                  {labelMap[mode]}
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: info.color }}
+                  />
+                  <span>{translate(language, `category.${cat}` as TranslationKey) || info.label}</span>
                 </button>
               );
             })}
           </div>
-
-          <button
-            onClick={onOpenCreatePanel}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>{translate(language, 'calendar.newSchedule')}</span>
-          </button>
         </div>
-      </div>
-
-      {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pt-3 border-t border-slate-100">
-        <span className="text-[11px] text-slate-400 uppercase tracking-wider font-extrabold shrink-0 mr-1">
-          {translate(language, 'calendar.filterBy')}:
-        </span>
-        {categories.map((cat) => {
-          const isActive = activeCategory === cat;
-          if (cat === 'all') {
-            return (
-              <button
-                key="all"
-                onClick={() => onCategoryChange('all')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                {isActive && <Check className="w-3.5 h-3.5" />}
-                <span>{translate(language, 'tasks.filter.all')}</span>
-              </button>
-            );
-          }
-          const info = CATEGORY_MAP[cat];
-          return (
-            <button
-              key={cat}
-              onClick={() => onCategoryChange(cat)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                isActive
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
-              }`}
-            >
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: info.color }}
-              />
-              <span>{translate(language, `category.${cat}` as TranslationKey) || info.label}</span>
-            </button>
-          );
-        })}
       </div>
     </div>
   );
 };
-

@@ -31,6 +31,10 @@ export type TranslationKey =
   | 'settings.subtitle'
   | 'settings.loading'
   | 'settings.error'
+  | 'settings.tabs.general'
+  | 'settings.tabs.notifications'
+  | 'settings.tabs.security'
+  | 'settings.tabs.appearance'
   | 'settings.general.title'
   | 'settings.general.subtitle'
   | 'settings.language.title'
@@ -38,6 +42,43 @@ export type TranslationKey =
   | 'settings.language.current'
   | 'settings.autosave.title'
   | 'settings.autosave.subtitle'
+  | 'settings.notifications.title'
+  | 'settings.notifications.subtitle'
+  | 'settings.notifications.email.title'
+  | 'settings.notifications.email.subtitle'
+  | 'settings.notifications.push.title'
+  | 'settings.notifications.push.subtitle'
+  | 'settings.notifications.deadline.title'
+  | 'settings.notifications.deadline.subtitle'
+  | 'settings.notifications.deadline.beforeHour'
+  | 'settings.notifications.deadline.beforeHours'
+  | 'settings.notifications.deadline.beforeDay'
+  | 'settings.notifications.deadline.beforeDays'
+  | 'settings.notifications.timetable.title'
+  | 'settings.notifications.timetable.subtitle'
+  | 'settings.notifications.sound.title'
+  | 'settings.notifications.sound.subtitle'
+  | 'settings.security.title'
+  | 'settings.security.subtitle'
+  | 'settings.security.password.title'
+  | 'settings.security.password.current'
+  | 'settings.security.password.new'
+  | 'settings.security.password.confirm'
+  | 'settings.security.password.update'
+  | 'settings.security.password.success'
+  | 'settings.security.password.error.currentRequired'
+  | 'settings.security.password.error.minLength'
+  | 'settings.security.password.error.mismatch'
+  | 'settings.security.password.error.failed'
+  | 'settings.security.twoFactor.title'
+  | 'settings.security.twoFactor.subtitle'
+  | 'settings.security.loginAlerts.title'
+  | 'settings.security.loginAlerts.subtitle'
+  | 'settings.appearance.title'
+  | 'settings.appearance.subtitle'
+  | 'settings.appearance.theme.title'
+  | 'settings.appearance.theme.light'
+  | 'settings.appearance.theme.dark'
   | 'sidebar.dashboard'
   | 'sidebar.calendar'
   | 'sidebar.timetable'
@@ -222,6 +263,10 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'settings.subtitle': 'Tùy chỉnh thông báo, bảo mật và giao diện hiển thị cho tài khoản Planora của bạn.',
     'settings.loading': 'Đang tải cài đặt...',
     'settings.error': 'Đã xảy ra lỗi khi tải cài đặt. Vui lòng thử lại sau.',
+    'settings.tabs.general': 'Cài đặt chung',
+    'settings.tabs.notifications': 'Thông báo & Nhắc nhở',
+    'settings.tabs.security': 'Bảo mật & Tài khoản',
+    'settings.tabs.appearance': 'Giao diện & Chủ đề',
     'settings.general.title': 'Cài đặt hệ thống & Ngôn ngữ',
     'settings.general.subtitle': 'Quản lý ngôn ngữ hiển thị và hành vi mặc định của ứng dụng.',
     'settings.language.title': 'Ngôn ngữ hiển thị',
@@ -229,6 +274,43 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'settings.language.current': 'Đang dùng',
     'settings.autosave.title': 'Tự động lưu bản nháp',
     'settings.autosave.subtitle': 'Tự động lưu thông tin đang nhập trong biểu mẫu.',
+    'settings.notifications.title': 'Cài đặt Thông báo & Nhắc nhở',
+    'settings.notifications.subtitle': 'Tùy chỉnh thời điểm và phương thức nhận thông báo về lịch trình & deadline.',
+    'settings.notifications.email.title': 'Thông báo qua Email',
+    'settings.notifications.email.subtitle': 'Gửi tóm tắt lịch học và deadline đến email cá nhân',
+    'settings.notifications.push.title': 'Thông báo trên trình duyệt (Push)',
+    'settings.notifications.push.subtitle': 'Bật thông báo popup khi có nhiệm vụ sắp đến giờ',
+    'settings.notifications.deadline.title': 'Thời gian nhắc nhở Deadline trước',
+    'settings.notifications.deadline.subtitle': 'Gửi cảnh báo trước khi deadline hết hạn',
+    'settings.notifications.deadline.beforeHour': 'Trước 1 giờ',
+    'settings.notifications.deadline.beforeHours': 'Trước {hours} giờ',
+    'settings.notifications.deadline.beforeDay': 'Trước 24 giờ (1 ngày)',
+    'settings.notifications.deadline.beforeDays': 'Trước 48 giờ (2 ngày)',
+    'settings.notifications.timetable.title': 'Nhắc nhở Thời khóa biểu',
+    'settings.notifications.timetable.subtitle': 'Nhắc tiết học đầu tiên trong ngày vào lúc 06:30 sáng',
+    'settings.notifications.sound.title': 'Âm thanh thông báo',
+    'settings.notifications.sound.subtitle': 'Phát âm thanh nhẹ khi hoàn thành công việc hoặc có nhắc nhở',
+    'settings.security.title': 'Bảo mật & Quản lý tài khoản',
+    'settings.security.subtitle': 'Đổi mật khẩu và tăng cường bảo mật cho tài khoản cá nhân.',
+    'settings.security.password.title': 'Đổi mật khẩu',
+    'settings.security.password.current': 'Mật khẩu hiện tại',
+    'settings.security.password.new': 'Mật khẩu mới',
+    'settings.security.password.confirm': 'Xác nhận mật khẩu mới',
+    'settings.security.password.update': 'Cập nhật mật khẩu',
+    'settings.security.password.success': 'Đổi mật khẩu thành công!',
+    'settings.security.password.error.currentRequired': 'Vui lòng nhập mật khẩu hiện tại',
+    'settings.security.password.error.minLength': 'Mật khẩu mới phải có ít nhất 6 ký tự',
+    'settings.security.password.error.mismatch': 'Mật khẩu xác nhận không khớp',
+    'settings.security.password.error.failed': 'Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.',
+    'settings.security.twoFactor.title': 'Xác thực 2 yếu tố (2FA)',
+    'settings.security.twoFactor.subtitle': 'Yêu cầu mã xác thực OTP khi đăng nhập từ thiết bị mới',
+    'settings.security.loginAlerts.title': 'Cảnh báo đăng nhập lạ',
+    'settings.security.loginAlerts.subtitle': 'Gửi email cảnh báo khi có vị trí đăng nhập bất thường',
+    'settings.appearance.title': 'Giao diện & Tùy biến chủ đề',
+    'settings.appearance.subtitle': 'Tùy chọn chế độ màu sắc và phong cách hiển thị cho ứng dụng Planora.',
+    'settings.appearance.theme.title': 'Chế độ giao diện (Theme)',
+    'settings.appearance.theme.light': 'Giao diện Sáng',
+    'settings.appearance.theme.dark': 'Giao diện Tối',
     'sidebar.dashboard': 'Tổng quan',
     'sidebar.calendar': 'Lịch của tôi',
     'sidebar.timetable': 'Thời khóa biểu',
@@ -412,6 +494,10 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'settings.subtitle': 'Customize notifications, security, and display preferences for your Planora account.',
     'settings.loading': 'Loading settings...',
     'settings.error': 'Could not load settings. Please try again later.',
+    'settings.tabs.general': 'General settings',
+    'settings.tabs.notifications': 'Notifications & reminders',
+    'settings.tabs.security': 'Security & account',
+    'settings.tabs.appearance': 'Appearance & theme',
     'settings.general.title': 'System & language settings',
     'settings.general.subtitle': 'Manage display language and default app behavior.',
     'settings.language.title': 'Display language',
@@ -419,6 +505,43 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'settings.language.current': 'Active',
     'settings.autosave.title': 'Auto-save drafts',
     'settings.autosave.subtitle': 'Automatically save information while you type in forms.',
+    'settings.notifications.title': 'Notification & reminder settings',
+    'settings.notifications.subtitle': 'Customize when and how you receive schedule and deadline alerts.',
+    'settings.notifications.email.title': 'Email notifications',
+    'settings.notifications.email.subtitle': 'Send study schedule and deadline summaries to your personal email',
+    'settings.notifications.push.title': 'Browser notifications (Push)',
+    'settings.notifications.push.subtitle': 'Show browser popups when tasks are coming up',
+    'settings.notifications.deadline.title': 'Deadline reminder lead time',
+    'settings.notifications.deadline.subtitle': 'Send alerts before deadlines expire',
+    'settings.notifications.deadline.beforeHour': '1 hour before',
+    'settings.notifications.deadline.beforeHours': '{hours} hours before',
+    'settings.notifications.deadline.beforeDay': '24 hours before (1 day)',
+    'settings.notifications.deadline.beforeDays': '48 hours before (2 days)',
+    'settings.notifications.timetable.title': 'Timetable reminders',
+    'settings.notifications.timetable.subtitle': 'Remind the first class of the day at 06:30 AM',
+    'settings.notifications.sound.title': 'Notification sounds',
+    'settings.notifications.sound.subtitle': 'Play a gentle sound when tasks are completed or reminders arrive',
+    'settings.security.title': 'Security & account management',
+    'settings.security.subtitle': 'Change your password and strengthen account security.',
+    'settings.security.password.title': 'Change password',
+    'settings.security.password.current': 'Current password',
+    'settings.security.password.new': 'New password',
+    'settings.security.password.confirm': 'Confirm new password',
+    'settings.security.password.update': 'Update password',
+    'settings.security.password.success': 'Password updated successfully!',
+    'settings.security.password.error.currentRequired': 'Please enter your current password',
+    'settings.security.password.error.minLength': 'New password must be at least 6 characters',
+    'settings.security.password.error.mismatch': 'Password confirmation does not match',
+    'settings.security.password.error.failed': 'Password change failed. Please check your current password.',
+    'settings.security.twoFactor.title': 'Two-factor authentication (2FA)',
+    'settings.security.twoFactor.subtitle': 'Require an OTP code when signing in from a new device',
+    'settings.security.loginAlerts.title': 'Unusual login alerts',
+    'settings.security.loginAlerts.subtitle': 'Send email alerts for unusual login locations',
+    'settings.appearance.title': 'Appearance & theme customization',
+    'settings.appearance.subtitle': 'Choose color mode and display style for Planora.',
+    'settings.appearance.theme.title': 'Theme mode',
+    'settings.appearance.theme.light': 'Light theme',
+    'settings.appearance.theme.dark': 'Dark theme',
     'sidebar.dashboard': 'Dashboard',
     'sidebar.calendar': 'My calendar',
     'sidebar.timetable': 'Timetable',
@@ -770,7 +893,7 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
 
 export const translate = (language: string | null | undefined, key: TranslationKey): string => {
   const normalized = normalizeLanguage(language);
-  return translations[normalized][key] ?? translations.vi[key] ?? key;
+  return translations[normalized][key] ?? translations.en[key] ?? translations.vi[key] ?? key;
 };
 
 

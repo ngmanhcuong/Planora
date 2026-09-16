@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Lock, KeyRound, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { normalizeLanguage, translate } from '@/lib/i18n';
 import type { UserSettingsState } from '../types';
 
 import { useChangePassword } from '../hooks/useSettings';
@@ -15,6 +16,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
   settings,
   onUpdate,
 }) => {
+  const language = normalizeLanguage(settings.language);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,15 +28,15 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPassword) {
-      setPassError('Vui lòng nhập mật khẩu hiện tại');
+      setPassError(translate(language, 'settings.security.password.error.currentRequired'));
       return;
     }
     if (newPassword.length < 6) {
-      setPassError('Mật khẩu mới phải có ít nhất 6 ký tự');
+      setPassError(translate(language, 'settings.security.password.error.minLength'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPassError('Mật khẩu xác nhận không khớp');
+      setPassError(translate(language, 'settings.security.password.error.mismatch'));
       return;
     }
 
@@ -47,7 +49,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       setConfirmPassword('');
       setTimeout(() => setPassSuccess(false), 3000);
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.';
+      const msg = err.response?.data?.message || translate(language, 'settings.security.password.error.failed');
       setPassError(msg);
     }
   };
@@ -57,21 +59,23 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       <div className="border-b border-[#F1F5F9] pb-4">
         <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-[#4F46E5]" />
-          Bảo mật & Quản lý tài khoản
+          {translate(language, 'settings.security.title')}
         </h3>
         <p className="text-xs text-[#64748B] mt-0.5">
-          Đổi mật khẩu và tăng cường bảo mật cho tài khoản cá nhân.
+          {translate(language, 'settings.security.subtitle')}
         </p>
       </div>
 
       {/* Password Form */}
       <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4 border-b border-[#F1F5F9] pb-6">
-        <h4 className="text-xs font-bold text-[#131B2E] uppercase tracking-wider">Đổi mật khẩu</h4>
+        <h4 className="text-xs font-bold text-[#131B2E] uppercase tracking-wider">
+          {translate(language, 'settings.security.password.title')}
+        </h4>
 
         {passSuccess && (
           <div className="flex items-center gap-2 p-3 rounded-lg bg-[#ECFDF5] border border-[#A7F3D0] text-xs font-semibold text-[#047857]">
             <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-            <span>Đổi mật khẩu thành công!</span>
+            <span>{translate(language, 'settings.security.password.success')}</span>
           </div>
         )}
 
@@ -82,7 +86,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
         )}
 
         <Input
-          label="Mật khẩu hiện tại"
+          label={translate(language, 'settings.security.password.current')}
           type="password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
@@ -92,7 +96,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label="Mật khẩu mới"
+            label={translate(language, 'settings.security.password.new')}
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
@@ -101,7 +105,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
           />
 
           <Input
-            label="Xác nhận mật khẩu mới"
+            label={translate(language, 'settings.security.password.confirm')}
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -112,7 +116,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
 
         <div className="flex justify-end pt-2">
           <Button type="submit" variant="primary" size="sm">
-            <span>Cập nhật mật khẩu</span>
+            <span>{translate(language, 'settings.security.password.update')}</span>
           </Button>
         </div>
       </form>
@@ -120,8 +124,8 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       {/* 2FA Toggle */}
       <div className="flex items-center justify-between gap-4 py-2 border-b border-[#F1F5F9]">
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-bold text-[#131B2E]">Xác thực 2 yếu tố (2FA)</span>
-          <span className="text-xs text-[#64748B]">Yêu cầu mã xác thực OTP khi đăng nhập từ thiết bị mới</span>
+          <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.security.twoFactor.title')}</span>
+          <span className="text-xs text-[#64748B]">{translate(language, 'settings.security.twoFactor.subtitle')}</span>
         </div>
         <button
           onClick={() => onUpdate({ twoFactorAuth: !settings.twoFactorAuth })}
@@ -140,8 +144,8 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       {/* Login Alerts */}
       <div className="flex items-center justify-between gap-4 py-2">
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-bold text-[#131B2E]">Cảnh báo đăng nhập lạ</span>
-          <span className="text-xs text-[#64748B]">Gửi email cảnh báo khi có vị trí đăng nhập bất thường</span>
+          <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.security.loginAlerts.title')}</span>
+          <span className="text-xs text-[#64748B]">{translate(language, 'settings.security.loginAlerts.subtitle')}</span>
         </div>
         <button
           onClick={() => onUpdate({ loginAlerts: !settings.loginAlerts })}

@@ -71,7 +71,7 @@ export interface CalendarRangeQuery {
 
 export interface CalendarItemResponse {
   id: string;
-  sourceType: 'EVENT' | 'TASK';
+  sourceType: 'EVENT' | 'TASK' | 'TIMETABLE';
   title: string;
   start: Date;
   end: Date | null;
@@ -82,6 +82,8 @@ export interface CalendarItemResponse {
   isOverdue?: boolean;
   displayStatus?: string;
   courseCode?: string | null;
+  lecturer?: string | null;
+  room?: string | null;
   category?: {
     id: string;
     name: string;

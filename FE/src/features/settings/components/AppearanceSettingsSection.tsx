@@ -1,5 +1,6 @@
 import React from 'react';
 import { Palette, Sun, Moon } from 'lucide-react';
+import { normalizeLanguage, translate } from '@/lib/i18n';
 import type { UserSettingsState } from '../types';
 
 export interface AppearanceSettingsProps {
@@ -11,9 +12,10 @@ export const AppearanceSettingsSection: React.FC<AppearanceSettingsProps> = ({
   settings,
   onUpdate,
 }) => {
+  const language = normalizeLanguage(settings.language);
   const themes: { id: 'light' | 'dark'; label: string; icon: React.FC<{ className?: string }> }[] = [
-    { id: 'light', label: 'Giao diện Sáng', icon: Sun },
-    { id: 'dark', label: 'Giao diện Tối', icon: Moon },
+    { id: 'light', label: translate(language, 'settings.appearance.theme.light'), icon: Sun },
+    { id: 'dark', label: translate(language, 'settings.appearance.theme.dark'), icon: Moon },
   ];
 
   return (
@@ -21,16 +23,16 @@ export const AppearanceSettingsSection: React.FC<AppearanceSettingsProps> = ({
       <div className="border-b border-[#F1F5F9] pb-4">
         <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
           <Palette className="w-5 h-5 text-[#4F46E5]" />
-          Giao diện & Tùy biến chủ đề
+          {translate(language, 'settings.appearance.title')}
         </h3>
         <p className="text-xs text-[#64748B] mt-0.5">
-          Tùy chọn chế độ màu sắc và phong cách hiển thị cho ứng dụng Planora.
+          {translate(language, 'settings.appearance.subtitle')}
         </p>
       </div>
 
       {/* Theme Picker */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-bold text-[#131B2E]">Chế độ giao diện (Theme)</span>
+        <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.appearance.theme.title')}</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {themes.map((t) => {
             const Icon = t.icon;

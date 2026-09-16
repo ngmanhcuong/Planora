@@ -120,6 +120,67 @@ export function expandRecurringEvents(
   return result;
 }
 
+function getMondayBasedDay(date: Date): number {
+  return (date.getDay() + 6) % 7;
+}
+
+function combineDateAndTime(date: Date, time: string): Date {
+  const [hours = '0', minutes = '0'] = time.split(':');
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    Number(hours),
+    Number(minutes),
+    0,
+    0
+  );
+}
+
+function expandTimetableItems(items: any[], rangeStart: Date, rangeEnd: Date): CalendarItemResponse[] {
+  const results: CalendarItemResponse[] = [];
+  const cursor = new Date(rangeStart);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (cursor < rangeEnd) {
+    const dayOfWeek = getMondayBasedDay(cursor);
+
+    for (const item of items) {
+      if (item.dayOfWeek !== dayOfWeek) continue;
+
+      const start = combineDateAndTime(cursor, item.startTime);
+      const end = combineDateAndTime(cursor, item.endTime);
+
+      if (start < rangeEnd && end > rangeStart) {
+        results.push({
+          id: `tt_${item.id}_${start.toISOString().slice(0, 10)}`,
+          sourceType: 'TIMETABLE',
+          title: item.subjectName,
+          start,
+          end,
+          allDay: false,
+          location: item.room || null,
+          courseCode: item.courseCode || null,
+          lecturer: item.lecturer || null,
+          room: item.room || null,
+          category: {
+            id: item.id,
+            name: 'Thời khóa biểu',
+            type: 'study',
+            color: item.color || '#4F46E5',
+            bgColor: item.bgColor || '#EEF2FF',
+            textColor: item.textColor || '#312E81',
+          },
+        });
+      }
+    }
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return results;
+}
+
 export class EventsService {
   /**
    * Create new event
@@ -386,32 +447,52 @@ export class EventsService {
   }
 
   /**
-   * Calendar range endpoint combining Events + Task deadlines
+   * Calendar range endpoint combining Events + Task deadlines + active timetable.
    */
   static async getCalendarRange(userId: string, query: CalendarRangeQuery): Promise<{ items: CalendarItemResponse[] }> {
     const rangeStart = new Date(query.start);
     const rangeEnd = new Date(query.end);
     const now = new Date();
 
-    const rawEvents = await prisma.event.findMany({
-      where: {
-        userId,
-        OR: [
-          {
-            AND: [
-              { startTime: { lt: rangeEnd } },
-              { endTime: { gt: rangeStart } },
-            ],
+    const [rawEvents, tasks, activeTimetable] = await Promise.all([
+      prisma.event.findMany({
+        where: {
+          userId,
+          OR: [
+            {
+              AND: [
+                { startTime: { lt: rangeEnd } },
+                { endTime: { gt: rangeStart } },
+              ],
+            },
+            {
+              recurrenceType: { not: RecurrenceType.NONE },
+            },
+          ],
+        },
+        include: {
+          category: true,
+        },
+      }),
+      prisma.task.findMany({
+        where: {
+          userId,
+          dueDate: {
+            gte: rangeStart,
+            lte: rangeEnd,
           },
-          {
-            recurrenceType: { not: RecurrenceType.NONE },
-          },
-        ],
-      },
-      include: {
-        category: true,
-      },
-    });
+        },
+        include: {
+          category: true,
+        },
+      }),
+      prisma.timetable.findFirst({
+        where: { userId, isCurrent: true },
+        include: {
+          items: true,
+        },
+      }),
+    ]);
 
     const expandedEvents = expandRecurringEvents(rawEvents, rangeStart, rangeEnd, 500);
 
@@ -426,19 +507,6 @@ export class EventsService {
       category: evt.category,
       recurrenceType: evt.recurrenceType,
     }));
-
-    const tasks = await prisma.task.findMany({
-      where: {
-        userId,
-        dueDate: {
-          gte: rangeStart,
-          lte: rangeEnd,
-        },
-      },
-      include: {
-        category: true,
-      },
-    });
 
     const taskItems: CalendarItemResponse[] = tasks.map((task: any) => {
       const isOverdue = task.status !== TaskStatus.COMPLETED && task.dueDate < now;
@@ -470,7 +538,9 @@ export class EventsService {
       };
     });
 
-    const items = [...eventItems, ...taskItems].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+    const timetableItems = activeTimetable ? expandTimetableItems(activeTimetable.items, rangeStart, rangeEnd) : [];
+
+    const items = [...eventItems, ...taskItems, ...timetableItems].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
     return { items };
   }

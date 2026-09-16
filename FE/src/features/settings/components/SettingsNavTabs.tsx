@@ -1,21 +1,25 @@
 import React from 'react';
 import { Sliders, Bell, ShieldCheck, Palette } from 'lucide-react';
+import { normalizeLanguage, translate } from '@/lib/i18n';
 import type { SettingsTab } from '../types';
 
 export interface SettingsNavTabsProps {
   activeTab: SettingsTab;
+  language?: string | null;
   onSelectTab: (tab: SettingsTab) => void;
 }
 
 export const SettingsNavTabs: React.FC<SettingsNavTabsProps> = ({
   activeTab,
+  language,
   onSelectTab,
 }) => {
+  const currentLanguage = normalizeLanguage(language);
   const tabs: { id: SettingsTab; label: string; icon: React.FC<{ className?: string }> }[] = [
-    { id: 'general', label: 'Cài đặt chung', icon: Sliders },
-    { id: 'notifications', label: 'Thông báo & Nhắc nhở', icon: Bell },
-    { id: 'security', label: 'Bảo mật & Tài khoản', icon: ShieldCheck },
-    { id: 'appearance', label: 'Giao diện & Chủ đề', icon: Palette },
+    { id: 'general', label: translate(currentLanguage, 'settings.tabs.general'), icon: Sliders },
+    { id: 'notifications', label: translate(currentLanguage, 'settings.tabs.notifications'), icon: Bell },
+    { id: 'security', label: translate(currentLanguage, 'settings.tabs.security'), icon: ShieldCheck },
+    { id: 'appearance', label: translate(currentLanguage, 'settings.tabs.appearance'), icon: Palette },
   ];
 
   return (

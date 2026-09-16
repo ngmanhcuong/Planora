@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell, Mail, Smartphone, Clock, Calendar, Volume2 } from 'lucide-react';
+import { normalizeLanguage, translate } from '@/lib/i18n';
 import type { UserSettingsState } from '../types';
 
 export interface NotificationSettingsProps {
@@ -11,15 +12,19 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
   settings,
   onUpdate,
 }) => {
+  const language = normalizeLanguage(settings.language);
+  const beforeHours = (hours: number) =>
+    translate(language, 'settings.notifications.deadline.beforeHours').replace('{hours}', String(hours));
+
   return (
     <section className="flex flex-col gap-6 p-6 border-b border-[#E2E8F0]">
       <div className="border-b border-[#F1F5F9] pb-4">
         <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
           <Bell className="w-5 h-5 text-[#4F46E5]" />
-          Cài đặt Thông báo & Nhắc nhở
+          {translate(language, 'settings.notifications.title')}
         </h3>
         <p className="text-xs text-[#64748B] mt-0.5">
-          Tùy chỉnh thời điểm và phương thức nhận thông báo về lịch trình & deadline.
+          {translate(language, 'settings.notifications.subtitle')}
         </p>
       </div>
 
@@ -28,8 +33,8 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         <div className="flex items-start gap-3">
           <Mail className="w-4 h-4 text-[#4F46E5] shrink-0 mt-0.5" />
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-bold text-[#131B2E]">Thông báo qua Email</span>
-            <span className="text-xs text-[#64748B]">Gửi tóm tắt lịch học và deadline đến email cá nhân</span>
+            <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.notifications.email.title')}</span>
+            <span className="text-xs text-[#64748B]">{translate(language, 'settings.notifications.email.subtitle')}</span>
           </div>
         </div>
         <button
@@ -51,8 +56,8 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         <div className="flex items-start gap-3">
           <Smartphone className="w-4 h-4 text-[#4F46E5] shrink-0 mt-0.5" />
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-bold text-[#131B2E]">Thông báo trên trình duyệt (Push)</span>
-            <span className="text-xs text-[#64748B]">Bật thông báo popup khi có nhiệm vụ sắp đến giờ</span>
+            <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.notifications.push.title')}</span>
+            <span className="text-xs text-[#64748B]">{translate(language, 'settings.notifications.push.subtitle')}</span>
           </div>
         </div>
         <button
@@ -74,8 +79,8 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         <div className="flex items-start gap-3">
           <Clock className="w-4 h-4 text-[#4F46E5] shrink-0 mt-0.5" />
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-bold text-[#131B2E]">Thời gian nhắc nhở Deadline trước</span>
-            <span className="text-xs text-[#64748B]">Gửi cảnh báo trước khi deadline hết hạn</span>
+            <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.notifications.deadline.title')}</span>
+            <span className="text-xs text-[#64748B]">{translate(language, 'settings.notifications.deadline.subtitle')}</span>
           </div>
         </div>
         <select
@@ -83,11 +88,11 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
           onChange={(e) => onUpdate({ deadlineReminderHours: Number(e.target.value) })}
           className="px-3 py-1.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-semibold text-[#131B2E] focus:outline-none focus:border-[#4F46E5]"
         >
-          <option value={1}>Truớc 1 giờ</option>
-          <option value={3}>Trước 3 giờ</option>
-          <option value={12}>Trước 12 giờ</option>
-          <option value={24}>Trước 24 giờ (1 ngày)</option>
-          <option value={48}>Trước 48 giờ (2 ngày)</option>
+          <option value={1}>{translate(language, 'settings.notifications.deadline.beforeHour')}</option>
+          <option value={3}>{beforeHours(3)}</option>
+          <option value={12}>{beforeHours(12)}</option>
+          <option value={24}>{translate(language, 'settings.notifications.deadline.beforeDay')}</option>
+          <option value={48}>{translate(language, 'settings.notifications.deadline.beforeDays')}</option>
         </select>
       </div>
 
@@ -96,8 +101,8 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         <div className="flex items-start gap-3">
           <Calendar className="w-4 h-4 text-[#006E4B] shrink-0 mt-0.5" />
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-bold text-[#131B2E]">Nhắc nhở Thời khóa biểu</span>
-            <span className="text-xs text-[#64748B]">Nhắc tiết học đầu tiên trong ngày vào lúc 06:30 sáng</span>
+            <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.notifications.timetable.title')}</span>
+            <span className="text-xs text-[#64748B]">{translate(language, 'settings.notifications.timetable.subtitle')}</span>
           </div>
         </div>
         <button
@@ -119,8 +124,8 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
         <div className="flex items-start gap-3">
           <Volume2 className="w-4 h-4 text-[#4F46E5] shrink-0 mt-0.5" />
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-bold text-[#131B2E]">Âm thanh thông báo</span>
-            <span className="text-xs text-[#64748B]">Phát âm thanh nhẹ khi hoàn thành công việc hoặc có nhắc nhở</span>
+            <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.notifications.sound.title')}</span>
+            <span className="text-xs text-[#64748B]">{translate(language, 'settings.notifications.sound.subtitle')}</span>
           </div>
         </div>
         <button

@@ -116,7 +116,7 @@ export interface ApiEvent {
 
 export interface ApiCalendarItem {
   id: string;
-  sourceType: 'EVENT' | 'TASK';
+  sourceType: 'EVENT' | 'TASK' | 'TIMETABLE';
   title: string;
   start: string;
   end?: string | null;
@@ -127,6 +127,8 @@ export interface ApiCalendarItem {
   isOverdue?: boolean;
   displayStatus?: string;
   courseCode?: string | null;
+  lecturer?: string | null;
+  room?: string | null;
   category?: ApiCategory | null;
   recurrenceType?: string;
 }

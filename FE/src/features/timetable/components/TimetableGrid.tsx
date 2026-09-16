@@ -37,9 +37,9 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
   const language = useCurrentLanguage();
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col min-w-[800px]">
+    <div className="w-full bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col min-w-[800px]">
       {/* Table Days Header */}
-      <div className="grid grid-cols-8 bg-slate-50/80 border-b border-slate-200/80 py-3 text-center">
+      <div className="grid grid-cols-8 bg-white border-b border-slate-100 py-3 text-center">
         <div className="flex flex-col items-center justify-center text-xs font-black text-slate-400 uppercase tracking-wider">
           {translate(language, 'timetable.periodHeader')}
         </div>
@@ -55,12 +55,12 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
       {/* Grid Container */}
       <div className="relative grid grid-cols-8 w-full min-h-[680px]">
         {/* Left Slots Column */}
-        <div className="flex flex-col border-r border-slate-200/80 bg-slate-50/40 select-none">
+        <div className="flex flex-col border-r border-slate-100 bg-slate-50/50 select-none">
           {SLOTS.map((slot) => (
             <div
               key={slot.num}
               style={{ height: `${slotHeightPx}px` }}
-              className="flex flex-col justify-center items-center px-2 border-b border-slate-200/60 last:border-b-0 text-center"
+              className="flex flex-col justify-center items-center px-2 border-b border-slate-100 last:border-b-0 text-center"
             >
               <span className="text-xs font-extrabold text-slate-900">
                 {translate(language, 'timetable.period')} {slot.num}
@@ -77,14 +77,14 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
           return (
             <div
               key={dayIndex}
-              className="relative h-[680px] border-r border-slate-200/60 last:border-r-0"
+              className="relative h-[680px] border-r border-slate-100 last:border-r-0 bg-white hover:bg-slate-50/50 transition-colors"
             >
               {/* Background slot grid lines */}
               {SLOTS.map((slot) => (
                 <div
                   key={slot.num}
                   style={{ height: `${slotHeightPx}px` }}
-                  className="border-b border-slate-200/60 last:border-b-0"
+                  className="border-b border-slate-100 last:border-b-0"
                 />
               ))}
 
@@ -97,7 +97,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
                   <div
                     key={cls.id}
                     onClick={() => onSelectClass(cls)}
-                    className="absolute left-1.5 right-1.5 rounded-xl p-2.5 flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer group z-10 hover:-translate-y-0.5"
+                    className="absolute left-1.5 right-1.5 rounded-2xl p-2.5 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group z-10 hover:-translate-y-0.5 ring-1 ring-black/5"
                     style={{
                       top: `${topPx}px`,
                       height: `${heightPx}px`,
@@ -144,4 +144,3 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
     </div>
   );
 };
-

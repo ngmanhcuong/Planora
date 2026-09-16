@@ -16,32 +16,37 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
   const language = useCurrentLanguage();
 
   return (
-    <div className="flex flex-col gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-6 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
+      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-5">
         {/* Title & Semester Selector */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-white/10 text-indigo-200 flex items-center justify-center border border-white/15 backdrop-blur-md shadow-lg shadow-black/10">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight font-heading">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-heading">
                 {translate(language, 'timetable.title')}
               </h1>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-white/10 text-indigo-100 border border-white/15 backdrop-blur-md">
                 {semesterInfo.termName} ({semesterInfo.academicYear})
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200/80 text-xs font-bold text-slate-600 sm:ml-2">
-            <span className="flex items-center gap-1.5 text-slate-900">
-              <BookOpen className="w-4 h-4 text-indigo-600" />
+          <div className="flex items-center gap-3 bg-white/10 px-3.5 py-2 rounded-2xl border border-white/15 text-xs font-bold text-indigo-100 backdrop-blur-md sm:ml-2">
+            <span className="flex items-center gap-1.5 text-white">
+              <BookOpen className="w-4 h-4 text-indigo-200" />
               {semesterInfo.totalSubjects} {translate(language, 'timetable.subjects')}
             </span>
-            <span className="w-1 h-1 rounded-full bg-slate-300" />
-            <span className="flex items-center gap-1.5 text-slate-900">
-              <Award className="w-4 h-4 text-emerald-600" />
+            <span className="w-1 h-1 rounded-full bg-white/40" />
+            <span className="flex items-center gap-1.5 text-white">
+              <Award className="w-4 h-4 text-emerald-300" />
               {semesterInfo.totalCredits} {translate(language, 'timetable.credits')}
             </span>
           </div>
@@ -51,22 +56,22 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-indigo-100 border border-white/15 text-xs font-bold transition-all cursor-pointer backdrop-blur-md"
           >
-            <Printer className="w-4 h-4 text-slate-600" />
+            <Printer className="w-4 h-4 text-indigo-200" />
             <span className="hidden sm:inline">{translate(language, 'timetable.print')}</span>
           </button>
 
           <button
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-indigo-100 border border-white/15 text-xs font-bold transition-all cursor-pointer backdrop-blur-md"
           >
-            <Download className="w-4 h-4 text-slate-600" />
+            <Download className="w-4 h-4 text-indigo-200" />
             <span className="hidden sm:inline">{translate(language, 'timetable.export')}</span>
           </button>
 
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
             <span>{translate(language, 'timetable.addSubject')}</span>
@@ -76,4 +81,3 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
     </div>
   );
 };
-

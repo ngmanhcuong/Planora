@@ -84,10 +84,12 @@ export const CalendarPage: React.FC = () => {
       timeRange = `${String(startD.getHours()).padStart(2, '0')}:${String(startD.getMinutes()).padStart(2, '0')} – ${String(endD.getHours()).padStart(2, '0')}:${String(endD.getMinutes()).padStart(2, '0')}`;
     }
 
-    const catName = item.category?.name || (item.sourceType === 'TASK' ? 'Deadline' : 'Sự kiện');
-    const catBg = item.category?.bgColor || (item.sourceType === 'TASK' ? '#FFE4E6' : '#EEF2FF');
-    const catText = item.category?.textColor || (item.sourceType === 'TASK' ? '#991B1B' : '#312E81');
-    const catColor = item.category?.color || (item.sourceType === 'TASK' ? '#E11D48' : '#4F46E5');
+    const isTask = item.sourceType === 'TASK';
+    const isTimetable = item.sourceType === 'TIMETABLE';
+    const catName = item.category?.name || (isTask ? 'Deadline' : isTimetable ? 'Thời khóa biểu' : 'Sự kiện');
+    const catBg = item.category?.bgColor || (isTask ? '#FFE4E6' : isTimetable ? '#D8E2FF' : '#EEF2FF');
+    const catText = item.category?.textColor || (isTask ? '#991B1B' : isTimetable ? '#001A42' : '#312E81');
+    const catColor = item.category?.color || (isTask ? '#E11D48' : isTimetable ? '#0058BE' : '#4F46E5');
 
     return {
       id: item.id || `evt_${idx}`,
@@ -97,9 +99,9 @@ export const CalendarPage: React.FC = () => {
       dayIndex,
       startTopPx,
       heightPx,
-      category: (item.category?.type?.toLowerCase() || 'study') as CategoryType,
+      category: (item.category?.type?.toLowerCase() || (isTask ? 'deadline' : 'study')) as CategoryType,
       categoryLabel: catName,
-      location: item.location || undefined,
+      location: item.location || item.room || undefined,
       color: catColor,
       bgColor: catBg,
       textColor: catText,
@@ -110,9 +112,11 @@ export const CalendarPage: React.FC = () => {
     if (activeCategory === 'all') return true;
     return evt.category === activeCategory;
   });
+  const todayKey = new Date().toDateString();
+  const todayItemsCount = filteredEvents.filter((evt) => evt.dateKey === todayKey).length;
 
   return (
-    <div className="flex flex-col gap-5 w-full min-h-screen pb-10">
+    <div className="flex flex-col gap-6 w-full min-h-screen pb-10">
       <CalendarHeader
         currentDate={currentDate}
         onPrevWeek={handlePrevWeek}
@@ -123,6 +127,8 @@ export const CalendarPage: React.FC = () => {
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
         onOpenCreatePanel={() => setIsCreateOpen(true)}
+        totalItems={filteredEvents.length}
+        todayItems={todayItemsCount}
       />
 
       {isLoading ? (
@@ -173,5 +179,3 @@ export const CalendarPage: React.FC = () => {
     </div>
   );
 };
-
-

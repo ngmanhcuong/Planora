@@ -47,6 +47,44 @@ function calculateProductivityScore(
   return 0;
 }
 
+function combineDateAndTime(date: Date, time: string): Date {
+  const [hours = '0', minutes = '0'] = time.split(':');
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    Number(hours),
+    Number(minutes),
+    0,
+    0
+  );
+}
+
+function countTimetableOccurrences(items: any[], rangeStart: Date, rangeEnd: Date): number {
+  let count = 0;
+  const cursor = new Date(rangeStart);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (cursor < rangeEnd) {
+    const dayOfWeek = (cursor.getDay() + 6) % 7;
+
+    for (const item of items) {
+      if (item.dayOfWeek !== dayOfWeek) continue;
+
+      const start = combineDateAndTime(cursor, item.startTime);
+      const end = combineDateAndTime(cursor, item.endTime);
+
+      if (start < rangeEnd && end > rangeStart) {
+        count++;
+      }
+    }
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return count;
+}
+
 export class DashboardService {
   /**
    * Main aggregated dashboard endpoint (/api/dashboard)
@@ -115,7 +153,6 @@ export class DashboardService {
         where: { userId, isCurrent: true },
         include: {
           items: {
-            where: { dayOfWeek: currentDayOfWeek },
             orderBy: { startTime: 'asc' },
           },
         },
@@ -168,7 +205,7 @@ export class DashboardService {
     const overdueTasksCount = overdueTasks.length;
 
     // 2. Process Events
-    const expandedEvents = expandRecurringEvents(eventsUpcomingRaw, now, next7DaysEnd, 5);
+    const expandedEvents = expandRecurringEvents(eventsUpcomingRaw, now, next7DaysEnd, 500);
     const upcomingEvents: DashboardEventItem[] = expandedEvents.slice(0, 5).map((e: any) => ({
       id: e.id,
       title: e.title,
@@ -180,8 +217,10 @@ export class DashboardService {
     }));
 
     // 3. Process Timetable
-    const todayTimetable: DashboardTimetableItem[] = activeTimetable
-      ? activeTimetable.items.map((i) => ({
+    const activeTimetableItems = activeTimetable?.items || [];
+    const todayTimetable: DashboardTimetableItem[] = activeTimetableItems
+      .filter((i) => i.dayOfWeek === currentDayOfWeek)
+      .map((i) => ({
           id: i.id,
           courseName: i.subjectName,
           subjectName: i.subjectName,
@@ -191,8 +230,8 @@ export class DashboardService {
           room: i.room || '',
           lecturer: i.lecturer || '',
           type: i.type,
-        }))
-      : [];
+        }));
+    const upcomingTimetableCount = countTimetableOccurrences(activeTimetableItems, now, next7DaysEnd);
 
     // 4. Process Habits
     const habitItems: DashboardHabitItem[] = habitsRaw.map((h) => {
@@ -228,7 +267,7 @@ export class DashboardService {
         tasksToday: tasksTodayCount,
         tasksCompletedToday: tasksCompletedTodayCount,
         overdueTasks: overdueTasksCount,
-        upcomingEvents: upcomingEvents.length,
+        upcomingEvents: upcomingEvents.length + upcomingTimetableCount,
         habitsCompletedToday: habitsCompletedTodayCount,
         totalHabits,
         unreadNotifications: unreadNotificationsCount,
