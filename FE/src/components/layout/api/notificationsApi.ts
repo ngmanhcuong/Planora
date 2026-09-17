@@ -3,6 +3,7 @@ import type { ApiNotification, ApiResponse } from '@/types';
 
 export const notificationsApi = {
   getNotifications: async (): Promise<ApiNotification[]> => {
+    await apiClient.post('/notifications/generate');
     const response = await apiClient.get<ApiResponse<{ notifications: ApiNotification[] }>>('/notifications');
     return response.data.data.notifications;
   },

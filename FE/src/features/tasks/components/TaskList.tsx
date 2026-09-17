@@ -9,12 +9,14 @@ export interface TaskListProps {
   tasks: ApiTask[];
   onToggleComplete: (id: string, currentStatus: string) => void;
   onDeleteTask: (id: string) => void;
+  onEditTask: (task: ApiTask) => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
   tasks,
   onToggleComplete,
   onDeleteTask,
+  onEditTask,
 }) => {
   const language = useCurrentLanguage();
 
@@ -42,6 +44,7 @@ export const TaskList: React.FC<TaskListProps> = ({
           task={task}
           onToggleComplete={onToggleComplete}
           onDeleteTask={onDeleteTask}
+          onEditTask={onEditTask}
         />
       ))}
     </div>

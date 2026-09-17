@@ -87,11 +87,11 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-hidden border-l border-white/70 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] animate-in slide-in-from-right duration-200 sm:w-[460px]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(79,70,229,0.16),transparent_34%),radial-gradient(circle_at_88%_22%,rgba(245,158,11,0.14),transparent_28%),linear-gradient(180deg,#F8FAFF_0%,#FFFFFF_42%,#F8FAFC_100%)]" />
+    <div className="ai-assistant-panel fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-hidden border-l border-white/70 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] animate-in slide-in-from-right duration-200 sm:w-[460px]">
+      <div className="ai-assistant-bg pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(79,70,229,0.16),transparent_34%),radial-gradient(circle_at_88%_22%,rgba(245,158,11,0.14),transparent_28%),linear-gradient(180deg,#F8FAFF_0%,#FFFFFF_42%,#F8FAFC_100%)]" />
 
       {/* Header */}
-      <div className="relative border-b border-white/70 bg-white/72 p-5 shadow-sm backdrop-blur-xl">
+      <div className="ai-assistant-header relative border-b border-white/70 bg-white/72 p-5 shadow-sm backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
           <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-slate-900 text-white shadow-lg shadow-indigo-500/25">
@@ -101,17 +101,17 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             </span>
           </div>
           <div>
-            <h3 className="font-heading text-lg font-black tracking-tight text-slate-950">
+            <h3 className="font-heading text-lg font-black tracking-tight text-slate-950 dark:text-slate-100">
               {translate(language, 'assistant.title')}
             </h3>
-            <p className="mt-0.5 text-xs font-medium text-slate-500">
+            <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
               {translate(language, 'assistant.panel.subtitle')}
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-900"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100"
         >
             <X className="h-5 w-5" />
         </button>
@@ -153,7 +153,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
                   className={`rounded-[1.35rem] px-4 py-3 text-sm leading-relaxed shadow-sm ${
                   m.sender === 'user'
                       ? 'rounded-tr-md bg-gradient-to-br from-indigo-600 to-violet-600 text-white'
-                      : 'rounded-tl-md border border-slate-200/80 bg-white/92 text-slate-800'
+                      : 'ai-assistant-message rounded-tl-md border border-slate-200/80 bg-white/92 text-slate-800'
                 }`}
               >
                 {m.text}
@@ -166,7 +166,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
         ))}
 
         {assistantMutation.isPending && (
-            <div className="flex w-fit items-center gap-2 rounded-2xl border border-indigo-100 bg-white/90 px-3 py-2 text-xs font-bold text-slate-500 shadow-sm">
+            <div className="ai-assistant-thinking flex w-fit items-center gap-2 rounded-2xl border border-indigo-100 bg-white/90 px-3 py-2 text-xs font-bold text-slate-500 shadow-sm">
               <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
             <span>{translate(language, 'assistant.panel.thinking')}</span>
           </div>
@@ -176,7 +176,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
 
       {/* Quick Sample Prompts */}
       {showSuggestions && (
-        <div className="relative border-t border-slate-200/80 bg-white/80 px-5 py-4 backdrop-blur-xl">
+        <div className="ai-assistant-suggestions relative border-t border-slate-200/80 bg-white/80 px-5 py-4 backdrop-blur-xl">
           <span className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
             {translate(language, 'assistant.panel.suggestions')}
           </span>
@@ -186,7 +186,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
                 key={idx}
                 onClick={() => handleSend(prompt)}
                 disabled={assistantMutation.isPending}
-                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-[11px] font-bold text-slate-600 transition-all hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-60"
+                className="ai-assistant-suggestion rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-[11px] font-bold text-slate-600 transition-all hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-60"
               >
                 {prompt}
               </button>
@@ -196,7 +196,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
       )}
 
       {/* Input Form */}
-      <div className="relative border-t border-slate-200/80 bg-white px-4 py-4">
+      <div className="ai-assistant-input-wrap relative border-t border-slate-200/80 bg-white px-4 py-4">
         {errorMessage && (
           <div className="mb-3 flex items-center gap-1.5 rounded-2xl border border-rose-100 bg-rose-50 p-2.5 text-[11px] font-semibold text-rose-700">
             <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
@@ -209,7 +209,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center gap-2 rounded-3xl border border-slate-200 bg-slate-50 p-2 shadow-[0_12px_34px_rgba(15,23,42,0.08)] transition-all focus-within:border-indigo-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100"
+          className="ai-assistant-form flex items-center gap-2 rounded-3xl border border-slate-200 bg-slate-50 p-2 shadow-[0_12px_34px_rgba(15,23,42,0.08)] transition-all focus-within:border-indigo-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100"
         >
           <input
             type="text"
@@ -217,7 +217,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             onChange={(e) => setInputMsg(e.target.value)}
             placeholder={translate(language, 'assistant.panel.placeholder')}
             disabled={assistantMutation.isPending}
-            className="h-10 flex-1 bg-transparent px-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none"
+            className="h-10 flex-1 bg-transparent px-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none dark:text-slate-100 dark:placeholder-slate-500"
           />
           <button
             type="submit"

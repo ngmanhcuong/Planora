@@ -34,6 +34,21 @@ function mapTypeString(typeStr?: string): NotificationType | undefined {
   return undefined;
 }
 
+function getTaskDueAt(task: { dueDate: Date; dueTime?: string | null }): Date {
+  const dueAt = new Date(task.dueDate);
+  if (!task.dueTime) return dueAt;
+
+  const match = task.dueTime.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return dueAt;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return dueAt;
+
+  dueAt.setHours(hours, minutes, 0, 0);
+  return dueAt;
+}
+
 export class NotificationsService {
   private static pendingGeneration = new Map<string, Promise<{ createdCount: number }>>();
   /**
@@ -270,7 +285,7 @@ export class NotificationsService {
       where: { userId },
     });
     const reminderHours = setting?.deadlineReminderHours || 24;
-    const reminderThreshold = new Date(now.getTime() + reminderHours * 3600 * 1000);
+    const reminderThreshold = new Date(now.getTime() + Math.max(reminderHours, 7 * 24) * 3600 * 1000);
 
     let createdCount = 0;
 
@@ -283,7 +298,9 @@ export class NotificationsService {
     });
 
     for (const task of incompleteTasks) {
-      if (task.dueDate < now) {
+      const dueAt = getTaskDueAt(task);
+
+      if (dueAt < now) {
         // Task Overdue
         const result = await NotificationsService.createNotification({
           userId,
@@ -295,7 +312,7 @@ export class NotificationsService {
           link: '/tasks',
         });
         if (result.isNew) createdCount++;
-      } else if (task.dueDate <= reminderThreshold) {
+      } else if (dueAt <= reminderThreshold) {
         // Task Reminder
         const result = await NotificationsService.createNotification({
           userId,
@@ -316,7 +333,7 @@ export class NotificationsService {
         userId,
         startTime: {
           gte: now,
-          lte: new Date(now.getTime() + 24 * 3600 * 1000),
+          lte: new Date(now.getTime() + 7 * 24 * 3600 * 1000),
         },
       },
     });

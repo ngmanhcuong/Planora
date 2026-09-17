@@ -16,6 +16,7 @@ export const TasksPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [isPriorityOpen, setIsPriorityOpen] = useState<boolean>(false);
+  const [editingTask, setEditingTask] = useState<ApiTask | null>(null);
 
   const { data: tasksData, isLoading, isError } = useTasks();
   const changeStatusMutation = useChangeTaskStatus();
@@ -32,6 +33,11 @@ export const TasksPage: React.FC = () => {
     deleteTaskMutation.mutate(id);
   };
 
+  const handleCloseTaskModal = () => {
+    setIsCreateOpen(false);
+    setEditingTask(null);
+  };
+
   // Filter tasks logic
   const filteredTasks = tasks.filter((task) => {
     const isCompleted = task.status === 'COMPLETED';
@@ -44,7 +50,7 @@ export const TasksPage: React.FC = () => {
 
     // Category filter
     if (activeCategory !== 'all') {
-      const catCode = task.category?.name?.toLowerCase() || '';
+      const catCode = task.category?.type?.toLowerCase() || '';
       if (catCode !== activeCategory.toLowerCase()) return false;
     }
 
@@ -106,12 +112,17 @@ export const TasksPage: React.FC = () => {
           tasks={filteredTasks}
           onToggleComplete={handleToggleComplete}
           onDeleteTask={handleDeleteTask}
+          onEditTask={(task) => {
+            setEditingTask(task);
+            setIsCreateOpen(true);
+          }}
         />
       )}
 
       <CreateTaskModal
         isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
+        onClose={handleCloseTaskModal}
+        task={editingTask}
       />
 
       <TaskPrioritySuggestion
@@ -121,5 +132,3 @@ export const TasksPage: React.FC = () => {
     </div>
   );
 };
-
-

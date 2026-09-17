@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Calendar, CheckSquare, Trash2, BookOpen } from 'lucide-react';
+import { Check, Calendar, CheckSquare, Trash2, BookOpen, Pencil, Clock3 } from 'lucide-react';
 import type { ApiTask } from '@/types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate } from '@/lib/i18n';
@@ -8,12 +8,14 @@ export interface TaskCardProps {
   task: ApiTask;
   onToggleComplete: (id: string, currentStatus: string) => void;
   onDeleteTask: (id: string) => void;
+  onEditTask: (task: ApiTask) => void;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   onToggleComplete,
   onDeleteTask,
+  onEditTask,
 }) => {
   const language = useCurrentLanguage();
   const isCompleted = task.status === 'COMPLETED';
@@ -40,7 +42,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     <div
       className={`group flex items-start justify-between gap-4 p-4.5 rounded-2xl border transition-all ${
         isCompleted
-          ? 'bg-slate-50/70 border-slate-200/80 opacity-75'
+          ? 'bg-white border-slate-200/80 hover:shadow-md hover:border-emerald-200 hover:-translate-y-0.5'
           : isOverdue
           ? 'bg-rose-50/40 border-rose-200/80'
           : 'bg-white border-slate-200/80 hover:shadow-md hover:border-indigo-200 hover:-translate-y-0.5'
@@ -93,11 +95,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             )}
           </div>
 
-          <h3
-            className={`text-sm font-extrabold text-slate-900 leading-snug ${
-              isCompleted ? 'line-through text-slate-400' : ''
-            }`}
-          >
+          <h3 className="text-sm font-extrabold leading-snug text-slate-900">
             {task.title}
           </h3>
 
@@ -136,14 +134,51 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       </div>
 
       {/* Action buttons */}
-      <button
-        onClick={() => onDeleteTask(task.id)}
-        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all shrink-0 cursor-pointer"
-        title={translate(language, 'tasks.card.delete')}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
+      <div className="flex shrink-0 flex-col items-end gap-2">
+        <div className="flex items-start gap-2">
+          <button
+            type="button"
+            onClick={() => onEditTask(task)}
+            className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-indigo-100 bg-indigo-50 px-3 text-xs font-extrabold text-indigo-600 shadow-sm transition-all hover:border-indigo-200 hover:bg-indigo-100 cursor-pointer"
+            title={language === 'vi' ? 'Chỉnh sửa công việc' : 'Edit task'}
+            aria-label={language === 'vi' ? 'Chỉnh sửa công việc' : 'Edit task'}
+          >
+            <Pencil className="w-4 h-4" />
+            <span>{language === 'vi' ? 'Sửa' : 'Edit'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onDeleteTask(task.id)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-rose-100 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+            title={translate(language, 'tasks.card.delete')}
+            aria-label={translate(language, 'tasks.card.delete')}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={() => onToggleComplete(task.id, task.status)}
+          className={`inline-flex h-8 min-w-[112px] items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-extrabold shadow-sm transition-all cursor-pointer ${
+            isCompleted
+              ? 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+              : 'border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100'
+          }`}
+          title={
+            isCompleted
+              ? translate(language, 'tasks.card.markIncomplete')
+              : translate(language, 'tasks.card.markComplete')
+          }
+          aria-label={
+            isCompleted
+              ? translate(language, 'tasks.card.markIncomplete')
+              : translate(language, 'tasks.card.markComplete')
+          }
+        >
+          {isCompleted ? <Check className="h-4 w-4" /> : <Clock3 className="h-4 w-4" />}
+          <span>{isCompleted ? translate(language, 'tasks.completed') : translate(language, 'tasks.inProgress')}</span>
+        </button>
+      </div>
     </div>
   );
 };
-
