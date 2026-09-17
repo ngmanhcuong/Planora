@@ -3,7 +3,7 @@ import { Flame, Check, Sparkles } from 'lucide-react';
 import type { ApiHabit } from '@/types';
 import { useCheckInHabit, useUndoCheckInHabit } from '../hooks/useHabits';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { translate } from '@/lib/i18n';
+import { translate, getMultiLangText } from '@/lib/i18n';
 
 export interface HabitTrackerWidgetProps {
   habits?: ApiHabit[];
@@ -53,7 +53,7 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
               {translate(language, 'dashboard.noHabits')}
             </p>
             <p className="text-[11px] text-slate-500">
-              Thiết lập thói quen hằng ngày để rèn luyện tính kỷ luật và tăng điểm năng suất!
+              {translate(language, 'dashboard.noHabitsDesc')}
             </p>
           </div>
         ) : (
@@ -75,7 +75,7 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-900 truncate">{title}</span>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-2xs">
-                      <Flame className="w-3 h-3 fill-slate-950" /> {streak} ngày
+                      <Flame className="w-3 h-3 fill-slate-950" /> {streak} {getMultiLangText(language, { vi: 'ngày', en: 'days', ja: '日', ko: '일', zh: '天', fr: 'jours', de: 'Tage', es: 'días' })}
                     </span>
                   </div>
                   {habit.description && (
@@ -98,7 +98,7 @@ export const HabitTrackerWidget: React.FC<HabitTrackerWidgetProps> = ({ habits =
                       {translate(language, 'dashboard.done')}
                     </>
                   ) : (
-                    'Điểm danh'
+                    getMultiLangText(language, { vi: 'Điểm danh', en: 'Check in', ja: 'チェックイン', ko: '출석 체크', zh: '打卡', fr: 'Valider', de: 'Check-in', es: 'Marcar' })
                   )}
                 </button>
               </div>

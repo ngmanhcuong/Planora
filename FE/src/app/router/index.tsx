@@ -79,6 +79,14 @@ export const AppRouter: React.FC = () => {
             </PublicRoute>
           }
         />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <LoginPage initialMode="forgot" />
+            </PublicRoute>
+          }
+        />
 
         {/* Protected Routes inside AppLayout */}
         <Route

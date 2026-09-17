@@ -12,7 +12,7 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import type { ApiTimetableItem, ApiEvent } from '@/types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { translate } from '@/lib/i18n';
+import { translate, getMultiLangText } from '@/lib/i18n';
 
 export interface TodayTimelineProps {
   timetableToday?: ApiTimetableItem[];
@@ -37,7 +37,16 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
               {translate(language, 'dashboard.todaySchedule')}
             </h2>
             <p className="text-xs text-slate-500 font-medium">
-              Theo dõi lịch học & sự kiện diễn ra trong ngày
+              {getMultiLangText(language, {
+                vi: 'Theo dõi lịch học & sự kiện diễn ra trong ngày',
+                en: 'Track classes & events taking place today',
+                ja: '本日の授業とイベントを確認',
+                ko: '오늘의 수업 및 이벤트 추적',
+                zh: '查看今天的课程与活动日程',
+                fr: 'Suivez les cours et événements d\'aujourd\'hui',
+                de: 'Verfolgen Sie die heutigen Kurse und Termine',
+                es: 'Sigue las clases y eventos de hoy',
+              })}
             </p>
           </div>
         </div>
@@ -50,7 +59,7 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
             to="/timetable"
             className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors ml-2"
           >
-            <span>TKB</span>
+            <span>{getMultiLangText(language, { vi: 'TKB', en: 'Timetable', ja: '時間割', ko: '시간표', zh: '课表', fr: 'Planning', de: 'Stundenplan', es: 'Horario' })}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -68,7 +77,16 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
               {translate(language, 'dashboard.noScheduleToday')}
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Bạn có thể dành thời gian này để hoàn thành các công việc tồn đọng, hoặc sử dụng AI để gợi ý lịch học cá nhân.
+              {getMultiLangText(language, {
+                vi: 'Bạn có thể dành thời gian này để hoàn thành các công việc tồn đọng, hoặc sử dụng AI để gợi ý lịch học cá nhân.',
+                en: 'You can use this time to complete pending tasks, or use AI to generate your study schedule.',
+                ja: '残っているタスクを完了するか、AIで学習スケジュールを作成しましょう。',
+                ko: '밀린 작업을 완료하거나 AI를 사용하여 학습 일정을 생성하세요.',
+                zh: '您可以利用这段时间完成积压的任务，或使用AI生成学习计划。',
+                fr: 'Profitez de ce temps pour terminer vos tâches ou laissez l\'IA générer votre planning.',
+                de: 'Nutzen Sie die Zeit für ausstehende Aufgaben oder lassen Sie sich vom KI-Planer helfen.',
+                es: 'Aprovecha este tiempo para terminar tareas pendientes o usa IA para generar tu plan de estudio.',
+              })}
             </p>
           </div>
 
@@ -78,14 +96,14 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-xs"
             >
               <BookOpen className="w-4 h-4 text-indigo-600" />
-              <span>Thời khóa biểu</span>
+              <span>{translate(language, 'sidebar.timetable')}</span>
             </Link>
             <Link
               to="/calendar"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-xs font-bold text-white hover:bg-indigo-500 transition-all shadow-md shadow-indigo-600/20"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
-              <span>Lịch của tôi</span>
+              <span>{translate(language, 'sidebar.calendar')}</span>
             </Link>
           </div>
         </div>

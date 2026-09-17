@@ -146,10 +146,10 @@ const SidebarNavLink: React.FC<{
     >
       <span
         className={clsx(
-          'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border transition-all duration-150 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:stroke-[2]',
+          'sidebar-nav-icon relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border transition-all duration-150 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:stroke-[2]',
           isActive
-            ? 'border-[#C7D2FE] bg-white text-[#4F46E5] shadow-sm'
-            : 'border-transparent bg-transparent text-[#64748B] group-hover:border-[#E2E8F0] group-hover:bg-white group-hover:text-[#4F46E5]'
+            ? 'sidebar-nav-icon-active border-[#C7D2FE] bg-white text-[#4F46E5] shadow-sm'
+            : 'sidebar-nav-icon-idle border-transparent bg-transparent text-[#64748B] group-hover:border-[#E2E8F0] group-hover:bg-white group-hover:text-[#4F46E5]'
         )}
       >
         {item.icon}
@@ -176,4 +176,5 @@ const SidebarNavLink: React.FC<{
     </button>
   );
 };
+
 

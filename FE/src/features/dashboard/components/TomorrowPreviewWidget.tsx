@@ -1,12 +1,16 @@
 import React from 'react';
 import { ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import type { ApiEvent } from '@/types';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate, getMultiLangText } from '@/lib/i18n';
 
 export interface TomorrowPreviewWidgetProps {
   events?: ApiEvent[];
 }
 
 export const TomorrowPreviewWidget: React.FC<TomorrowPreviewWidgetProps> = ({ events = [] }) => {
+  const language = useCurrentLanguage();
+
   return (
     <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-sm flex flex-col gap-4">
       {/* Header */}
@@ -15,10 +19,12 @@ export const TomorrowPreviewWidget: React.FC<TomorrowPreviewWidgetProps> = ({ ev
           <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
             <CalendarIcon className="w-4 h-4" />
           </div>
-          <h2 className="text-base font-bold text-slate-900 font-heading">Sự kiện sắp tới</h2>
+          <h2 className="text-base font-bold text-slate-900 font-heading">
+            {translate(language, 'dashboard.upcomingEvents')}
+          </h2>
         </div>
         <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
-          7 ngày tới
+          {translate(language, 'dashboard.next7Days')}
         </span>
       </div>
 
@@ -26,16 +32,26 @@ export const TomorrowPreviewWidget: React.FC<TomorrowPreviewWidgetProps> = ({ ev
       <div className="flex flex-col gap-2.5">
         {events.length === 0 ? (
           <div className="py-6 px-4 rounded-xl bg-slate-50/70 border border-dashed border-slate-200 text-center text-xs text-slate-500">
-            Không có sự kiện sắp tới trong 7 ngày tới.
+            {translate(language, 'dashboard.noUpcomingEvents')}
           </div>
         ) : (
           events.slice(0, 4).map((event) => {
             const startDate = new Date(event.startAt);
             const timeStr = event.allDay
-              ? 'Cả ngày'
+              ? translate(language, 'dashboard.allDay')
               : `${startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
             const dayNum = startDate.getDate();
             const monthNum = startDate.getMonth() + 1;
+            const monthLabel = getMultiLangText(language, {
+              vi: `T${monthNum}`,
+              en: `M${monthNum}`,
+              ja: `${monthNum}月`,
+              ko: `${monthNum}월`,
+              zh: `${monthNum}月`,
+              fr: `M${monthNum}`,
+              de: `M${monthNum}`,
+              es: `M${monthNum}`,
+            });
 
             return (
               <div
@@ -46,7 +62,7 @@ export const TomorrowPreviewWidget: React.FC<TomorrowPreviewWidgetProps> = ({ ev
                   {/* Date badge */}
                   <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col items-center justify-center shrink-0">
                     <span className="text-[10px] font-bold text-indigo-600 uppercase leading-none">
-                      T{monthNum}
+                      {monthLabel}
                     </span>
                     <span className="text-xs font-black text-slate-900 leading-none mt-0.5">
                       {dayNum}

@@ -9,5 +9,12 @@ export const config = {
   jwtExpiresIn: env.JWT_EXPIRES_IN,
   aiProvider: env.AI_PROVIDER,
   aiApiKey: env.AI_API_KEY,
+  smtp: {
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT ? parseInt(env.SMTP_PORT, 10) : undefined,
+    secure: env.SMTP_SECURE === 'true',
+    user: env.SMTP_USER,
+    pass: env.SMTP_PASS,
+    from: env.SMTP_FROM,
+  },
 };
-

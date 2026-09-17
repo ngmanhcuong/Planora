@@ -15,14 +15,25 @@ import {
   useMarkReadNotification,
   useMarkAllReadNotifications,
 } from '@/components/layout/hooks/useNotifications';
-import { clsx } from 'clsx';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { getMultiLangText, translateRelativeTime } from '@/lib/i18n';
+import { clsx } from 'clsx';
+
+const LOCALE_MAP: Record<string, string> = {
+  vi: 'vi-VN',
+  en: 'en-US',
+  ja: 'ja-JP',
+  ko: 'ko-KR',
+  zh: 'zh-CN',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  es: 'es-ES',
+};
 
 type FilterType = 'all' | 'unread' | 'tasks' | 'events' | 'system';
 
 export const NotificationsPage: React.FC = () => {
   const language = useCurrentLanguage();
-  const isVietnamese = language === 'vi';
   const [filter, setFilter] = useState<FilterType>('all');
   const { data: notificationsData, isLoading, isError, refetch } = useNotifications();
   const { data: unreadData } = useUnreadCount();
@@ -36,36 +47,133 @@ export const NotificationsPage: React.FC = () => {
 
   const unreadCount = typeof unreadData === 'number' ? unreadData : 0;
   const copy = {
-    title: isVietnamese ? 'Thông báo & Nhắc nhở' : 'Notifications & reminders',
-    subtitle: isVietnamese
-      ? 'Cập nhật tức thì về công việc, lịch trình học tập và nhắc nhở hệ thống.'
-      : 'Get instant updates about tasks, study schedules, and system reminders.',
-    unread: isVietnamese ? 'chưa đọc' : 'unread',
-    markAllRead: isVietnamese ? 'Đánh dấu tất cả đã đọc' : 'Mark all as read',
-    markRead: isVietnamese ? 'Đánh dấu đã đọc' : 'Mark as read',
-    loadError: isVietnamese ? 'Không tải được thông báo.' : 'Could not load notifications.',
-    retry: isVietnamese ? 'Thử lại' : 'Retry',
-    readError: isVietnamese ? 'Không thể đánh dấu đã đọc. Vui lòng thử lại.' : 'Could not mark notifications as read. Please try again.',
-    emptyTitle: isVietnamese ? 'Không có thông báo nào' : 'No notifications',
-    emptyUnread: isVietnamese ? 'Tuyệt vời! Bạn đã đọc hết tất cả thông báo.' : 'Great! You have read all notifications.',
-    emptyDefault: isVietnamese ? 'Hiện chưa có thông báo mới nào dành cho bạn.' : 'There are no new notifications for you yet.',
-    justNow: isVietnamese ? 'Vừa xong' : 'Just now',
-    minutesAgo: (value: number) => isVietnamese ? `${value} phút trước` : `${value} min ago`,
-    hoursAgo: (value: number) => isVietnamese ? `${value} giờ trước` : `${value} hr ago`,
-    daysAgo: (value: number) => isVietnamese ? `${value} ngày trước` : `${value} days ago`,
+    title: getMultiLangText(language, {
+      vi: 'Thông báo & Nhắc nhở',
+      en: 'Notifications & reminders',
+      ja: '通知とリマインダー',
+      ko: '알림 및 리마인더',
+      zh: '通知与提醒',
+      fr: 'Notifications & rappels',
+      de: 'Benachrichtigungen & Erinnerungen',
+      es: 'Notificaciones y recordatorios',
+    }),
+    subtitle: getMultiLangText(language, {
+      vi: 'Cập nhật tức thì về công việc, lịch trình học tập và nhắc nhở hệ thống.',
+      en: 'Get instant updates about tasks, study schedules, and system reminders.',
+      ja: 'タスク、学習スケジュール、システム通知の最新情報を確認できます。',
+      ko: '작업, 학습 일정 및 시스템 알림에 대한 즉각적인 업데이트를 받으세요.',
+      zh: '及时获取任务、学习日程及系统提醒的更新。',
+      fr: 'Recevez des mises à jour instantanées sur vos tâches et rappels.',
+      de: 'Erhalten Sie sofortige Updates zu Aufgaben und Erinnerungen.',
+      es: 'Obtén actualizaciones instantáneas sobre tus tareas y avisos.',
+    }),
+    unread: getMultiLangText(language, {
+      vi: 'chưa đọc',
+      en: 'unread',
+      ja: '未読',
+      ko: '읽지 않음',
+      zh: '未读',
+      fr: 'non lus',
+      de: 'ungelesen',
+      es: 'no leídos',
+    }),
+    markAllRead: getMultiLangText(language, {
+      vi: 'Đánh dấu tất cả đã đọc',
+      en: 'Mark all as read',
+      ja: 'すべて既読にする',
+      ko: '모두 읽음으로 표시',
+      zh: '全部标记为已读',
+      fr: 'Tout marquer comme lu',
+      de: 'Alle als gelesen markieren',
+      es: 'Marcar todo como leído',
+    }),
+    markRead: getMultiLangText(language, {
+      vi: 'Đánh dấu đã đọc',
+      en: 'Mark as read',
+      ja: '既読にする',
+      ko: '읽음으로 표시',
+      zh: '标记为已读',
+      fr: 'Marquer comme lu',
+      de: 'Als gelesen markieren',
+      es: 'Marcar como leído',
+    }),
+    loadError: getMultiLangText(language, {
+      vi: 'Không tải được thông báo.',
+      en: 'Could not load notifications.',
+      ja: '通知を読み込めませんでした。',
+      ko: '알림을 불러올 수 없습니다.',
+      zh: '无法加载通知。',
+      fr: 'Impossible de charger les notifications.',
+      de: 'Benachrichtigungen konnten nicht geladen werden.',
+      es: 'No se pudieron cargar las notificaciones.',
+    }),
+    retry: getMultiLangText(language, {
+      vi: 'Thử lại',
+      en: 'Retry',
+      ja: '再試行',
+      ko: '다시 시도',
+      zh: '重试',
+      fr: 'Réessayer',
+      de: 'Erneut versuchen',
+      es: 'Reintentar',
+    }),
+    readError: getMultiLangText(language, {
+      vi: 'Không thể đánh dấu đã đọc. Vui lòng thử lại.',
+      en: 'Could not mark notifications as read. Please try again.',
+      ja: '既読にできませんでした。もう一度お試しください。',
+      ko: '읽음으로 표시하지 못했습니다. 다시 시도해 주세요.',
+      zh: '无法标记为已读，请重试。',
+      fr: 'Échec du marquage comme lu.',
+      de: 'Fehler beim Als-Gelesen-Markieren.',
+      es: 'No se pudo marcar como leído.',
+    }),
+    emptyTitle: getMultiLangText(language, {
+      vi: 'Không có thông báo nào',
+      en: 'No notifications',
+      ja: '通知はありません',
+      ko: '알림이 없습니다',
+      zh: '暂无通知',
+      fr: 'Aucune notification',
+      de: 'Keine Benachrichtigungen',
+      es: 'Sin notificaciones',
+    }),
+    emptyUnread: getMultiLangText(language, {
+      vi: 'Tuyệt vời! Bạn đã đọc hết tất cả thông báo.',
+      en: 'Great! You have read all notifications.',
+      ja: '素晴らしい！すべての通知を確認しました。',
+      ko: '좋습니다! 모든 알림을 확인했습니다.',
+      zh: '太棒了！您已阅读所有通知。',
+      fr: 'Super ! Vous avez lu toutes vos notifications.',
+      de: 'Super! Sie haben alle Benachrichtigungen gelesen.',
+      es: '¡Genial! Has leído todas las notificaciones.',
+    }),
+    emptyDefault: getMultiLangText(language, {
+      vi: 'Hiện chưa có thông báo mới nào dành cho bạn.',
+      en: 'There are no new notifications for you yet.',
+      ja: '現在、新しい通知はありません。',
+      ko: '현재 새로운 알림이 없습니다.',
+      zh: '目前没有新的通知。',
+      fr: 'Aucune nouvelle notification pour le moment.',
+      de: 'Keine neuen Benachrichtigungen vorliegend.',
+      es: 'No tienes notificaciones nuevas por ahora.',
+    }),
+    justNow: translateRelativeTime(language, 'Just now'),
+    minutesAgo: (value: number) => translateRelativeTime(language, `${value} min ago`),
+    hoursAgo: (value: number) => translateRelativeTime(language, `${value} hr ago`),
+    daysAgo: (value: number) => translateRelativeTime(language, `${value} days ago`),
     labels: {
-      task: isVietnamese ? 'Công việc' : 'Task',
-      event: isVietnamese ? 'Sự kiện' : 'Event',
-      timetable: isVietnamese ? 'Thời khóa biểu' : 'Timetable',
-      habit: isVietnamese ? 'Thói quen' : 'Habit',
-      system: isVietnamese ? 'Hệ thống' : 'System',
+      task: getMultiLangText(language, { vi: 'Công việc', en: 'Task', ja: 'タスク', ko: '작업', zh: '任务', fr: 'Tâche', de: 'Aufgabe', es: 'Tarea' }),
+      event: getMultiLangText(language, { vi: 'Sự kiện', en: 'Event', ja: 'イベント', ko: '이벤트', zh: '事件', fr: 'Événement', de: 'Ereignis', es: 'Evento' }),
+      timetable: getMultiLangText(language, { vi: 'Thời khóa biểu', en: 'Timetable', ja: '時間割', ko: '시간표', zh: '课程表', fr: 'Emploi du temps', de: 'Stundenplan', es: 'Horario' }),
+      habit: getMultiLangText(language, { vi: 'Thói quen', en: 'Habit', ja: '習慣', ko: '습관', zh: '习惯', fr: 'Habitude', de: 'Gewohnheit', es: 'Hábito' }),
+      system: getMultiLangText(language, { vi: 'Hệ thống', en: 'System', ja: 'システム', ko: '시스템', zh: '系统', fr: 'Système', de: 'System', es: 'Sistema' }),
     },
     filters: {
-      all: isVietnamese ? 'Tất cả' : 'All',
-      unread: isVietnamese ? `Chưa đọc (${unreadCount})` : `Unread (${unreadCount})`,
-      tasks: isVietnamese ? 'Công việc & Deadline' : 'Tasks & deadlines',
-      events: isVietnamese ? 'Lịch trình' : 'Schedule',
-      system: isVietnamese ? 'Hệ thống' : 'System',
+      all: getMultiLangText(language, { vi: 'Tất cả', en: 'All', ja: 'すべて', ko: '전체', zh: '全部', fr: 'Tous', de: 'Alle', es: 'Todos' }),
+      unread: `${getMultiLangText(language, { vi: 'Chưa đọc', en: 'Unread', ja: '未読', ko: '읽지 않음', zh: '未读', fr: 'Non lus', de: 'Ungelesen', es: 'No leídos' })} (${unreadCount})`,
+      tasks: getMultiLangText(language, { vi: 'Công việc & Deadline', en: 'Tasks & deadlines', ja: 'タスクと締切', ko: '작업 및 마감일', zh: '任务与截止日期', fr: 'Tâches & Échéances', de: 'Aufgaben & Fristen', es: 'Tareas y Fechas límite' }),
+      events: getMultiLangText(language, { vi: 'Lịch trình', en: 'Schedule', ja: 'スケジュール', ko: '일정', zh: '日程', fr: 'Planning', de: 'Zeitplan', es: 'Programación' }),
+      system: getMultiLangText(language, { vi: 'Hệ thống', en: 'System', ja: 'システム', ko: '시스템', zh: '系统', fr: 'Système', de: 'System', es: 'Sistema' }),
     },
   };
 
@@ -139,7 +247,7 @@ export const NotificationsPage: React.FC = () => {
       if (diffInHours < 24) return copy.hoursAgo(diffInHours);
       const diffInDays = Math.floor(diffInHours / 24);
       if (diffInDays < 30) return copy.daysAgo(diffInDays);
-      return new Date(dateStr).toLocaleDateString(isVietnamese ? 'vi-VN' : 'en-US');
+      return new Date(dateStr).toLocaleDateString(LOCALE_MAP[language || 'vi'] || 'en-US');
     } catch {
       return copy.justNow;
     }

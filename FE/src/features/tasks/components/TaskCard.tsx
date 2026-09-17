@@ -2,7 +2,18 @@ import React from 'react';
 import { Check, Calendar, CheckSquare, Trash2, BookOpen, Pencil, Clock3 } from 'lucide-react';
 import type { ApiTask } from '@/types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { translate } from '@/lib/i18n';
+import { translate, translateCategory, getMultiLangText } from '@/lib/i18n';
+
+const LOCALE_MAP: Record<string, string> = {
+  vi: 'vi-VN',
+  en: 'en-US',
+  ja: 'ja-JP',
+  ko: 'ko-KR',
+  zh: 'zh-CN',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  es: 'es-ES',
+};
 
 export interface TaskCardProps {
   task: ApiTask;
@@ -30,13 +41,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   const prio = priorityStyles[task.priority] || priorityStyles.MEDIUM;
 
-  const categoryName = task.category?.name || 'Học tập';
+  const categoryName = translateCategory(language, task.category?.name);
   const categoryBg = task.category?.bgColor || '#EEF2FF';
   const categoryText = task.category?.textColor || '#312E81';
   const categoryDot = task.category?.color || '#4F46E5';
 
   // Format dueDate display
-  const dueDateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : '';
+  const dueDateStr = task.dueDate
+    ? new Date(task.dueDate).toLocaleDateString(LOCALE_MAP[language || 'vi'] || 'en-US')
+    : '';
 
   return (
     <div
@@ -140,11 +153,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             type="button"
             onClick={() => onEditTask(task)}
             className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-indigo-100 bg-indigo-50 px-3 text-xs font-extrabold text-indigo-600 shadow-sm transition-all hover:border-indigo-200 hover:bg-indigo-100 cursor-pointer"
-            title={language === 'vi' ? 'Chỉnh sửa công việc' : 'Edit task'}
-            aria-label={language === 'vi' ? 'Chỉnh sửa công việc' : 'Edit task'}
+            title={getMultiLangText(language, { vi: 'Chỉnh sửa công việc', en: 'Edit task', ja: 'タスクを編集', ko: '작업 수정', zh: '编辑任务', fr: 'Modifier la tâche', de: 'Aufgabe bearbeiten', es: 'Editar tarea' })}
+            aria-label={getMultiLangText(language, { vi: 'Chỉnh sửa công việc', en: 'Edit task', ja: 'タスクを編集', ko: '작업 수정', zh: '编辑任务', fr: 'Modifier la tâche', de: 'Aufgabe bearbeiten', es: 'Editar tarea' })}
           >
             <Pencil className="w-4 h-4" />
-            <span>{language === 'vi' ? 'Sửa' : 'Edit'}</span>
+            <span>{getMultiLangText(language, { vi: 'Sửa', en: 'Edit', ja: '編集', ko: '수정', zh: '编辑', fr: 'Modifier', de: 'Bearbeiten', es: 'Editar' })}</span>
           </button>
           <button
             type="button"

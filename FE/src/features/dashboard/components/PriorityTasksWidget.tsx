@@ -54,14 +54,14 @@ export const PriorityTasksWidget: React.FC<PriorityTasksWidgetProps> = ({ tasks 
               {translate(language, 'dashboard.noPriorityTasks')}
             </p>
             <p className="text-[11px] text-slate-500">
-              Tuyệt vời! Bạn không có công việc tồn đọng nào cần xử lý ngay.
+              {translate(language, 'dashboard.noPriorityDesc')}
             </p>
             <Link
               to="/tasks"
               className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Tạo công việc mới</span>
+              <span>{translate(language, 'tasks.create')}</span>
             </Link>
           </div>
         ) : (

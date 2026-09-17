@@ -20,7 +20,7 @@ import {
 import { createTaskSchema, type CreateTaskInput } from '../validations/taskSchemas';
 import { useCreateTask, useUpdateTask } from '../hooks/useTasks';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { translate } from '@/lib/i18n';
+import { translate, getMultiLangText } from '@/lib/i18n';
 import { clsx } from 'clsx';
 import type { ApiCategory, ApiTask } from '@/types';
 
@@ -283,7 +283,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditMode ? (language === 'vi' ? 'Chỉnh sửa công việc' : 'Edit task') : translate(language, 'tasks.modal.title')}
+      title={isEditMode ? getMultiLangText(language, { vi: 'Chỉnh sửa công việc', en: 'Edit task', ja: 'タスクを編集', ko: '작업 수정', zh: '编辑任务', fr: 'Modifier la tâche', de: 'Aufgabe bearbeiten', es: 'Editar tarea' }) : translate(language, 'tasks.modal.title')}
       maxWidth="xl"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex max-h-[78vh] flex-col gap-5 overflow-y-auto pr-1">
@@ -625,9 +625,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               {createTaskMutation.isPending || updateTaskMutation.isPending
                 ? translate(language, 'tasks.modal.saving')
                 : isEditMode
-                  ? language === 'vi'
-                    ? 'Cập nhật công việc'
-                    : 'Update task'
+                  ? getMultiLangText(language, { vi: 'Cập nhật công việc', en: 'Update task', ja: 'タスクを更新', ko: '작업 업데이트', zh: '更新任务', fr: 'Mettre à jour la tâche', de: 'Aufgabe aktualisieren', es: 'Actualizar tarea' })
                   : translate(language, 'tasks.modal.save')}
             </span>
           </Button>

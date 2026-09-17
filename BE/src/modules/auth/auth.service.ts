@@ -1,7 +1,15 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../config/prisma';
 import { signAccessToken } from '../../utils/jwt';
-import type { RegisterInput, LoginInput, GoogleLoginInput } from './auth.schemas';
+import { sendPasswordResetOtpEmail } from '../../utils/mailer';
+import type {
+  RegisterInput,
+  LoginInput,
+  GoogleLoginInput,
+  ForgotPasswordInput,
+  RequestPasswordResetOtpInput,
+  VerifyPasswordResetOtpInput,
+} from './auth.schemas';
 import type { AuthSuccessData, SafeUserResponse } from './auth.types';
 
 type GoogleTokenPayload = {
@@ -12,6 +20,20 @@ type GoogleTokenPayload = {
   picture?: string;
   sub?: string;
 };
+
+type PasswordResetOtpRecord = {
+  email: string;
+  otpHash: string;
+  expiresAt: number;
+  verified: boolean;
+  attempts: number;
+};
+
+const passwordResetOtpStore = new Map<string, PasswordResetOtpRecord>();
+const PASSWORD_RESET_OTP_TTL_MS = 10 * 60 * 1000;
+const PASSWORD_RESET_OTP_MAX_ATTEMPTS = 5;
+
+const createOtpCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 export class AuthService {
   async googleLogin(input: GoogleLoginInput): Promise<AuthSuccessData> {
@@ -236,6 +258,95 @@ export class AuthService {
     };
   }
 
+  async requestPasswordResetOtp(input: RequestPasswordResetOtpInput): Promise<void> {
+    const normalizedEmail = input.email.trim().toLowerCase();
+
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true, email: true },
+    });
+
+    if (!user) {
+      throw new Error('Không tìm thấy tài khoản với email này');
+    }
+
+    const otp = createOtpCode();
+    const otpHash = await bcrypt.hash(otp, 10);
+
+    passwordResetOtpStore.set(normalizedEmail, {
+      email: normalizedEmail,
+      otpHash,
+      expiresAt: Date.now() + PASSWORD_RESET_OTP_TTL_MS,
+      verified: false,
+      attempts: 0,
+    });
+
+    void sendPasswordResetOtpEmail(user.email, otp).catch((error) => {
+      console.error('[Password Reset OTP] Failed to send email:', {
+        email: user.email,
+        message: error?.message || error,
+        code: error?.code,
+      });
+    });
+  }
+
+  async verifyPasswordResetOtp(input: VerifyPasswordResetOtpInput): Promise<void> {
+    const normalizedEmail = input.email.trim().toLowerCase();
+    const record = passwordResetOtpStore.get(normalizedEmail);
+
+    if (!record) {
+      throw new Error('Mã OTP không tồn tại hoặc đã hết hạn');
+    }
+
+    if (Date.now() > record.expiresAt) {
+      passwordResetOtpStore.delete(normalizedEmail);
+      throw new Error('Mã OTP đã hết hạn');
+    }
+
+    if (record.attempts >= PASSWORD_RESET_OTP_MAX_ATTEMPTS) {
+      passwordResetOtpStore.delete(normalizedEmail);
+      throw new Error('Bạn đã nhập sai OTP quá nhiều lần. Vui lòng gửi lại mã mới');
+    }
+
+    const isMatch = await bcrypt.compare(input.otp, record.otpHash);
+    if (!isMatch) {
+      record.attempts += 1;
+      passwordResetOtpStore.set(normalizedEmail, record);
+      throw new Error('Mã OTP không chính xác');
+    }
+
+    passwordResetOtpStore.set(normalizedEmail, {
+      ...record,
+      verified: true,
+    });
+  }
+
+  async forgotPassword(input: ForgotPasswordInput): Promise<void> {
+    const normalizedEmail = input.email.trim().toLowerCase();
+
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (!user) {
+      throw new Error('Không tìm thấy tài khoản với email này');
+    }
+
+    const record = passwordResetOtpStore.get(normalizedEmail);
+    if (!record || Date.now() > record.expiresAt || !record.verified) {
+      throw new Error('Vui lòng xác minh OTP trước khi đặt lại mật khẩu');
+    }
+
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(input.newPassword, saltRounds);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
+
+    passwordResetOtpStore.delete(normalizedEmail);
+  }
   async getCurrentUser(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -284,3 +395,4 @@ export class AuthService {
 }
 
 export const authService = new AuthService();
+

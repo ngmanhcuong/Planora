@@ -3,8 +3,7 @@ import { Plus, Sparkles, Bot, Calendar as CalendarIcon, CheckCircle2, Clock } fr
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { translate } from '@/lib/i18n';
-
+import { translate, getMultiLangText } from '@/lib/i18n';
 export interface WelcomeGreetingProps {
   summary?: {
     tasksToday: number;
@@ -13,7 +12,18 @@ export interface WelcomeGreetingProps {
   };
   onOpenScheduleModal?: () => void;
   onOpenAssistantPanel?: () => void;
-}
+};
+
+const LOCALE_MAP: Record<string, string> = {
+  vi: 'vi-VN',
+  en: 'en-US',
+  ja: 'ja-JP',
+  ko: 'ko-KR',
+  zh: 'zh-CN',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  es: 'es-ES',
+};
 
 export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
   summary,
@@ -25,7 +35,8 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
   const language = useCurrentLanguage();
 
   const todayDate = new Date();
-  const todayStr = todayDate.toLocaleDateString(language === 'en' ? 'en-US' : 'vi-VN', {
+  const locale = LOCALE_MAP[language || 'vi'] || 'en-US';
+  const todayStr = todayDate.toLocaleDateString(locale, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -36,16 +47,10 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
   const hour = todayDate.getHours();
   const greetingTime =
     hour < 12
-      ? language === 'en'
-        ? 'Good Morning'
-        : 'Buổi sáng tốt lành'
+      ? getMultiLangText(language, { vi: 'Buổi sáng tốt lành', en: 'Good Morning', ja: 'おはようございます', ko: '좋은 아침입니다', zh: '早上好', fr: 'Bonjour', de: 'Guten Morgen', es: 'Buenos días' })
       : hour < 18
-      ? language === 'en'
-        ? 'Good Afternoon'
-        : 'Buổi chiều hiệu quả'
-      : language === 'en'
-      ? 'Good Evening'
-      : 'Buổi tối vui vẻ';
+      ? getMultiLangText(language, { vi: 'Buổi chiều hiệu quả', en: 'Good Afternoon', ja: 'こんにちは', ko: '즐거운 오후입니다', zh: '下午好', fr: 'Bon après-midi', de: 'Guten Tag', es: 'Buenas tardes' })
+      : getMultiLangText(language, { vi: 'Buổi tối vui vẻ', en: 'Good Evening', ja: 'こんばんは', ko: '편안한 저녁입니다', zh: '晚上好', fr: 'Bonsoir', de: 'Guten Abend', es: 'Buenas noches' });
 
   const tasksToday = summary?.tasksToday || 0;
   const eventsCount = summary?.upcomingEvents || 0;
@@ -93,11 +98,11 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
               <CalendarIcon className="w-3.5 h-3.5 text-indigo-300" />
-              <span>{eventsCount} sự kiện 7 ngày tới</span>
+              <span>{getMultiLangText(language, { vi: `${eventsCount} sự kiện 7 ngày tới`, en: `${eventsCount} events in next 7 days`, ja: `今後7日間のイベント ${eventsCount}件`, ko: `향후 7일간 이벤트 ${eventsCount}개`, zh: `未来7天内有 ${eventsCount} 个活动`, fr: `${eventsCount} événements dans les 7 prochains jours`, de: `${eventsCount} Termine in den nächsten 7 Tagen`, es: `${eventsCount} eventos en los próximos 7 días` })}</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{tasksDone}/{tasksToday} việc hoàn thành</span>
+              <span>{getMultiLangText(language, { vi: `${tasksDone}/${tasksToday} việc hoàn thành`, en: `${tasksDone}/${tasksToday} completed`, ja: `完了 ${tasksDone}/${tasksToday}`, ko: `완료 ${tasksDone}/${tasksToday}`, zh: `已完成 ${tasksDone}/${tasksToday}`, fr: `${tasksDone}/${tasksToday} terminées`, de: `${tasksDone}/${tasksToday} erledigt`, es: `${tasksDone}/${tasksToday} completadas` })}</span>
             </div>
           </div>
         </div>

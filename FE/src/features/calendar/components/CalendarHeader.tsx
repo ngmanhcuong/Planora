@@ -4,8 +4,19 @@ import type { CategoryType } from '@/types';
 import { CATEGORY_MAP } from '@/utils/categories';
 import type { CalendarViewMode } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { translate, type TranslationKey } from '@/lib/i18n';
+import { translate, getMultiLangText, type TranslationKey } from '@/lib/i18n';
 import { getWeekNumber, getStartOfWeek } from '@/utils/dateUtils';
+
+const LOCALE_MAP: Record<string, string> = {
+  vi: 'vi-VN',
+  en: 'en-US',
+  ja: 'ja-JP',
+  ko: 'ko-KR',
+  zh: 'zh-CN',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  es: 'es-ES',
+};
 
 export interface CalendarHeaderProps {
   currentDate: Date;
@@ -33,14 +44,14 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onOpenCreatePanel,
 }) => {
   const language = useCurrentLanguage();
-  const isVietnamese = language === 'vi';
   const weekNum = getWeekNumber(currentDate);
   const monday = getStartOfWeek(currentDate);
 
   // Format date header text dynamically based on viewMode
   const formatDateTitle = () => {
     if (viewMode === 'day') {
-      const formatted = currentDate.toLocaleDateString(language === 'en' ? 'en-US' : 'vi-VN', {
+      const locale = LOCALE_MAP[language || 'vi'] || 'en-US';
+      const formatted = currentDate.toLocaleDateString(locale, {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
@@ -94,9 +105,16 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 {translate(language, 'calendar.title')}
               </h1>
               <p className="text-xs sm:text-sm font-medium text-indigo-100/90 mt-0.5">
-                {isVietnamese
-                  ? 'Quản lý lịch học, deadline và sự kiện trong một không gian đồng bộ.'
-                  : 'Manage classes, deadlines, and events in one synchronized workspace.'}
+                {getMultiLangText(language, {
+                  vi: 'Quản lý lịch học, deadline và sự kiện trong một không gian đồng bộ.',
+                  en: 'Manage classes, deadlines, and events in one synchronized workspace.',
+                  ja: '授業、締切、イベントを一元管理。',
+                  ko: '수업, 마감일, 이벤트를 하나의 동기화된 공간에서 관리하세요.',
+                  zh: '在一个同步的空间中管理课程、截止日期和事件。',
+                  fr: 'Gérez cours, échéances et événements dans un espace synchronisé.',
+                  de: 'Verwalten Sie Kurse, Fristen und Termine an einem Ort.',
+                  es: 'Gestiona clases, fechas límite y eventos en un espacio sincronizado.',
+                })}
               </p>
             </div>
           </div>
@@ -115,14 +133,14 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               <button
                 onClick={onPrevWeek}
                 className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
-                title={isVietnamese ? 'Trước' : 'Previous'}
+                title={getMultiLangText(language, { vi: 'Trước', en: 'Previous', ja: '前へ', ko: '이전', zh: '上一页', fr: 'Précédent', de: 'Zurück', es: 'Anterior' })}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={onNextWeek}
                 className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
-                title={isVietnamese ? 'Sau' : 'Next'}
+                title={getMultiLangText(language, { vi: 'Sau', en: 'Next', ja: '次へ', ko: '다음', zh: '下一页', fr: 'Suivant', de: 'Weiter', es: 'Siguiente' })}
               >
                 <ChevronRight className="w-4 h-4" />
               </button>

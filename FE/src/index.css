@@ -693,3 +693,26 @@
   border-color: rgb(129 140 248 / 0.65) !important;
   --tw-ring-color: rgb(99 102 241 / 0.22) !important;
 }
+
+:root[data-theme='dark'] aside .sidebar-nav-icon-active {
+  background-color: rgb(30 41 59 / 0.96) !important;
+  border-color: rgb(129 140 248 / 0.72) !important;
+  color: #c7d2fe !important;
+  box-shadow: inset 0 0 0 1px rgb(129 140 248 / 0.22), 0 8px 18px rgb(0 0 0 / 0.24) !important;
+}
+
+:root[data-theme='dark'] aside .sidebar-nav-icon-idle {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: #cbd5e1 !important;
+}
+
+:root[data-theme='dark'] aside button:hover .sidebar-nav-icon-idle {
+  background-color: rgb(30 41 59 / 0.92) !important;
+  border-color: rgb(71 85 105 / 0.78) !important;
+  color: #c7d2fe !important;
+}
+
+:root[data-theme='dark'] aside .sidebar-nav-icon svg {
+  stroke: currentColor !important;
+}
