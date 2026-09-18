@@ -91,7 +91,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
 
         setAuth(accessToken, user);
         setIsSubmitting(false);
-        navigate('/dashboard');
+        navigate(user.role === 'ADMIN' ? '/admin' : '/dashboard');
       } else {
         setAuthError(response.data.message || 'Đăng nhập không thành công.');
         setIsSubmitting(false);

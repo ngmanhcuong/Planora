@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
@@ -10,13 +10,9 @@ import { TimePicker } from '@/components/ui/TimePicker';
 import { apiClient } from '@/lib/axios';
 import {
   BookmarkPlus,
-  Calendar,
-  Clock,
   BookOpen,
   Loader2,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { createTaskSchema, type CreateTaskInput } from '../validations/taskSchemas';
 import { useCreateTask, useUpdateTask } from '../hooks/useTasks';
@@ -95,9 +91,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     description: editingTask?.description ?? '',
   });
 
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
 
   const {
     register,
@@ -120,26 +113,17 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setIsCalendarOpen(false);
-      setIsTimePickerOpen(false);
       setIsCategoryOpen(false);
       setIsPriorityOpen(false);
       return;
     }
 
     reset(getDefaultValues(task));
-    setIsCalendarOpen(false);
-    setIsTimePickerOpen(false);
     setIsCategoryOpen(false);
     setIsPriorityOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, task?.id]);
 
-  useEffect(() => {
-    if (selectedDate) {
-      setCalendarMonth(new Date(`${selectedDate}T00:00:00`));
-    }
-  }, [selectedDate]);
 
   const onSubmit = (data: CreateTaskInput) => {
     const priorityMap: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'> = {
@@ -189,38 +173,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     );
   };
 
-  const selectedDateLabel = selectedDate
-    ? new Date(`${selectedDate}T00:00:00`).toLocaleDateString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
-    : 'Chọn ngày';
-
-  const calendarDays = useMemo(() => {
-    const year = calendarMonth.getFullYear();
-    const month = calendarMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const startDate = new Date(firstDay);
-    startDate.setDate(firstDay.getDate() - firstDay.getDay());
-
-    return Array.from({ length: 42 }, (_, index) => {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + index);
-      return date;
-    });
-  }, [calendarMonth]);
-
-  const changeMonth = (delta: number) => {
-    setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() + delta, 1));
-  };
-
-  const selectDate = (date: Date) => {
-    const value = formatDateValue(date);
-    setValue('dueDate', value, { shouldDirty: true, shouldValidate: true });
-    setIsCalendarOpen(false);
-  };
-
   const fallbackCategoryOptions: TaskCategoryOption[] = [
     { value: 'study', label: translate(language, 'category.study'), color: '#3B82F6' },
     { value: 'deadline', label: translate(language, 'category.deadline'), color: '#F43F5E' },
@@ -257,28 +209,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const currentPriority =
     priorityOptions.find((option) => option.value === selectedPriority) ?? priorityOptions[1];
 
-  const [selectedHour = '23', selectedMinute = '59'] = selectedTime.split(':');
-  const timeHour12 = String(((Number(selectedHour) + 11) % 12) + 1).padStart(2, '0');
-  const timeMeridiem = Number(selectedHour) >= 12 ? 'PM' : 'AM';
-  const hourOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, '0'));
-  const minuteOptions = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
-
-  const updateTime = (hour12: string, minute: string, meridiem: string) => {
-    const hourNumber = Number(hour12);
-    const hour24 =
-      meridiem === 'PM'
-        ? hourNumber === 12
-          ? 12
-          : hourNumber + 12
-        : hourNumber === 12
-          ? 0
-          : hourNumber;
-
-    setValue('dueTime', `${String(hour24).padStart(2, '0')}:${minute}`, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  };
 
   return (
     <Modal
@@ -311,8 +241,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 type="button"
                 onClick={() => {
                   setIsPriorityOpen(false);
-                  setIsCalendarOpen(false);
-                  setIsTimePickerOpen(false);
                   setIsCategoryOpen((value) => !value);
                 }}
                 className={clsx(
@@ -370,8 +298,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 type="button"
                 onClick={() => {
                   setIsCategoryOpen(false);
-                  setIsCalendarOpen(false);
-                  setIsTimePickerOpen(false);
                   setIsPriorityOpen((value) => !value);
                 }}
                 className={clsx(
@@ -487,3 +413,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     </Modal>
   );
 };
+
+
+

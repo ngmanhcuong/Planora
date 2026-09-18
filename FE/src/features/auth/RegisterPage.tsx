@@ -63,7 +63,7 @@ export const RegisterPage: React.FC = () => {
 
         setAuth(accessToken, user);
         setIsSubmitting(false);
-        navigate('/dashboard');
+        navigate(user.role === 'ADMIN' ? '/admin' : '/dashboard');
       } else {
         setAuthError(response.data.message || 'Đăng ký không thành công.');
         setIsSubmitting(false);
