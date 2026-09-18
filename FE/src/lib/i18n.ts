@@ -158,15 +158,10 @@ export type TranslationKey =
   | 'goals.addPlaceholder'
   | 'goals.add'
   | 'goals.progress'
-  | 'goals.sample.one'
-  | 'goals.sample.two'
-  | 'goals.sample.three'
   | 'notes.title'
   | 'notes.subtitle'
   | 'notes.placeholder'
   | 'notes.save'
-  | 'notes.sample.one'
-  | 'notes.sample.two'
   | 'reports.title'
   | 'reports.subtitle'
   | 'reports.completedTasks'
@@ -420,15 +415,10 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'goals.addPlaceholder': 'Thêm mục tiêu mới...',
     'goals.add': 'Thêm',
     'goals.progress': 'Tiến độ',
-    'goals.sample.one': 'Hoàn thành 4 công việc quan trọng trong tuần',
-    'goals.sample.two': 'Duy trì học tập 2 giờ mỗi ngày',
-    'goals.sample.three': 'Không để task quá hạn',
     'notes.title': 'Ghi chú nhanh',
     'notes.subtitle': 'Lưu ý tưởng, việc cần nhớ và các đầu việc nhỏ chưa cần tạo task.',
     'notes.placeholder': 'Viết ghi chú...',
     'notes.save': 'Lưu',
-    'notes.sample.one': 'Chuẩn bị tài liệu cho buổi học chiều nay',
-    'notes.sample.two': 'Kiểm tra deadline bài tập nhóm',
     'reports.title': 'Báo cáo',
     'reports.subtitle': 'Tổng hợp nhanh nhịp làm việc và hiệu suất trong tuần.',
     'reports.completedTasks': 'Task hoàn thành',
@@ -681,15 +671,10 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'goals.addPlaceholder': 'Add a new goal...',
     'goals.add': 'Add',
     'goals.progress': 'Progress',
-    'goals.sample.one': 'Complete 4 important tasks this week',
-    'goals.sample.two': 'Study 2 hours every day',
-    'goals.sample.three': 'Avoid overdue tasks',
     'notes.title': 'Quick notes',
     'notes.subtitle': 'Save ideas, reminders, and small items that do not need a task yet.',
     'notes.placeholder': 'Write a note...',
     'notes.save': 'Save',
-    'notes.sample.one': 'Prepare materials for this afternoon class',
-    'notes.sample.two': 'Check the group assignment deadline',
     'reports.title': 'Reports',
     'reports.subtitle': 'Get a quick summary of your weekly work rhythm and performance.',
     'reports.completedTasks': 'Completed tasks',
@@ -2409,6 +2394,7 @@ export const translateRelativeTime = (language: string | null | undefined, timeS
 
   return timeStr;
 };
+
 
 
 

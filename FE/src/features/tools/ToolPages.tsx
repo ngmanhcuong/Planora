@@ -61,6 +61,15 @@ interface GoalItem {
   targetDate: string;
   description?: string;
   isCompleted?: boolean;
+  targetWorkload?: number;
+  metrics?: {
+    taskProgress: number;
+    timeScore: number;
+    workloadScore: number;
+    relatedTasks: number;
+    completedTasks: number;
+    overdueTasks: number;
+  };
 }
 
 export interface CategoryOption {
@@ -79,6 +88,95 @@ const COLOR_THEMES = [
   { id: 'purple', label: 'Tím', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-100', dot: 'bg-purple-500' },
   { id: 'sky', label: 'Xanh dương', color: 'text-sky-600', bg: 'bg-sky-50 border-sky-100', dot: 'bg-sky-500' },
 ];
+
+const clampPercent = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+
+const normalizeGoalCategory = (category: string) => {
+  const map: Record<string, string[]> = {
+    study: ['STUDY', 'HOC_TAP', 'HỌC TẬP'],
+    work: ['WORK', 'TASK', 'DEADLINE', 'CONG_VIEC', 'CÔNG VIỆC'],
+    personal: ['PERSONAL', 'MEETING', 'CA_NHAN', 'CÁ NHÂN'],
+    health: ['HABIT', 'HEALTH', 'SUC_KHOE', 'SỨC KHỎE'],
+  };
+
+  return map[category] || [];
+};
+
+const getTaskDueAt = (task: { dueDate?: string; dueTime?: string | null }) => {
+  if (!task.dueDate) return null;
+  const datePart = task.dueDate.slice(0, 10);
+  const timePart = task.dueTime || '23:59';
+  const value = new Date(`${datePart}T${timePart}`);
+  return Number.isNaN(value.getTime()) ? null : value;
+};
+
+const getRelatedGoalTasks = (goal: GoalItem, tasks: Array<any>) => {
+  const allowedTypes = normalizeGoalCategory(goal.category);
+  const targetTime = new Date(`${goal.targetDate}T23:59:59`).getTime();
+
+  return tasks.filter((task) => {
+    const dueAt = getTaskDueAt(task);
+    if (!dueAt || dueAt.getTime() > targetTime) return false;
+
+    const taskCategoryType = String(task.category?.type || '').toUpperCase();
+    const taskCategoryName = String(task.category?.name || '').toUpperCase();
+    const title = `${task.title || ''} ${task.description || ''}`.toLowerCase();
+
+    const matchesCategory =
+      allowedTypes.length === 0 ||
+      allowedTypes.includes(taskCategoryType) ||
+      allowedTypes.some((type) => taskCategoryName.includes(type));
+
+    if (matchesCategory) return true;
+
+    if (goal.category === 'health') {
+      return /(chạy|thể thao|tập|gym|sức khỏe|sport|health|run)/i.test(title);
+    }
+
+    return false;
+  });
+};
+
+const calculateGoalEvaluation = (goal: GoalItem, tasks: Array<any>) => {
+  const relatedTasks = getRelatedGoalTasks(goal, tasks);
+  const completedTasks = relatedTasks.filter((task) => task.status === 'COMPLETED');
+  const overdueTasks = relatedTasks.filter((task) => task.isOverdue || task.status === 'OVERDUE');
+  const targetWorkload = goal.targetWorkload || Math.max(1, relatedTasks.length);
+
+  const taskProgress = relatedTasks.length > 0 ? (completedTasks.length / relatedTasks.length) * 100 : 0;
+  const workloadScore = Math.min(100, (relatedTasks.length / targetWorkload) * 100);
+
+  const onTimeCompleted = completedTasks.filter((task) => {
+    const dueAt = getTaskDueAt(task);
+    if (!dueAt) return false;
+    if (!task.completedAt) return !task.isOverdue;
+    return new Date(task.completedAt).getTime() <= dueAt.getTime();
+  }).length;
+
+  const timeScore = completedTasks.length > 0
+    ? (onTimeCompleted / completedTasks.length) * 100
+    : overdueTasks.length > 0
+    ? 0
+    : relatedTasks.length > 0
+    ? 50
+    : 0;
+
+  const progress = clampPercent(taskProgress * 0.4 + timeScore * 0.3 + workloadScore * 0.3);
+
+  return {
+    ...goal,
+    progress,
+    isCompleted: progress >= 100,
+    metrics: {
+      taskProgress: clampPercent(taskProgress),
+      timeScore: clampPercent(timeScore),
+      workloadScore: clampPercent(workloadScore),
+      relatedTasks: relatedTasks.length,
+      completedTasks: completedTasks.length,
+      overdueTasks: overdueTasks.length,
+    },
+  };
+};
 
 export const AssistantPage: React.FC = () => {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -346,6 +444,8 @@ export const AssistantPage: React.FC = () => {
 
 export const GoalsPage: React.FC = () => {
   const language = useCurrentLanguage();
+  const { data: tasksData } = useTasks();
+  const systemTasks = useMemo(() => tasksData?.tasks || [], [tasksData]);
   const goalsCopy = {
     all: getMultiLangText(language, { vi: 'Tất cả', en: 'All', ja: 'すべて', ko: '전체', zh: '全部', fr: 'Tous', de: 'Alle', es: 'Todos' }),
     study: getMultiLangText(language, { vi: 'Học tập', en: 'Study', ja: '学習', ko: '학습', zh: '学习', fr: 'Études', de: 'Studium', es: 'Estudio' }),
@@ -379,43 +479,11 @@ export const GoalsPage: React.FC = () => {
   const [newCategory, setNewCategory] = useState<string>('study');
   const [newTargetDate, setNewTargetDate] = useState('2026-10-15');
 
-  const initialGoals: GoalItem[] = useMemo(() => [
-    {
-      id: 1,
-      title: 'Hoàn thành 4 công việc quan trọng trong tuần',
-      category: 'work',
-      progress: 75,
-      targetDate: '2026-09-20',
-      description: 'Tập trung các task ưu tiên cao nhất.',
-    },
-    {
-      id: 2,
-      title: 'Duy trì học tập 2 giờ mỗi ngày',
-      category: 'study',
-      progress: 50,
-      targetDate: '2026-09-30',
-      description: 'Dành 120 phút mỗi buổi tối để tự học & đọc sách.',
-    },
-    {
-      id: 3,
-      title: 'Không để task quá hạn trong tháng 9',
-      category: 'personal',
-      progress: 90,
-      targetDate: '2026-09-30',
-      description: 'Hoàn thành 100% deadline trước 23:59.',
-    },
-    {
-      id: 4,
-      title: 'Chạy bộ 5km & Tập thể thao 3 buổi/tuần',
-      category: 'health',
-      progress: 100,
-      targetDate: '2026-09-18',
-      description: 'Rèn luyện sức khỏe & độ dẻo dai.',
-      isCompleted: true,
-    },
-  ], []);
-
-  const [goals, setGoals] = useState<GoalItem[]>(initialGoals);
+  const [goals, setGoals] = useState<GoalItem[]>([]);
+  const evaluatedGoals = useMemo(
+    () => goals.map((goal) => calculateGoalEvaluation(goal, systemTasks)),
+    [goals, systemTasks]
+  );
 
   const handleCreateCategory = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -436,15 +504,15 @@ export const GoalsPage: React.FC = () => {
   };
 
   const filteredGoals = useMemo(() => {
-    return goals.filter((g) => {
+    return evaluatedGoals.filter((g) => {
       const matchCat = selectedCategory === 'all' || g.category === selectedCategory;
       const matchSearch = g.title.toLowerCase().includes(searchQuery.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [goals, selectedCategory, searchQuery]);
+  }, [evaluatedGoals, selectedCategory, searchQuery]);
 
-  const averageProgress = goals.length > 0 ? Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / goals.length) : 0;
-  const completedCount = goals.filter((g) => g.progress === 100 || g.isCompleted).length;
+  const averageProgress = evaluatedGoals.length > 0 ? Math.round(evaluatedGoals.reduce((sum, g) => sum + g.progress, 0) / evaluatedGoals.length) : 0;
+  const completedCount = evaluatedGoals.filter((g) => g.progress === 100 || g.isCompleted).length;
 
   const handleAddGoal = (e: React.FormEvent) => {
     e.preventDefault();
@@ -456,25 +524,12 @@ export const GoalsPage: React.FC = () => {
       progress: 0,
       targetDate: newTargetDate,
       description: newDescription.trim() || undefined,
+      targetWorkload: 1,
     };
     setGoals((prev) => [createdGoal, ...prev]);
     setNewTitle('');
     setNewDescription('');
     setIsAddingGoal(false);
-  };
-
-  const updateProgress = (id: number, delta: number) => {
-    setGoals((prev) =>
-      prev.map((g) => {
-        if (g.id !== id) return g;
-        const newProg = Math.max(0, Math.min(100, g.progress + delta));
-        return {
-          ...g,
-          progress: newProg,
-          isCompleted: newProg === 100,
-        };
-      })
-    );
   };
 
   return (
@@ -506,14 +561,14 @@ export const GoalsPage: React.FC = () => {
           <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/15 p-3 rounded-2xl shrink-0">
             <div className="px-4 py-2 text-center border-r border-white/15">
               <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">
-                {translate(language, 'goals.averageProgress')}
+                Điểm hệ thống
               </span>
               <span className="text-2xl font-black text-amber-300 font-heading">{averageProgress}%</span>
             </div>
             <div className="px-4 py-2 text-center border-r border-white/15">
               <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">{goalsCopy.completed}</span>
               <span className="text-2xl font-black text-emerald-400 font-heading">
-                {completedCount}/{goals.length}
+                {completedCount}/{evaluatedGoals.length}
               </span>
             </div>
             <div className="px-4 py-2 text-center">
@@ -761,6 +816,27 @@ export const GoalsPage: React.FC = () => {
         )}
 
       {/* Goals Grid */}
+      {filteredGoals.length === 0 && (
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+            <Target className="h-7 w-7" />
+          </div>
+          <h3 className="font-heading text-lg font-extrabold text-slate-900">
+            Chưa có mục tiêu thật nào
+          </h3>
+          <p className="mx-auto mt-2 max-w-md text-sm font-medium text-slate-500">
+            Hãy tạo mục tiêu mới. Hệ thống sẽ tự đánh giá tiến độ dựa trên công việc thật, thời gian hoàn thành và khối lượng task liên quan.
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsAddingGoal(true)}
+            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-extrabold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Tạo mục tiêu đầu tiên</span>
+          </button>
+        </div>
+      )}
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {filteredGoals.map((goal) => {
           const catConfig = categories.find((c) => c.id === goal.category) || {
@@ -832,6 +908,21 @@ export const GoalsPage: React.FC = () => {
                   </span>
                 </div>
 
+                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                  <div className="rounded-xl bg-slate-50 border border-slate-100 px-2 py-2">
+                    <div className="font-extrabold text-slate-500">Tiến độ</div>
+                    <div className="mt-1 font-black text-slate-900">{goal.metrics?.taskProgress ?? 0}%</div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 border border-slate-100 px-2 py-2">
+                    <div className="font-extrabold text-slate-500">Thời gian</div>
+                    <div className="mt-1 font-black text-slate-900">{goal.metrics?.timeScore ?? 0}%</div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 border border-slate-100 px-2 py-2">
+                    <div className="font-extrabold text-slate-500">Khối lượng</div>
+                    <div className="mt-1 font-black text-slate-900">{goal.metrics?.workloadScore ?? 0}%</div>
+                  </div>
+                </div>
+
                 {/* Progress Bar */}
                 <div className="relative h-3 w-full rounded-full bg-slate-100 overflow-hidden shadow-inner">
                   <div
@@ -845,37 +936,9 @@ export const GoalsPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Quick Progress Buttons */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => updateProgress(goal.id, 10)}
-                      disabled={isDone}
-                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-indigo-100 hover:text-indigo-700 transition-colors disabled:opacity-40 cursor-pointer"
-                    >
-                      +10%
-                    </button>
-                    <button
-                      onClick={() => updateProgress(goal.id, 25)}
-                      disabled={isDone}
-                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-indigo-100 hover:text-indigo-700 transition-colors disabled:opacity-40 cursor-pointer"
-                    >
-                      +25%
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => updateProgress(goal.id, isDone ? -100 : 100)}
-                    className={clsx(
-                      'px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1',
-                      isDone
-                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                        : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
-                    )}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>{isDone ? 'Đã hoàn thành 🎉' : 'Xong ngay'}</span>
-                  </button>
+                <div className="flex items-center justify-between pt-1 text-[11px] font-bold text-slate-500">
+                  <span>{goal.metrics?.completedTasks ?? 0}/{goal.metrics?.relatedTasks ?? 0} task hoàn thành</span>
+                  <span>{goal.metrics?.overdueTasks ?? 0} quá hạn</span>
                 </div>
               </div>
             </article>
@@ -968,49 +1031,36 @@ export const NotesPage: React.FC = () => {
     createdAt?: string;
   }
 
-  const initialNotes: NoteItem[] = [
-    {
-      id: 1,
-      text: 'Chuẩn bị slide thuyết trình cho môn Lịch sử tư tưởng triết học',
-      done: false,
-      tag: translateCategory(language, 'study'),
-      isPinned: true,
-      color: 'sky',
-      createdAt: translateRelativeTime(language, 'Today'),
-    },
-    {
-      id: 2,
-      text: 'Kiểm tra lại deadline báo cáo tiến độ đồ án với giảng viên hướng dẫn',
-      done: false,
-      tag: translateCategory(language, 'work'),
-      isPinned: true,
-      color: 'amber',
-      createdAt: translateRelativeTime(language, 'Today'),
-    },
-    {
-      id: 3,
-      text: 'Mua thêm sổ ghi chép và bút highlight màu pastel',
-      done: true,
-      tag: translateCategory(language, 'personal'),
-      isPinned: false,
-      color: 'white',
-      createdAt: translateRelativeTime(language, 'Yesterday'),
-    },
-    {
-      id: 4,
-      text: 'Ý tưởng tối ưu giao diện Dashboard với Widget theo dõi năng suất',
-      done: false,
-      tag: translateCategory(language, 'idea'),
-      isPinned: false,
-      color: 'violet',
-      createdAt: translateRelativeTime(language, '2 days ago'),
-    },
-  ];
+  const initialNotes: NoteItem[] = [];
+  const decodeLegacyText = (value: string) => decodeURIComponent(escape(window.atob(value)));
+  const legacyDemoNoteTexts = new Set(
+    [
+      'Q2h14bqpbiBi4buLIHNsaWRlIHRodXnhur90IHRyw6xuaCBjaG8gbcO0biBM4buLY2ggc+G7rSB0xrAgdMaw4bufbmcgdHJp4bq/dCBo4buNYw==',
+      'S2nhu4NtIHRyYSBs4bqhaSBkZWFkbGluZSBiw6FvIGPDoW8gdGnhur9uIMSR4buZIMSR4buTIMOhbiB24bubaSBnaeG6o25nIHZpw6puIGjGsOG7m25nIGThuqtu',
+      'TXVhIHRow6ptIHPhu5UgZ2hpIGNow6lwIHbDoCBiw7p0IGhpZ2hsaWdodCBtw6B1IHBhc3RlbA==',
+      'w50gdMaw4bufbmcgdOG7kWkgxrB1IGdpYW8gZGnhu4duIERhc2hib2FyZCB24bubaSBXaWRnZXQgdGhlbyBkw7VpIG7Eg25nIHN14bqldA==',
+      'S2nhu4NtIEdp4bqjaSDEkOG6uXA=',
+    ].map(decodeLegacyText),
+  );
+
+  const isLegacyDemoNote = (note: NoteItem) => {
+    const text = typeof note.text === 'string' ? note.text.trim() : '';
+    return legacyDemoNoteTexts.has(text);
+  };
 
   const [notes, setNotes] = useState<NoteItem[]>(() => {
     try {
       const saved = localStorage.getItem('planora_quick_notes_v3');
-      return saved ? JSON.parse(saved) : initialNotes;
+      if (!saved) return initialNotes;
+
+      const parsed = JSON.parse(saved) as NoteItem[];
+      if (!Array.isArray(parsed)) return initialNotes;
+
+      const cleanedNotes = parsed.filter((note) => !isLegacyDemoNote(note));
+      if (cleanedNotes.length !== parsed.length) {
+        localStorage.setItem('planora_quick_notes_v3', JSON.stringify(cleanedNotes));
+      }
+      return cleanedNotes;
     } catch {
       return initialNotes;
     }
