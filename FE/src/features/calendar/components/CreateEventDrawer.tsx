@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Clock, MapPin, BookmarkPlus } from 'lucide-react';
+import { AlertTriangle, MapPin, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { TimePicker } from '@/components/ui/TimePicker';
+import { Select } from '@/components/ui/Select';
 
 import { useQuery } from '@tanstack/react-query';
 import { calendarApi, type CreateEventPayload } from '../api/calendarApi';
@@ -60,9 +63,18 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
     } catch { setError('Không thể lưu hoặc kiểm tra lịch. Vui lòng thử lại.'); }
     finally { setSaving(false); }
   };
+  const categoryOptions = [
+    { value: '', label: 'Không phân loại', color: '#94A3B8' },
+    ...(categories.data?.map(item => ({
+      value: item.id,
+      label: item.name,
+      color: item.color || '#6366F1'
+    })) || [])
+  ];
+
   return (
     <Modal isOpen={isOpen} onClose={close} title="Thêm lịch trình mới" maxWidth="xl">
-    <div className="max-h-[70dvh] overflow-y-auto pr-1 flex flex-col gap-5">
+    <div className="max-h-[75dvh] overflow-y-auto overflow-x-visible p-1 flex flex-col gap-5">
       {/* Form Inputs */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4"><fieldset disabled={saving || isPending} className="flex flex-col gap-4">
         {/* Title Input */}
@@ -74,31 +86,44 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
           required
         />
 
-        <label className="text-xs font-semibold text-[#131B2E]">Danh mục
-          <select className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white p-2" value={category} onChange={e => setCategory(e.target.value)}>
-            <option value="">Không phân loại</option>
-            {categories.data?.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
-          </select>
-        </label>
-        {categories.isError && <p role="alert">Không tải được danh mục; có thể lưu không phân loại.</p>}
+        <Select
+          label="Danh mục"
+          options={categoryOptions}
+          value={category}
+          onChange={(val) => setCategory(val)}
+        />
+        {categories.isError && <p role="alert" className="text-xs text-red-500">Không tải được danh mục; có thể lưu không phân loại.</p>}
         {/* Date & Time */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-[#131B2E]">Thời gian diễn ra</label>
-          <Input label="Ngày" type="date" value={date} required onChange={e => {setDate(e.target.value); setAllowConflict(false);}} />
-          <div className="grid grid-cols-2 gap-2">
-            <Input
+        <div className="flex flex-col gap-3">
+          <DatePicker
+            label="Ngày diễn ra"
+            value={date}
+            required
+            onChange={(val) => {
+              setDate(val);
+              setAllowConflict(false);
+            }}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <TimePicker
               label="Bắt đầu"
-              type="time"
               value={startTime}
-              onChange={(e) => {setStartTime(e.target.value); setAllowConflict(false);}}
-              rightIcon={<Clock className="w-4 h-4" />}
+              align="left"
+              required
+              onChange={(val) => {
+                setStartTime(val);
+                setAllowConflict(false);
+              }}
             />
-            <Input
+            <TimePicker
               label="Kết thúc"
-              type="time"
               value={endTime}
-              onChange={(e) => {setEndTime(e.target.value); setAllowConflict(false);}}
-              rightIcon={<Clock className="w-4 h-4" />}
+              align="right"
+              required
+              onChange={(val) => {
+                setEndTime(val);
+                setAllowConflict(false);
+              }}
             />
           </div>
         </div>

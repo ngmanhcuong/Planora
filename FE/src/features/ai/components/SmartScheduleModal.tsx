@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Sparkles, Calendar, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useGenerateSchedule, useApplySchedule } from '../hooks/useAi';
@@ -137,19 +138,15 @@ export const SmartScheduleModal: React.FC<SmartScheduleModalProps> = ({
 
         {/* Form Controls */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-          <Input
+          <DatePicker
             label="Từ ngày"
-            type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            leftIcon={<Calendar className="w-4 h-4" />}
+            onChange={(val) => setStartDate(val)}
           />
-          <Input
+          <DatePicker
             label="Đến ngày"
-            type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            leftIcon={<Calendar className="w-4 h-4" />}
+            onChange={(val) => setEndDate(val)}
           />
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-[#131B2E]">Thời lượng 1 buổi</label>

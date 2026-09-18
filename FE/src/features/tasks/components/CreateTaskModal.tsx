@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { TimeWheel } from '@/components/ui/TimeWheel';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { TimePicker } from '@/components/ui/TimePicker';
 import { apiClient } from '@/lib/axios';
 import {
   BookmarkPlus,
@@ -286,7 +287,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       title={isEditMode ? getMultiLangText(language, { vi: 'Chỉnh sửa công việc', en: 'Edit task', ja: 'タスクを編集', ko: '작업 수정', zh: '编辑任务', fr: 'Modifier la tâche', de: 'Aufgabe bearbeiten', es: 'Editar tarea' }) : translate(language, 'tasks.modal.title')}
       maxWidth="xl"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="flex max-h-[78vh] flex-col gap-5 overflow-y-auto pr-1">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex max-h-[78vh] flex-col gap-5 overflow-y-auto pr-1 pb-14">
         {/* Title */}
         <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC]/80 p-4">
           <Input
@@ -421,166 +422,18 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
         {/* Dates */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="relative flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[#131B2E]">
-              {translate(language, 'tasks.modal.dueDate')}
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                setIsCategoryOpen(false);
-                setIsPriorityOpen(false);
-                setIsTimePickerOpen(false);
-                setIsCalendarOpen((value) => !value);
-              }}
-              className="flex h-12 w-full items-center justify-between rounded-xl border border-[#E2E8F0] bg-white px-4 text-left text-sm font-semibold text-[#131B2E] shadow-sm transition-all hover:border-[#C7D2FE] focus:border-[#4F46E5] focus:outline-none focus:ring-4 focus:ring-[#4F46E5]/10"
-            >
-              <span className="flex items-center gap-3">
-                <Calendar className="h-4 w-4 text-[#64748B]" />
-                {selectedDateLabel}
-              </span>
-              <ChevronDown className="h-4 w-4 text-[#64748B]" />
-            </button>
-            {errors.dueDate?.message && (
-              <span className="text-xs font-medium text-[#F43F5E]">{errors.dueDate.message}</span>
-            )}
-            {isCalendarOpen && (
-              <div className="absolute left-0 top-[74px] z-20 w-full rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-[0_20px_45px_rgba(15,23,42,0.16)]">
-                <div className="mb-3 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => changeMonth(-1)}
-                    className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#131B2E]"
-                    aria-label="Tháng trước"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <div className="text-sm font-bold text-[#131B2E]">
-                    {calendarMonth.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => changeMonth(1)}
-                    className="rounded-lg p-2 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#131B2E]"
-                    aria-label="Tháng sau"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-[#94A3B8]">
-                  {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day) => (
-                    <span key={day} className="py-1">{day}</span>
-                  ))}
-                </div>
-                <div className="mt-1 grid grid-cols-7 gap-1">
-                  {calendarDays.map((date) => {
-                    const value = formatDateValue(date);
-                    const isSelected = value === selectedDate;
-                    const isCurrentMonth = date.getMonth() === calendarMonth.getMonth();
-                    const isToday = value === todayStr;
-
-                    return (
-                      <button
-                        type="button"
-                        key={value}
-                        onClick={() => selectDate(date)}
-                        className={[
-                          'h-9 rounded-lg text-sm font-semibold transition-all',
-                          isSelected ? 'bg-[#4F46E5] text-white shadow-md shadow-[#4F46E5]/25' : '',
-                          !isSelected && isToday ? 'bg-[#EEF2FF] text-[#4F46E5]' : '',
-                          !isSelected && !isToday && isCurrentMonth ? 'text-[#131B2E] hover:bg-[#F1F5F9]' : '',
-                          !isSelected && !isCurrentMonth ? 'text-[#CBD5E1] hover:bg-[#F8FAFC]' : '',
-                        ].join(' ')}
-                      >
-                        {date.getDate()}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-[#131B2E]">
-              {translate(language, 'tasks.modal.dueTime')}
-            </label>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsCategoryOpen(false);
-                  setIsPriorityOpen(false);
-                  setIsCalendarOpen(false);
-                  setIsTimePickerOpen((value) => !value);
-                }}
-                className="flex h-12 w-full min-w-0 items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-4 text-left shadow-sm transition-all hover:border-[#C7D2FE] focus:border-[#4F46E5] focus:outline-none focus:ring-4 focus:ring-[#4F46E5]/10"
-              >
-                <Clock className="h-4 w-4 shrink-0 text-[#64748B]" />
-                <span className="flex-1 text-center text-sm font-bold text-[#131B2E]">
-                  {timeHour12}:{selectedMinute} {timeMeridiem}
-                </span>
-                <ChevronDown className="h-4 w-4 shrink-0 text-[#64748B]" />
-              </button>
-
-              {isTimePickerOpen && (
-                <div className="absolute right-0 top-[54px] z-30 w-full min-w-[300px] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.18)] animate-in fade-in zoom-in-95 duration-150">
-                  {/* Header Toolbar */}
-                  <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/70 px-3 py-3">
-                    <span className="flex min-w-0 flex-1 items-center gap-1.5 whitespace-nowrap text-xs font-black uppercase tracking-wider text-slate-500">
-                      <Clock className="h-3.5 w-3.5 shrink-0 text-indigo-600" />
-                      Chọn giờ
-                    </span>
-
-                    {/* AM / PM Toggle */}
-                    <div className="flex shrink-0 rounded-xl border border-slate-200/70 bg-white p-1 shadow-sm">
-                      {['AM', 'PM'].map((period) => (
-                        <button
-                          key={period}
-                          type="button"
-                          onClick={() => updateTime(timeHour12, selectedMinute, period)}
-                          className={clsx(
-                            'h-8 min-w-11 rounded-lg px-3 text-xs font-black transition-all cursor-pointer',
-                            timeMeridiem === period
-                              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                              : 'text-indigo-600 hover:bg-indigo-50'
-                          )}
-                        >
-                          {period}
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsTimePickerOpen(false)}
-                      className="h-9 shrink-0 rounded-xl bg-indigo-50 px-3 text-xs font-extrabold text-indigo-600 transition-colors hover:bg-indigo-100 cursor-pointer"
-                    >
-                      Xong
-                    </button>
-                  </div>
-
-                  {/* Hour & Minute Scroll Columns */}
-                  <div className="p-3">
-                  <div className="relative rounded-2xl border border-slate-100 bg-slate-50/90 p-2.5">
-                    <div className="grid grid-cols-[1fr_auto_1fr] gap-3 px-1 pb-2">
-                      <div className="text-center text-[10px] font-black uppercase tracking-wider text-slate-400">Giờ</div>
-                      <div className="w-4" />
-                      <div className="text-center text-[10px] font-black uppercase tracking-wider text-slate-400">Phút</div>
-                    </div>
-                    <div className="pointer-events-none absolute left-2.5 right-7 top-[72px] h-9 rounded-xl bg-white ring-1 ring-indigo-100" />
-                    <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] gap-3">
-                      <TimeWheel label="Giờ" options={hourOptions} value={timeHour12} onChange={hour => updateTime(hour, selectedMinute, timeMeridiem)} />
-                      <div className="flex h-[108px] w-4 items-center justify-center text-xl font-black text-slate-300">:</div>
-                      <TimeWheel label="Phút" options={minuteOptions} value={selectedMinute} onChange={minute => updateTime(timeHour12, minute, timeMeridiem)} />
-                    </div>
-
-                  </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <DatePicker
+            label={translate(language, 'tasks.modal.dueDate')}
+            value={selectedDate}
+            error={errors.dueDate?.message}
+            onChange={(val) => setValue('dueDate', val, { shouldDirty: true, shouldValidate: true })}
+          />
+          <TimePicker
+            label={translate(language, 'tasks.modal.dueTime')}
+            value={selectedTime}
+            error={errors.dueTime?.message}
+            onChange={(val) => setValue('dueTime', val, { shouldDirty: true, shouldValidate: true })}
+          />
         </div>
 
         {/* Course Code */}
