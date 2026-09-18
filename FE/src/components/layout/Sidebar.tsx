@@ -14,6 +14,7 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
+  ShieldCheck,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/useUIStore';
 import { clsx } from 'clsx';
@@ -21,10 +22,12 @@ import { Logo } from '@/components/ui/Logo';
 import { useSettings } from '@/features/settings/hooks/useSettings';
 import { useUnreadCount } from './hooks/useNotifications';
 import { normalizeLanguage, translate, type TranslationKey } from '@/lib/i18n';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 interface NavItem {
   to: string;
-  labelKey: TranslationKey;
+  labelKey?: TranslationKey;
+  label?: string;
   icon: React.ReactNode;
   badge?: number;
 }
@@ -41,6 +44,10 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { to: '/reports', labelKey: 'sidebar.reports', icon: <BarChart3 className="w-5 h-5" /> },
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { to: '/admin', label: 'Quản trị', icon: <ShieldCheck className="w-5 h-5" /> },
+];
+
 const ACCOUNT_NAV_ITEMS: NavItem[] = [
   { to: '/profile', labelKey: 'sidebar.profile', icon: <User className="w-5 h-5" /> },
   { to: '/settings', labelKey: 'sidebar.settings', icon: <Settings className="w-5 h-5" /> },
@@ -50,9 +57,12 @@ export const Sidebar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
   const { data: settings } = useSettings();
   const { data: unreadData } = useUnreadCount();
+  const user = useAuthStore((state) => state.user);
   const language = normalizeLanguage(settings?.language);
 
   const unreadCount = typeof unreadData === 'number' ? unreadData : 0;
+  const isAdmin = user?.role === 'ADMIN';
+  const mainNavItems = isAdmin ? ADMIN_NAV_ITEMS : MAIN_NAV_ITEMS;
 
   return (
     <aside
@@ -91,13 +101,13 @@ export const Sidebar: React.FC = () => {
       >
         <div className="flex min-h-full flex-col justify-between gap-6">
           <div className="flex flex-col gap-1">
-            {MAIN_NAV_ITEMS.map((item) => (
+            {mainNavItems.map((item) => (
               <SidebarNavLink
                 key={item.to}
                 item={item}
                 language={language}
                 collapsed={isSidebarCollapsed}
-                badge={item.to === '/notifications' ? unreadCount : item.badge}
+                badge={!isAdmin && item.to === '/notifications' ? unreadCount : item.badge}
               />
             ))}
           </div>
@@ -125,7 +135,7 @@ const SidebarNavLink: React.FC<{
   collapsed: boolean;
   badge?: number;
 }> = ({ item, language, collapsed, badge }) => {
-  const label = translate(language, item.labelKey);
+  const label = item.label || translate(language, item.labelKey!);
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);

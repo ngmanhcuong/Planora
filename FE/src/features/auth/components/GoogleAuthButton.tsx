@@ -83,7 +83,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
         setAuth(accessToken, user);
         setIsLoading(false);
         if (onSuccess) onSuccess();
-        navigate('/dashboard');
+        navigate(user.role === 'ADMIN' ? '/admin' : '/dashboard');
         return;
       }
 

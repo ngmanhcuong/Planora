@@ -11,6 +11,7 @@ import { ProfilePage } from '@/features/profile/ProfilePage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { AssistantPage, GoalsPage, NotesPage, ReportsPage } from '@/features/tools/ToolPages';
+import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Loader2 } from 'lucide-react';
 
@@ -18,37 +19,42 @@ interface GuardProps {
   children: React.ReactElement;
 }
 
+const LoadingScreen = () => (
+  <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
+    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+  </div>
+);
+
 const ProtectedRoute: React.FC<GuardProps> = ({ children }) => {
   const { isAuthenticated, isInitializing } = useAuthStore();
 
-  if (isInitializing) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  if (isInitializing) return <LoadingScreen />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 };
 
 const PublicRoute: React.FC<GuardProps> = ({ children }) => {
-  const { isAuthenticated, isInitializing } = useAuthStore();
+  const { isAuthenticated, isInitializing, user } = useAuthStore();
 
-  if (isInitializing) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
+  if (isInitializing) return <LoadingScreen />;
+  if (isAuthenticated) return <Navigate to={user?.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />;
+  return children;
+};
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
+const RoleHomeRedirect: React.FC = () => {
+  const user = useAuthStore((state) => state.user);
+  return <Navigate to={user?.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />;
+};
+
+const AdminOnlyRoute: React.FC<GuardProps> = ({ children }) => {
+  const user = useAuthStore((state) => state.user);
+  if (user?.role !== 'ADMIN') return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
+const UserOnlyRoute: React.FC<GuardProps> = ({ children }) => {
+  const user = useAuthStore((state) => state.user);
+  if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
   return children;
 };
 
@@ -62,56 +68,27 @@ export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <RegisterPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicRoute>
-              <LoginPage initialMode="forgot" />
-            </PublicRoute>
-          }
-        />
+        <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+        <Route path="/forgot-password" element={<PublicRoute><LoginPage initialMode="forgot" /></PublicRoute>} />
 
-        {/* Protected Routes inside AppLayout */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/timetable" element={<TimetablePage />} />
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/assistant" element={<AssistantPage />} />
-          <Route path="/goals" element={<GoalsPage />} />
-          <Route path="/notes" element={<NotesPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
+        <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+          <Route path="/" element={<RoleHomeRedirect />} />
+          <Route path="/admin" element={<AdminOnlyRoute><AdminDashboardPage /></AdminOnlyRoute>} />
+          <Route path="/dashboard" element={<UserOnlyRoute><DashboardPage /></UserOnlyRoute>} />
+          <Route path="/calendar" element={<UserOnlyRoute><CalendarPage /></UserOnlyRoute>} />
+          <Route path="/timetable" element={<UserOnlyRoute><TimetablePage /></UserOnlyRoute>} />
+          <Route path="/tasks" element={<UserOnlyRoute><TasksPage /></UserOnlyRoute>} />
+          <Route path="/notifications" element={<UserOnlyRoute><NotificationsPage /></UserOnlyRoute>} />
+          <Route path="/assistant" element={<UserOnlyRoute><AssistantPage /></UserOnlyRoute>} />
+          <Route path="/goals" element={<UserOnlyRoute><GoalsPage /></UserOnlyRoute>} />
+          <Route path="/notes" element={<UserOnlyRoute><NotesPage /></UserOnlyRoute>} />
+          <Route path="/reports" element={<UserOnlyRoute><ReportsPage /></UserOnlyRoute>} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
-        {/* Fallback Catch-all */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<RoleHomeRedirect />} />
       </Routes>
     </BrowserRouter>
   );
