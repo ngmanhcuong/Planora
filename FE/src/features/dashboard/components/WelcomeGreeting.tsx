@@ -57,84 +57,70 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
   const tasksDone = summary?.tasksCompletedToday || 0;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-6 sm:p-8 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
-      {/* Decorative Glowing Ambient Spheres */}
-      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
+    <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-950 px-7 py-6 text-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
+      <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.16),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.08)_0,transparent_32%)]" />
+      <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 left-8 h-44 w-44 rounded-full bg-indigo-400/15 blur-3xl" />
 
-      {/* Grid subtle texture overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        {/* Left Side: Greeting & Stats info */}
-        <div className="flex flex-col gap-3 max-w-2xl">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-indigo-200 border border-white/15 backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>{greetingTime}</span>
-            </span>
-            <span className="text-xs text-indigo-300/80 font-medium">
-              <Clock className="w-3 h-3 inline mr-1" />
-              {todayStr}
-            </span>
+      <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex min-w-0 items-start gap-5">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl border border-white/15 bg-white/12 shadow-2xl shadow-black/10 backdrop-blur-md">
+            <Sparkles className="h-8 w-8 text-amber-300" />
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight font-heading text-white leading-tight">
-            {translate(language, 'dashboard.hello')},{' '}
-            <span className="bg-gradient-to-r from-indigo-200 via-white to-blue-200 bg-clip-text text-transparent">
-              {user?.name || translate(language, 'dashboard.userFallback')}
-            </span>{' '}
-            👋
-          </h1>
-
-          <p className="text-xs sm:text-sm text-indigo-100/90 leading-relaxed font-medium">
-            {translate(language, 'dashboard.summaryLine')
-              .replace('{events}', String(eventsCount))
-              .replace('{tasks}', String(tasksToday))}
-          </p>
-
-          {/* Quick Badges Bar */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
-              <CalendarIcon className="w-3.5 h-3.5 text-indigo-300" />
-              <span>{getMultiLangText(language, { vi: `${eventsCount} sự kiện 7 ngày tới`, en: `${eventsCount} events in next 7 days`, ja: `今後7日間のイベント ${eventsCount}件`, ko: `향후 7일간 이벤트 ${eventsCount}개`, zh: `未来7天内有 ${eventsCount} 个活动`, fr: `${eventsCount} événements dans les 7 prochains jours`, de: `${eventsCount} Termine in den nächsten 7 Tagen`, es: `${eventsCount} eventos en los próximos 7 días` })}</span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/85 backdrop-blur-md">
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                {greetingTime}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-indigo-100/80">
+                <Clock className="h-3.5 w-3.5" />
+                {todayStr}
+              </span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{getMultiLangText(language, { vi: `${tasksDone}/${tasksToday} việc hoàn thành`, en: `${tasksDone}/${tasksToday} completed`, ja: `完了 ${tasksDone}/${tasksToday}`, ko: `완료 ${tasksDone}/${tasksToday}`, zh: `已完成 ${tasksDone}/${tasksToday}`, fr: `${tasksDone}/${tasksToday} terminées`, de: `${tasksDone}/${tasksToday} erledigt`, es: `${tasksDone}/${tasksToday} completadas` })}</span>
+
+            <h1 className="mt-3 max-w-5xl text-2xl font-bold leading-tight tracking-[-0.02em] md:text-3xl">
+              {translate(language, 'dashboard.hello')},{' '}
+              <span className="text-white/92">{user?.name || translate(language, 'dashboard.userFallback')}</span>{' '}
+              <span aria-hidden="true">👋</span>
+            </h1>
+
+            <p className="mt-2 max-w-4xl text-sm font-medium leading-6 text-white/80">
+              {translate(language, 'dashboard.summaryLine')
+                .replace('{events}', String(eventsCount))
+                .replace('{tasks}', String(tasksToday))}
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md">
+                <CalendarIcon className="h-3.5 w-3.5 text-indigo-200" />
+                {getMultiLangText(language, { vi: `${eventsCount} sự kiện 7 ngày tới`, en: `${eventsCount} events in next 7 days`, ja: `今後7日間のイベント ${eventsCount}件`, ko: `향후 7일간 이벤트 ${eventsCount}개`, zh: `未来7天内有 ${eventsCount} 个活动`, fr: `${eventsCount} événements dans les 7 prochains jours`, de: `${eventsCount} Termine in den nächsten 7 Tagen`, es: `${eventsCount} eventos en los próximos 7 días` })}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
+                {getMultiLangText(language, { vi: `${tasksDone}/${tasksToday} việc hoàn thành`, en: `${tasksDone}/${tasksToday} completed`, ja: `完了 ${tasksDone}/${tasksToday}`, ko: `완료 ${tasksDone}/${tasksToday}`, zh: `已完成 ${tasksDone}/${tasksToday}`, fr: `${tasksDone}/${tasksToday} terminées`, de: `${tasksDone}/${tasksToday} erledigt`, es: `${tasksDone}/${tasksToday} completadas` })}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Interactive AI & Quick Action Buttons */}
-        <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
-          <button
-            onClick={onOpenAssistantPanel}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs sm:text-sm font-bold text-white backdrop-blur-md shadow-lg shadow-black/10 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-          >
-            <Bot className="w-4 h-4 text-indigo-300" />
-            <span>{translate(language, 'dashboard.assistant')}</span>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row xl:items-center">
+          <button type="button" onClick={onOpenAssistantPanel} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-black/10 backdrop-blur-md transition hover:bg-white/16">
+            <Bot className="h-4 w-4 text-indigo-200" />
+            {translate(language, 'dashboard.assistant')}
           </button>
-
-          <button
-            onClick={onOpenScheduleModal}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-xs sm:text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:opacity-95 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 fill-slate-950 text-slate-950" />
-            <span>{translate(language, 'dashboard.aiSchedule')}</span>
+          <button type="button" onClick={onOpenScheduleModal} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/25 transition hover:opacity-95">
+            <Sparkles className="h-4 w-4 fill-slate-950 text-slate-950" />
+            {translate(language, 'dashboard.aiSchedule')}
           </button>
-
-          <button
-            onClick={() => navigate('/tasks')}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-xs sm:text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-all transform hover:-translate-y-0.5 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{translate(language, 'dashboard.createTask')}</span>
+          <button type="button" onClick={() => navigate('/tasks')} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500">
+            <Plus className="h-4 w-4" />
+            {translate(language, 'dashboard.createTask')}
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

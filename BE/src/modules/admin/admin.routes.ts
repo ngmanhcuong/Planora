@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../../middlewares/auth.middleware';
 import { requireAdmin } from '../../middlewares/admin.middleware';
+import teamRouter from './team.routes';
 import {
   createAdminUser,
   createCampaign,
@@ -31,6 +32,7 @@ import {
 const router = Router();
 
 router.use(authenticate, requireAdmin);
+router.use('/team', teamRouter);
 router.get('/overview', getAdminOverview);
 router.get('/analytics', getAdminAnalytics);
 router.get('/users', listAdminUsers);

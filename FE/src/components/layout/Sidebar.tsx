@@ -18,19 +18,21 @@ import {
   FileText,
   Headphones,
   Users,
+  Bot,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/useUIStore';
 import { clsx } from 'clsx';
 import { Logo } from '@/components/ui/Logo';
 import { useSettings } from '@/features/settings/hooks/useSettings';
 import { useUnreadCount } from './hooks/useNotifications';
-import { normalizeLanguage, translate, type TranslationKey } from '@/lib/i18n';
+import { getMultiLangText, normalizeLanguage, translate, type TranslationKey } from '@/lib/i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 interface NavItem {
   to: string;
   labelKey?: TranslationKey;
   label?: string;
+  labelMap?: { vi: string; en: string; ja?: string; ko?: string; zh?: string; fr?: string; de?: string; es?: string };
   icon: React.ReactNode;
   badge?: number;
 }
@@ -48,10 +50,11 @@ const MAIN_NAV_ITEMS: NavItem[] = [
 ];
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
-  { to: '/admin?tab=users', label: 'Quản trị hệ thống', icon: <ShieldCheck className="w-5 h-5" /> },
-  { to: '/admin?tab=content', label: 'Quản lý nội dung', icon: <FileText className="w-5 h-5" /> },
-  { to: '/admin?tab=support', label: 'Chăm sóc khách hàng', icon: <Headphones className="w-5 h-5" /> },
-  { to: '/admin?tab=team', label: 'Quản lý doanh nghiệp', icon: <Users className="w-5 h-5" /> },
+  { to: '/admin?tab=users', labelMap: { vi: 'Hệ Thống', en: 'System', ja: 'システム', ko: '시스템', zh: '系统', fr: 'Système', de: 'System', es: 'Sistema' }, icon: <ShieldCheck className="w-5 h-5" /> },
+  { to: '/admin?tab=content', labelMap: { vi: 'Nội Dung', en: 'Content', ja: 'コンテンツ', ko: '콘텐츠', zh: '内容', fr: 'Contenu', de: 'Inhalte', es: 'Contenido' }, icon: <FileText className="w-5 h-5" /> },
+  { to: '/admin?tab=support', labelMap: { vi: 'Hỗ Trợ', en: 'Support', ja: 'サポート', ko: '지원', zh: '支持', fr: 'Support', de: 'Support', es: 'Soporte' }, icon: <Headphones className="w-5 h-5" /> },
+  { to: '/admin?tab=team', labelMap: { vi: 'Doanh Nghiệp', en: 'Enterprise', ja: '法人', ko: '기업', zh: '企业', fr: 'Entreprise', de: 'Enterprise', es: 'Empresa' }, icon: <Users className="w-5 h-5" /> },
+  { to: '/admin?tab=system', labelMap: { vi: 'AI Tự Động', en: 'AI Auto', ja: 'AI自動', ko: 'AI 자동', zh: 'AI 自动', fr: 'IA auto', de: 'KI Auto', es: 'IA auto' }, icon: <Bot className="w-5 h-5" /> },
 ];
 
 const ACCOUNT_NAV_ITEMS: NavItem[] = [
@@ -69,6 +72,9 @@ export const Sidebar: React.FC = () => {
   const unreadCount = typeof unreadData === 'number' ? unreadData : 0;
   const isStaffOrAdmin = ['ADMIN', 'CONTENT_MANAGER', 'CUSTOMER_SUPPORT', 'ENTERPRISE_LEAD'].includes(user?.role || '');
   const mainNavItems = isStaffOrAdmin ? ADMIN_NAV_ITEMS : MAIN_NAV_ITEMS;
+  const accountNavItems = isStaffOrAdmin
+    ? ACCOUNT_NAV_ITEMS.filter((item) => item.to !== '/profile')
+    : ACCOUNT_NAV_ITEMS;
 
   return (
     <aside
@@ -118,7 +124,7 @@ export const Sidebar: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-1 border-t border-[var(--color-border)] pt-3">
-            {ACCOUNT_NAV_ITEMS.map((item) => (
+            {accountNavItems.map((item) => (
               <SidebarNavLink
                 key={item.to}
                 item={item}
@@ -140,7 +146,7 @@ const SidebarNavLink: React.FC<{
   collapsed: boolean;
   badge?: number;
 }> = ({ item, language, collapsed, badge }) => {
-  const label = item.label || translate(language, item.labelKey!);
+  const label = item.labelMap ? getMultiLangText(language, item.labelMap) : item.label || translate(language, item.labelKey!);
   const navigate = useNavigate();
   const location = useLocation();
   const currentPathWithQuery = location.pathname + location.search;
@@ -195,5 +201,6 @@ const SidebarNavLink: React.FC<{
     </button>
   );
 };
+
 
 

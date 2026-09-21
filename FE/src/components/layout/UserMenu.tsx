@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserIcon, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useSettings } from '@/features/settings/hooks/useSettings';
+import { getMultiLangText, normalizeLanguage } from '@/lib/i18n';
 
 export const UserMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +11,8 @@ export const UserMenu: React.FC = () => {
   const navigate = useNavigate();
   const { user, openLogoutModal } = useAuthStore();
   const [brokenAvatar, setBrokenAvatar] = useState<string | null>(null);
+  const { data: settings } = useSettings();
+  const language = normalizeLanguage(settings?.language);
   const initials = user?.name.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || 'P';
 
   useEffect(() => {
@@ -29,12 +33,12 @@ export const UserMenu: React.FC = () => {
       >
         {user?.avatarUrl && brokenAvatar !== user.avatarUrl ? <img
           src={user.avatarUrl}
-          alt={user?.name || 'User Avatar'}
+          alt={user?.name || getMultiLangText(language, { vi: 'Ảnh đại diện người dùng', en: 'User avatar', ja: 'ユーザーアバター', ko: '사용자 아바타', zh: '用户头像', fr: 'Avatar utilisateur', de: 'Benutzeravatar', es: 'Avatar de usuario' })}
           className="w-9 h-9 rounded-full object-cover border border-[#E2E8F0]"
           onError={() => setBrokenAvatar(user.avatarUrl || null)}
         /> : <span className="flex w-9 h-9 items-center justify-center rounded-full bg-[#EEF2FF] text-xs font-bold text-[#4F46E5]">{initials}</span>}
         <div className="hidden sm:flex flex-col text-left">
-          <span className="text-xs font-bold text-[#131B2E] truncate max-w-[120px]">{user?.name || 'Tài khoản'}</span>
+          <span className="text-xs font-bold text-[#131B2E] truncate max-w-[120px]">{user?.name || getMultiLangText(language, { vi: 'Tài khoản', en: 'Account', ja: 'アカウント', ko: '계정', zh: '账户', fr: 'Compte', de: 'Konto', es: 'Cuenta' })}</span>
           <span className="text-[10px] text-[#64748B] truncate max-w-[120px]">{user?.email || 'user@planora.vn'}</span>
         </div>
         <ChevronDown className="w-4 h-4 text-[#64748B] hidden sm:block" />
@@ -55,7 +59,7 @@ export const UserMenu: React.FC = () => {
             className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-[#131B2E] hover:bg-[#F8FAFC] transition-colors"
           >
             <UserIcon className="w-4 h-4 text-[#64748B]" />
-            Hồ sơ cá nhân
+            {getMultiLangText(language, { vi: 'Hồ sơ cá nhân', en: 'Profile', ja: 'プロフィール', ko: '프로필', zh: '个人资料', fr: 'Profil', de: 'Profil', es: 'Perfil' })}
           </button>
 
           <button
@@ -66,7 +70,7 @@ export const UserMenu: React.FC = () => {
             className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-[#131B2E] hover:bg-[#F8FAFC] transition-colors"
           >
             <Settings className="w-4 h-4 text-[#64748B]" />
-            Cài đặt tài khoản
+            {getMultiLangText(language, { vi: 'Cài đặt tài khoản', en: 'Account settings', ja: 'アカウント設定', ko: '계정 설정', zh: '账户设置', fr: 'Paramètres du compte', de: 'Kontoeinstellungen', es: 'Configuración de cuenta' })}
           </button>
 
           <div className="my-1 border-t border-[#E2E8F0]" />
@@ -79,7 +83,7 @@ export const UserMenu: React.FC = () => {
             className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-[#F43F5E] hover:bg-[#FFF1F2] transition-colors"
           >
             <LogOut className="w-4 h-4 text-[#F43F5E]" />
-            Đăng xuất
+            {getMultiLangText(language, { vi: 'Đăng xuất', en: 'Sign out', ja: 'ログアウト', ko: '로그아웃', zh: '退出登录', fr: 'Déconnexion', de: 'Abmelden', es: 'Cerrar sesión' })}
           </button>
         </div>
       )}
