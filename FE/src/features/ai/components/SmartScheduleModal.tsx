@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { DatePicker } from '@/components/ui/DatePicker';
-import { Sparkles, Calendar, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Sparkles, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useGenerateSchedule, useApplySchedule } from '../hooks/useAi';
 import { ScheduleSuggestionCard } from './ScheduleSuggestionCard';
@@ -279,3 +278,4 @@ export const SmartScheduleModal: React.FC<SmartScheduleModalProps> = ({
     </Modal>
   );
 };
+
