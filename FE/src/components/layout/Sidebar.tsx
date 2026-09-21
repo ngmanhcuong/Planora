@@ -15,6 +15,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
+  FileText,
+  Headphones,
+  Users,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/useUIStore';
 import { clsx } from 'clsx';
@@ -45,7 +48,10 @@ const MAIN_NAV_ITEMS: NavItem[] = [
 ];
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
-  { to: '/admin', label: 'Quản trị', icon: <ShieldCheck className="w-5 h-5" /> },
+  { to: '/admin?tab=users', label: 'Quản trị hệ thống', icon: <ShieldCheck className="w-5 h-5" /> },
+  { to: '/admin?tab=content', label: 'Quản lý nội dung', icon: <FileText className="w-5 h-5" /> },
+  { to: '/admin?tab=support', label: 'Chăm sóc khách hàng', icon: <Headphones className="w-5 h-5" /> },
+  { to: '/admin?tab=team', label: 'Quản lý doanh nghiệp', icon: <Users className="w-5 h-5" /> },
 ];
 
 const ACCOUNT_NAV_ITEMS: NavItem[] = [
@@ -61,8 +67,8 @@ export const Sidebar: React.FC = () => {
   const language = normalizeLanguage(settings?.language);
 
   const unreadCount = typeof unreadData === 'number' ? unreadData : 0;
-  const isAdmin = user?.role === 'ADMIN';
-  const mainNavItems = isAdmin ? ADMIN_NAV_ITEMS : MAIN_NAV_ITEMS;
+  const isStaffOrAdmin = ['ADMIN', 'CONTENT_MANAGER', 'CUSTOMER_SUPPORT', 'ENTERPRISE_LEAD'].includes(user?.role || '');
+  const mainNavItems = isStaffOrAdmin ? ADMIN_NAV_ITEMS : MAIN_NAV_ITEMS;
 
   return (
     <aside
@@ -81,7 +87,6 @@ export const Sidebar: React.FC = () => {
         <div className={clsx('flex items-center gap-3 overflow-hidden', isSidebarCollapsed && 'justify-center')}>
           <Logo size="md" theme="light" showText={!isSidebarCollapsed} />
         </div>
-
       </div>
 
       <button
@@ -107,7 +112,7 @@ export const Sidebar: React.FC = () => {
                 item={item}
                 language={language}
                 collapsed={isSidebarCollapsed}
-                badge={!isAdmin && item.to === '/notifications' ? unreadCount : item.badge}
+                badge={!isStaffOrAdmin && item.to === '/notifications' ? unreadCount : item.badge}
               />
             ))}
           </div>
@@ -138,7 +143,11 @@ const SidebarNavLink: React.FC<{
   const label = item.label || translate(language, item.labelKey!);
   const navigate = useNavigate();
   const location = useLocation();
-  const isActive = location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+  const currentPathWithQuery = location.pathname + location.search;
+  const isActive =
+    location.pathname === item.to ||
+    currentPathWithQuery === item.to ||
+    (item.to === '/admin?tab=users' && location.pathname === '/admin' && (!location.search || location.search === '?tab=users'));
 
   return (
     <button

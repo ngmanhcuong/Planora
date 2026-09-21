@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/jwt';
 import { sendError } from '../utils/response';
+import { prisma } from '../config/prisma';
 
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
@@ -19,5 +20,9 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
   }
 
   req.user = payload;
+  void prisma.user.update({
+    where: { id: payload.userId },
+    data: { lastActiveAt: new Date() },
+  }).catch(() => undefined);
   next();
 };

@@ -123,6 +123,8 @@ export class AuthService {
       name: user.name,
       email: user.email,
       role: user.role,
+      accountTier: user.accountTier,
+      status: user.status,
       isVerified: user.isVerified,
       createdAt: user.createdAt,
     };
@@ -210,6 +212,8 @@ export class AuthService {
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
+      accountTier: newUser.accountTier,
+      status: newUser.status,
       isVerified: newUser.isVerified,
       createdAt: newUser.createdAt,
     };
@@ -232,6 +236,10 @@ export class AuthService {
       throw new Error('Email hoặc mật khẩu không chính xác');
     }
 
+    if (user.status === 'LOCKED') {
+      throw new Error('Tài khoản đã bị khóa. Vui lòng liên hệ admin.');
+    }
+
     const isMatch = await bcrypt.compare(input.password, user.passwordHash);
     if (!isMatch) {
       throw new Error('Email hoặc mật khẩu không chính xác');
@@ -248,6 +256,8 @@ export class AuthService {
       name: user.name,
       email: user.email,
       role: user.role,
+      accountTier: user.accountTier,
+      status: user.status,
       isVerified: user.isVerified,
       createdAt: user.createdAt,
     };
@@ -395,4 +405,5 @@ export class AuthService {
 }
 
 export const authService = new AuthService();
+
 

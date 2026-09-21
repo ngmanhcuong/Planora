@@ -10,6 +10,38 @@ generator client {
 enum Role {
   USER
   ADMIN
+  CONTENT_MANAGER
+  CUSTOMER_SUPPORT
+  ENTERPRISE_LEAD
+}
+
+enum AccountTier {
+  FREE
+  PREMIUM
+  VIP
+  INTERNAL
+}
+
+enum AccountStatus {
+  ACTIVE
+  LOCKED
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum NotificationCampaignStatus {
+  DRAFT
+  SENT
+}
+
+enum AdminContentType {
+  HANDBOOK
+  HOMEPAGE
+  BANNER
 }
 
 enum TaskStatus {
@@ -81,7 +113,10 @@ model User {
   passwordHash String
   name         String
   role         Role     @default(USER)
+  accountTier  AccountTier @default(FREE)
+  status       AccountStatus @default(ACTIVE)
   isVerified   Boolean  @default(false)
+  lastActiveAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -93,8 +128,13 @@ model User {
   timetables    Timetable[]
   habits        Habit[]
   notifications Notification[]
+  supportTickets SupportTicket[]
 
   @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([accountTier])
+  @@index([lastActiveAt])
   @@map("users")
 }
 
@@ -315,4 +355,81 @@ model Notification {
   @@index([userId])
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+model SupportTicket {
+  id          String              @id @default(cuid())
+  userId      String
+  subject     String
+  message     String              @db.Text
+  status      SupportTicketStatus @default(OPEN)
+  adminReply  String?             @db.Text
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  label       String
+  value       String
+  description String?  @db.Text
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@map("system_configs")
+}
+
+model GlobalCategoryTemplate {
+  id          String       @id @default(cuid())
+  name        String
+  type        CategoryType
+  color       String       @default("#4F46E5")
+  bgColor     String       @default("#E2DFFF")
+  textColor   String       @default("#3323CC")
+  description String?      @db.Text
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([type])
+  @@index([isActive])
+  @@map("global_category_templates")
+}
+
+model NotificationCampaign {
+  id             String                     @id @default(cuid())
+  title          String
+  message        String                     @db.Text
+  audience       AccountTier?
+  status         NotificationCampaignStatus @default(DRAFT)
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  recipientsCount Int                       @default(0)
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  @@index([status])
+  @@index([audience])
+  @@map("notification_campaigns")
+}
+
+model AdminContent {
+  id          String           @id @default(cuid())
+  type        AdminContentType
+  title       String
+  body        String           @db.Text
+  isPublished Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([type])
+  @@index([isPublished])
+  @@map("admin_contents")
 }

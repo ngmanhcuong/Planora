@@ -3,6 +3,8 @@ export interface SafeUserResponse {
   name: string;
   email: string;
   role: string;
+  accountTier: string;
+  status: string;
   isVerified: boolean;
   createdAt: Date;
 }

@@ -10,7 +10,8 @@
     "test:integration": "ts-node tests/run_tests.ts",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
-    "seed:admin": "ts-node src/scripts/seedAdmin.ts"
+    "seed:admin": "ts-node src/scripts/seedAdmin.ts",
+    "clean:fake-data": "ts-node src/scripts/cleanFakeData.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",
