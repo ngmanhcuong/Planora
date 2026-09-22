@@ -326,7 +326,7 @@ export const AdminDashboardPage: React.FC = () => {
   const canCreateUser = Boolean(userForm.name.trim() && userForm.email.trim() && userForm.password.trim());
 
   return (
-    <div className="mx-auto max-w-[1480px] space-y-6 px-3 pb-12 lg:px-6">
+    <div className="admin-dashboard-scope mx-auto max-w-[1480px] space-y-6 px-3 pb-12 lg:px-6">
       {/* Dynamic Role Header Banner */}
       {activeTab === 'users' && (
         <RoleHeroBanner
@@ -389,7 +389,7 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
       )}
 
-      <section className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-3 shadow-sm backdrop-blur">
+      <section className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-3 shadow-sm backdrop-blur dark:border-slate-700/80 dark:bg-slate-900/80">
         <div className="grid gap-2 md:grid-cols-5">
           {adminTabs.map((tab) => {
             const Icon = tab.icon;
@@ -401,10 +401,12 @@ export const AdminDashboardPage: React.FC = () => {
                 onClick={() => handleTabChange(tab.id)}
                 className={clsx(
                   'group flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all',
-                  active ? 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-transparent bg-slate-50/80 text-slate-500 hover:border-slate-200 hover:bg-white hover:text-slate-900'
+                  active
+                    ? 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm dark:border-indigo-400/50 dark:bg-indigo-500/15 dark:text-indigo-200'
+                    : 'border-transparent bg-slate-50/80 text-slate-500 hover:border-slate-200 hover:bg-white hover:text-slate-900 dark:bg-slate-800/70 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white'
                 )}
               >
-                <span className={clsx('flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition', active ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white text-slate-500 group-hover:text-indigo-600')}>
+                <span className={clsx('flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition', active ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 dark:bg-indigo-500' : 'bg-white text-slate-500 group-hover:text-indigo-600 dark:bg-slate-900 dark:text-slate-300 dark:group-hover:text-indigo-300')}>
                   <Icon className="h-5 w-5" />
                 </span>
                 <span className="min-w-0">
@@ -477,7 +479,7 @@ export const AdminDashboardPage: React.FC = () => {
             >
               {/* Filter by role */}
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-slate-500">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-300">
                   {getMultiLangText(language, { vi: 'Lọc theo vai trò:', en: 'Filter by role:', ja: '役割でフィルター:', ko: '역할별 필터:', zh: '按角色筛选:', fr: 'Filtrer par rôle :', de: 'Nach Rolle filtern:', es: 'Filtrar por rol:' })}
                 </span>
                 <FilterPill label={getMultiLangText(language, { vi: 'Tất cả', en: 'All', ja: 'すべて', ko: '전체', zh: '全部', fr: 'Tous', de: 'Alle', es: 'Todos' })} active={roleFilter === 'ALL'} onClick={() => setRoleFilter('ALL')} />
@@ -632,7 +634,7 @@ export const AdminDashboardPage: React.FC = () => {
             >
               {/* Quick Reply Macros */}
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-slate-500">Mẫu phản hồi nhanh CS:</span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-300">Mẫu phản hồi nhanh CS:</span>
                 <button
                   type="button"
                   onClick={() => setTicketForm({ ...ticketForm, message: 'Chào bạn, chúng tôi đã ghi nhận sự cố đồng bộ lịch. Vui lòng thử bấm "Đồng bộ lại" trong mục Cài đặt.' })}
@@ -829,7 +831,7 @@ const Panel = ({ title, subtitle, icon: Icon, children, className = '' }: any) =
         <Icon className="h-5 w-5" />
       </div>
       <div>
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
         <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
       </div>
     </div>
@@ -843,7 +845,7 @@ const TextInput = ({ value, onChange, placeholder, type = 'text' }: { value: str
     value={value}
     onChange={(e) => onChange(e.target.value)}
     placeholder={placeholder}
-    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium outline-none focus:border-indigo-400 focus:bg-white"
+    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-indigo-400 focus:bg-white dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:bg-slate-800"
   />
 );
 
@@ -853,7 +855,7 @@ const TextArea = ({ value, onChange, placeholder }: { value: string; onChange: (
     onChange={(e) => onChange(e.target.value)}
     placeholder={placeholder}
     rows={3}
-    className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium outline-none focus:border-indigo-400 focus:bg-white"
+    className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-indigo-400 focus:bg-white dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:bg-slate-800"
   />
 );
 
@@ -861,7 +863,7 @@ const Select = ({ value, onChange, options, labels = {} }: { value: string; onCh
   <select
     value={value}
     onChange={(e) => onChange(e.target.value)}
-    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium outline-none focus:border-indigo-400 focus:bg-white"
+    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-indigo-400 focus:bg-white dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
   >
     {options.map((option) => (
       <option key={option} value={option}>
@@ -876,7 +878,7 @@ const PrimaryButton = ({ children, onClick, disabled }: { children: React.ReactN
     type="button"
     disabled={disabled}
     onClick={onClick}
-    className="rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 disabled:opacity-50 transition active:scale-95"
+    className="rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 disabled:bg-indigo-500/70 disabled:text-white/80 disabled:opacity-100 transition active:scale-95"
   >
     {children}
   </button>
@@ -913,13 +915,13 @@ const UserRow = ({
     <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <div className="flex items-center gap-2">
-          <p className="font-bold text-slate-950 text-sm">{user.name}</p>
+          <p className="font-bold text-slate-950 text-sm dark:text-slate-100">{user.name}</p>
           <span className={clsx('rounded-full px-2.5 py-0.5 text-[10px] font-semibold border', roleBadgeColors[user.role])}>
             {roleLabelsMap[user.role]}
           </span>
         </div>
-        <p className="text-xs font-medium text-slate-500">{user.email}</p>
-        <p className="mt-1 text-[11px] text-slate-400">
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-300">{user.email}</p>
+        <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-400">
           {user._count.tasks} task · {user._count.events} {getMultiLangText(language, { vi: 'sự kiện', en: 'events', ja: 'イベント', ko: '이벤트', zh: '事件', fr: 'événements', de: 'Termine', es: 'eventos' })} · {getMultiLangText(language, { vi: 'Hoạt động:', en: 'Active:', ja: 'アクティブ:', ko: '활동:', zh: '活跃:', fr: 'Actif :', de: 'Aktiv:', es: 'Activo:' })} {user.lastActiveAt ? new Date(user.lastActiveAt).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US') : getMultiLangText(language, { vi: 'chưa có', en: 'none', ja: 'なし', ko: '없음', zh: '暂无', fr: 'aucun', de: 'keine', es: 'ninguna' })}
         </p>
       </div>
@@ -985,8 +987,8 @@ const TicketCard = ({
   <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
     <div className="flex items-start justify-between gap-3">
       <div>
-        <p className="font-bold text-slate-950 text-sm">{ticket.subject}</p>
-        <p className="text-xs font-medium text-slate-500">
+        <p className="font-bold text-slate-950 text-sm dark:text-slate-100">{ticket.subject}</p>
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-300">
           {getMultiLangText(language, { vi: 'Gửi bởi:', en: 'Sent by:', ja: '送信者:', ko: '보낸 사람:', zh: '发送者:', fr: 'Envoyé par :', de: 'Gesendet von:', es: 'Enviado por:' })} {ticket.user.email}
         </p>
       </div>
@@ -1026,7 +1028,7 @@ const ActionSelect = ({ value, options, labels = {}, onChange }: { value: string
   <select
     value={value}
     onChange={(e) => onChange(e.target.value)}
-    className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-400"
+    className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-indigo-400 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
   >
     {options.map((o) => (
       <option key={o} value={o}>
@@ -1065,7 +1067,7 @@ const List = ({ rows }: { rows: { id: string; title: string; meta: string; desc?
           <div key={row.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-bold text-slate-950 text-xs">{row.title}</p>
+                <p className="font-bold text-slate-950 text-xs dark:text-slate-100">{row.title}</p>
                 <p className="text-[11px] font-medium text-slate-500">{row.meta}</p>
               </div>
               {row.onDelete && (
@@ -1095,4 +1097,5 @@ void FilterPill;
 void UserRow;
 void TicketCard;
 void EmptyState;
+
 

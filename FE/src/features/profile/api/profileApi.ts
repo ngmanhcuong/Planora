@@ -12,6 +12,7 @@ export interface UpdateProfilePayload {
   totalCredits?: number | null;
   bio?: string | null;
   avatarUrl?: string | null;
+  coverUrl?: string | null;
 }
 
 export const profileApi = {
@@ -25,3 +26,5 @@ export const profileApi = {
     return response.data.data.profile;
   },
 };
+
+

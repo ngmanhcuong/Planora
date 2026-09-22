@@ -281,7 +281,7 @@ export const AssistantPage: React.FC = () => {
       <UserHeroBanner
         tone="assistant"
         icon={Bot}
-        iconClassName="text-blue-100"
+        iconClassName="text-fuchsia-100"
         badge={(
           <>
             <Sparkles className="h-3.5 w-3.5 text-amber-300" />
@@ -920,15 +920,15 @@ export const GoalsPage: React.FC = () => {
       </div>
 
       {/* Badges / Motivation Section */}
-      <section className="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-lg space-y-4">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+      <section className="goals-achievement-card rounded-3xl p-6 shadow-sm space-y-4 sm:p-8">
+        <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 dark:border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center justify-center">
               <Trophy className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold font-heading text-white">{getMultiLangText(language, { vi: 'Huy hiệu thành tích', en: 'Achievement Badges', ja: '実績バッジ', ko: '업적 배지', zh: '成就徽章', fr: 'Badges de réussite', de: 'Erfolgs-Badges', es: 'Insignias de logros' })}</h3>
-              <p className="text-xs text-indigo-200/70 font-medium">{getMultiLangText(language, { vi: 'Đạt mốc để mở khóa danh hiệu cá nhân', en: 'Reach milestones to unlock personal titles', ja: 'マイルストーンを達成して個人称号を解除', ko: '마일스톤을 달성하여 개인 칭호 잠금 해제', zh: '达成里程碑以解锁个人头衔', fr: 'Atteignez des jalons pour débloquer des titres', de: 'Erreichen Sie Meilensteine, um Titel freizuschalten', es: 'Alcanza hitos para desbloquear títulos' })}</p>
+              <h3 className="text-base font-extrabold font-heading text-slate-950 dark:text-white">{getMultiLangText(language, { vi: 'Huy hiệu thành tích', en: 'Achievement Badges', ja: '実績バッジ', ko: '업적 배지', zh: '成就徽章', fr: 'Badges de réussite', de: 'Erfolgs-Badges', es: 'Insignias de logros' })}</h3>
+              <p className="text-xs text-slate-500 font-medium dark:text-indigo-200/70">{getMultiLangText(language, { vi: 'Đạt mốc để mở khóa danh hiệu cá nhân', en: 'Reach milestones to unlock personal titles', ja: 'マイルストーンを達成して個人称号を解除', ko: '마일스톤을 달성하여 개인 칭호 잠금 해제', zh: '达成里程碑以解锁个人头衔', fr: 'Atteignez des jalons pour débloquer des titres', de: 'Erreichen Sie Meilensteine, um Titel freizuschalten', es: 'Alcanza hitos para desbloquear títulos' })}</p>
             </div>
           </div>
         </div>
@@ -960,18 +960,18 @@ export const GoalsPage: React.FC = () => {
             <div
               key={badge.title}
               className={clsx(
-                'p-4 rounded-2xl border backdrop-blur-md flex items-center gap-3.5 transition-all',
+                'goals-achievement-item p-4 rounded-2xl border backdrop-blur-md flex items-center gap-3.5 transition-all',
                 badge.unlocked
-                  ? 'bg-white/10 border-white/20 text-white'
-                  : 'bg-white/5 border-white/5 opacity-50'
+                  ? 'is-unlocked'
+                  : 'is-locked'
               )}
             >
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 dark:bg-white/10">
                 <badge.icon className={clsx('w-5 h-5', badge.color)} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">{badge.title}</h4>
-                <p className="text-[11px] text-indigo-200/70 mt-0.5">{badge.desc}</p>
+                <h4 className="text-xs font-bold">{badge.title}</h4>
+                <p className="mt-0.5 text-[11px]">{badge.desc}</p>
               </div>
             </div>
           ))}
@@ -2209,20 +2209,20 @@ export const ReportsPage: React.FC = () => {
         </div>
 
         {/* AI Productivity Suggestions */}
-        <div className="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+        <div className="reports-ai-advice-card relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 shadow-sm">
           <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
 
           <div className="space-y-4 relative z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-white/10 text-amber-300 flex items-center justify-center border border-white/15 backdrop-blur-md">
+                <div className="w-9 h-9 rounded-xl bg-white text-amber-500 flex items-center justify-center border border-amber-100 shadow-sm backdrop-blur-md dark:bg-white/10 dark:text-amber-300 dark:border-white/15">
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-heading text-base font-extrabold text-white">
+                  <h3 className="font-heading text-base font-extrabold text-slate-950 dark:text-white">
                     {translate(language, 'reports.aiAdviceTitle')}
                   </h3>
-                  <p className="text-[11px] text-indigo-200/80">{translate(language, 'reports.aiAdviceSubtitle')}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-indigo-200/80">{translate(language, 'reports.aiAdviceSubtitle')}</p>
                 </div>
               </div>
               <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/30">
@@ -2230,8 +2230,8 @@ export const ReportsPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-3 text-xs leading-relaxed text-indigo-100/90 font-medium pt-1">
-              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md flex items-start gap-3">
+            <div className="space-y-3 text-xs leading-relaxed text-slate-600 font-medium pt-1 dark:text-indigo-100/90">
+              <div className="p-3.5 rounded-2xl bg-white/85 border border-slate-200 backdrop-blur-md flex items-start gap-3 dark:bg-white/10 dark:border-white/15">
                 <Lightbulb className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   {getMultiLangText(language, {
@@ -2247,10 +2247,10 @@ export const ReportsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md flex items-start gap-3">
+              <div className="p-3.5 rounded-2xl bg-white/85 border border-slate-200 backdrop-blur-md flex items-start gap-3 dark:bg-white/10 dark:border-white/15">
                 <Zap className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-white block mb-0.5">
+                  <strong className="text-slate-950 block mb-0.5 dark:text-white">
                     {getMultiLangText(language, {
                       vi: 'Mẹo xếp lịch tối ưu:',
                       en: 'Optimal schedule tip:',

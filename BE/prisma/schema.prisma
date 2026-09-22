@@ -149,6 +149,7 @@ model Profile {
   totalCredits     Int      @default(135)
   bio              String?  @db.Text
   avatarUrl        String?  @db.Text
+  coverUrl         String?  @db.Text
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -433,3 +434,5 @@ model AdminContent {
   @@index([isPublished])
   @@map("admin_contents")
 }
+
+

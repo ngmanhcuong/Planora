@@ -57,14 +57,14 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgb(148 163 184 / 0.34);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgb(99 102 241 / 0.36);
 }
 
 :root[data-theme='dark'] ::-webkit-scrollbar-track {
@@ -133,6 +133,7 @@
 }
 :root[data-theme='dark'] .text-\[\#131B2E\],
 :root[data-theme='dark'] .text-\[\#0F172A\],
+:root[data-theme='dark'] .text-slate-950,
 :root[data-theme='dark'] .text-slate-700,
 :root[data-theme='dark'] .text-slate-800,
 :root[data-theme='dark'] .text-slate-900,
@@ -429,6 +430,28 @@
 .profile-select-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #818cf8;
 }
+.calendar-soft-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184 / 0.26) transparent;
+}
+.calendar-soft-scrollbar::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+.calendar-soft-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.calendar-soft-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(148 163 184 / 0.24);
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background-clip: content-box;
+}
+.calendar-soft-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgb(99 102 241 / 0.30);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
 
 :root[data-theme='dark'] .assistant-hero {
   background:
@@ -639,6 +662,277 @@
   color: #BAC6D8 !important;
 }
 
+.calendar-week-shell {
+  background: #ffffff;
+  border-color: rgb(226 232 240 / 0.8);
+}
+.calendar-week-header {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+.calendar-week-body {
+  background: #ffffff;
+}
+.calendar-week-time {
+  background: rgb(248 250 252 / 0.7);
+  border-color: #e2e8f0;
+}
+.calendar-week-day {
+  border-color: #e2e8f0;
+}
+.calendar-week-day-idle {
+  background: #ffffff;
+}
+.calendar-week-day-idle:hover {
+  background: rgb(248 250 252 / 0.65);
+}
+.calendar-week-day-today {
+  background: linear-gradient(180deg, rgb(14 165 233 / 0.12), rgb(14 165 233 / 0.035), transparent);
+  box-shadow: inset 0 0 0 2px rgb(14 165 233 / 0.22);
+}
+
+:root[data-theme='dark'] .calendar-week-shell {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+:root[data-theme='dark'] .calendar-week-header {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
+:root[data-theme='dark'] .calendar-week-body {
+  background: #0f172a !important;
+}
+:root[data-theme='dark'] .calendar-week-time {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
+:root[data-theme='dark'] .calendar-week-day {
+  border-color: #334155 !important;
+}
+:root[data-theme='dark'] .calendar-week-day-idle {
+  background: #0f172a !important;
+}
+:root[data-theme='dark'] .calendar-week-day-idle:hover {
+  background: #162033 !important;
+}
+:root[data-theme='dark'] .calendar-week-day-today {
+  background: linear-gradient(180deg, rgb(34 211 238 / 0.16), rgb(34 211 238 / 0.055), rgb(15 23 42 / 0.96)) !important;
+  box-shadow: inset 0 0 0 2px rgb(34 211 238 / 0.28) !important;
+}
+
+.goals-achievement-card {
+  background: linear-gradient(135deg, #ffffff 0%, rgb(255 251 235 / 0.92) 48%, rgb(238 242 255 / 0.9) 100%) !important;
+  border: 1px solid rgb(253 230 138 / 0.8) !important;
+  color: #0f172a !important;
+}
+.goals-achievement-item.is-unlocked {
+  background: rgb(255 255 255 / 0.86) !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+.goals-achievement-item.is-locked {
+  background: rgb(255 255 255 / 0.58) !important;
+  border-color: #f1f5f9 !important;
+  color: #64748b !important;
+  opacity: 0.72;
+}
+.goals-achievement-card h3 {
+  color: #020617 !important;
+}
+.goals-achievement-card > div p {
+  color: #475569 !important;
+}
+.goals-achievement-item h4 {
+  color: #0f172a !important;
+}
+.goals-achievement-item p {
+  color: #475569 !important;
+}
+.goals-achievement-item.is-locked h4 {
+  color: #334155 !important;
+}
+.goals-achievement-item.is-locked p {
+  color: #64748b !important;
+}
+.reports-ai-advice-card {
+  background: linear-gradient(135deg, #ffffff 0%, rgb(238 242 255 / 0.88) 48%, rgb(255 251 235 / 0.82) 100%) !important;
+  border: 1px solid #c7d2fe !important;
+  color: #1e293b !important;
+}
+.reports-ai-advice-card h3 {
+  color: #020617 !important;
+}
+.reports-ai-advice-card p,
+.reports-ai-advice-card div {
+  color: #334155 !important;
+}
+.reports-ai-advice-card strong {
+  color: #020617 !important;
+}
+.reports-ai-advice-card .text-amber-300 {
+  color: #d97706 !important;
+}
+
+:root[data-theme='dark'] .goals-achievement-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 56%, #020617 100%) !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+:root[data-theme='dark'] .goals-achievement-item.is-unlocked {
+  background: rgb(255 255 255 / 0.10) !important;
+  border-color: rgb(255 255 255 / 0.20) !important;
+  color: #ffffff !important;
+}
+:root[data-theme='dark'] .goals-achievement-item.is-locked {
+  background: rgb(255 255 255 / 0.05) !important;
+  border-color: rgb(255 255 255 / 0.05) !important;
+  color: #94a3b8 !important;
+}
+:root[data-theme='dark'] .goals-achievement-card h3,
+:root[data-theme='dark'] .goals-achievement-item h4 {
+  color: #ffffff !important;
+}
+:root[data-theme='dark'] .goals-achievement-card > div p,
+:root[data-theme='dark'] .goals-achievement-item p {
+  color: rgb(199 210 254 / 0.72) !important;
+}
+:root[data-theme='dark'] .reports-ai-advice-card {
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 48%, #312e81 100%) !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+:root[data-theme='dark'] .reports-ai-advice-card h3,
+:root[data-theme='dark'] .reports-ai-advice-card strong {
+  color: #ffffff !important;
+}
+:root[data-theme='dark'] .reports-ai-advice-card p,
+:root[data-theme='dark'] .reports-ai-advice-card div {
+  color: rgb(224 231 255 / 0.90) !important;
+}
+:root[data-theme='dark'] .reports-ai-advice-card .text-amber-300 {
+  color: #fcd34d !important;
+}
+
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope {
+  color: #e2e8f0;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.bg-white, .bg-white\/90, .bg-white\/95) {
+  background-color: rgb(17 24 39 / 0.96) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80, .bg-slate-50\/90, .bg-slate-100) {
+  background-color: rgb(30 41 59 / 0.82) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.border-slate-100, .border-slate-200, .border-slate-200\/80, .border-slate-300) {
+  border-color: rgb(71 85 105 / 0.76) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+  color: #f1f5f9 !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.text-slate-600, .text-slate-500, .text-slate-400) {
+  color: #aeb9ca !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(input, textarea, select) {
+  background-color: rgb(15 23 42 / 0.92) !important;
+  border-color: rgb(71 85 105 / 0.78) !important;
+  color: #e2e8f0 !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(input, textarea)::placeholder {
+  color: #94a3b8 !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(button.bg-white, select.bg-white) {
+  background-color: rgb(15 23 42 / 0.92) !important;
+  border-color: rgb(71 85 105 / 0.78) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.text-indigo-700, .text-purple-700) {
+  color: #c7d2fe !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.text-emerald-700, .text-emerald-900) {
+  color: #86efac !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope :is(.text-amber-700, .text-orange-700) {
+  color: #fcd34d !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope .bg-indigo-50 {
+  background-color: rgb(79 70 229 / 0.22) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope .bg-emerald-50 {
+  background-color: rgb(16 185 129 / 0.18) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope .bg-amber-50,
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope .bg-orange-50 {
+  background-color: rgb(245 158 11 / 0.18) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope button:disabled {
+  opacity: 1 !important;
+  color: rgb(255 255 255 / 0.82) !important;
+}
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope .hover\:bg-white:hover,
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope .hover\:bg-slate-50:hover,
+:is(:root[data-theme='dark'], :root.dark) .admin-dashboard-scope .hover\:bg-slate-100:hover {
+  background-color: rgb(51 65 85 / 0.86) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin-dashboard-scope {
+    color: #e2e8f0;
+  }
+  .admin-dashboard-scope :is(.bg-white, .bg-white\/90, .bg-white\/95) {
+    background-color: rgb(17 24 39 / 0.96) !important;
+  }
+  .admin-dashboard-scope :is(.bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80, .bg-slate-50\/90, .bg-slate-100) {
+    background-color: rgb(30 41 59 / 0.82) !important;
+  }
+  .admin-dashboard-scope :is(.border-slate-100, .border-slate-200, .border-slate-200\/80, .border-slate-300) {
+    border-color: rgb(71 85 105 / 0.76) !important;
+  }
+  .admin-dashboard-scope :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
+    color: #f1f5f9 !important;
+  }
+  .admin-dashboard-scope :is(.text-slate-600, .text-slate-500, .text-slate-400) {
+    color: #aeb9ca !important;
+  }
+  .admin-dashboard-scope :is(input, textarea, select) {
+    background-color: rgb(15 23 42 / 0.92) !important;
+    border-color: rgb(71 85 105 / 0.78) !important;
+    color: #e2e8f0 !important;
+  }
+  .admin-dashboard-scope :is(input, textarea)::placeholder {
+    color: #94a3b8 !important;
+  }
+  .admin-dashboard-scope :is(button.bg-white, select.bg-white) {
+    background-color: rgb(15 23 42 / 0.92) !important;
+    border-color: rgb(71 85 105 / 0.78) !important;
+  }
+  .admin-dashboard-scope :is(.text-indigo-700, .text-purple-700) {
+    color: #c7d2fe !important;
+  }
+  .admin-dashboard-scope :is(.text-emerald-700, .text-emerald-900) {
+    color: #86efac !important;
+  }
+  .admin-dashboard-scope :is(.text-amber-700, .text-orange-700) {
+    color: #fcd34d !important;
+  }
+  .admin-dashboard-scope .bg-indigo-50 {
+    background-color: rgb(79 70 229 / 0.22) !important;
+  }
+  .admin-dashboard-scope .bg-emerald-50 {
+    background-color: rgb(16 185 129 / 0.18) !important;
+  }
+  .admin-dashboard-scope .bg-amber-50,
+  .admin-dashboard-scope .bg-orange-50 {
+    background-color: rgb(245 158 11 / 0.18) !important;
+  }
+  .admin-dashboard-scope button:disabled {
+    opacity: 1 !important;
+    color: rgb(255 255 255 / 0.82) !important;
+  }
+  .admin-dashboard-scope .hover\:bg-white:hover,
+  .admin-dashboard-scope .hover\:bg-slate-50:hover,
+  .admin-dashboard-scope .hover\:bg-slate-100:hover {
+    background-color: rgb(51 65 85 / 0.86) !important;
+  }
+}
+
 :root[data-theme='dark'] .ai-assistant-panel {
   background-color: #0F172A !important;
   border-color: #334155 !important;
@@ -716,3 +1010,147 @@
 :root[data-theme='dark'] aside .sidebar-nav-icon svg {
   stroke: currentColor !important;
 }
+
+/* Final admin dark-mode contrast pass.
+   Kept at the end so it wins against older utility bridges and page-specific styles. */
+:root[data-theme='dark'] .admin-dashboard-scope,
+.dark .admin-dashboard-scope {
+  color: #e5edf8 !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.bg-white, .bg-white\/90, .bg-white\/95, .bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80, .bg-slate-50\/90, .bg-slate-100),
+.dark .admin-dashboard-scope :is(.bg-white, .bg-white\/90, .bg-white\/95, .bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80, .bg-slate-50\/90, .bg-slate-100) {
+  background-color: #1b2433 !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(section, article, .rounded-2xl, .rounded-3xl, .rounded-\[2rem\], .rounded-\[1\.75rem\]),
+.dark .admin-dashboard-scope :is(section, article, .rounded-2xl, .rounded-3xl, .rounded-\[2rem\], .rounded-\[1\.75rem\]) {
+  border-color: rgb(71 85 105 / 0.82) !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(h1, h2, h3, h4, h5, h6, p, label, span, strong, small, div),
+.dark .admin-dashboard-scope :is(h1, h2, h3, h4, h5, h6, p, label, span, strong, small, div) {
+  border-color: inherit;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700, .text-gray-900),
+.dark .admin-dashboard-scope :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700, .text-gray-900) {
+  color: #f8fafc !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.text-slate-600, .text-slate-500, .text-slate-400, .text-gray-600, .text-gray-500),
+.dark .admin-dashboard-scope :is(.text-slate-600, .text-slate-500, .text-slate-400, .text-gray-600, .text-gray-500) {
+  color: #c9d4e5 !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.text-indigo-700, .text-indigo-600, .text-purple-700, .text-purple-600),
+.dark .admin-dashboard-scope :is(.text-indigo-700, .text-indigo-600, .text-purple-700, .text-purple-600) {
+  color: #c7d2fe !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.text-emerald-900, .text-emerald-700, .text-emerald-600),
+.dark .admin-dashboard-scope :is(.text-emerald-900, .text-emerald-700, .text-emerald-600) {
+  color: #86efac !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.text-amber-700, .text-orange-700, .text-yellow-700),
+.dark .admin-dashboard-scope :is(.text-amber-700, .text-orange-700, .text-yellow-700) {
+  color: #fde68a !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.bg-indigo-50, .bg-violet-50, .bg-purple-50),
+.dark .admin-dashboard-scope :is(.bg-indigo-50, .bg-violet-50, .bg-purple-50) {
+  background-color: rgb(79 70 229 / 0.24) !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.bg-emerald-50, .bg-teal-50),
+.dark .admin-dashboard-scope :is(.bg-emerald-50, .bg-teal-50) {
+  background-color: rgb(16 185 129 / 0.18) !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(.bg-amber-50, .bg-orange-50, .bg-yellow-50),
+.dark .admin-dashboard-scope :is(.bg-amber-50, .bg-orange-50, .bg-yellow-50) {
+  background-color: rgb(245 158 11 / 0.18) !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(input, textarea, select, button.bg-white),
+.dark .admin-dashboard-scope :is(input, textarea, select, button.bg-white) {
+  background-color: #111827 !important;
+  border-color: rgb(71 85 105 / 0.86) !important;
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope :is(input, textarea)::placeholder,
+.dark .admin-dashboard-scope :is(input, textarea)::placeholder {
+  color: #b6c3d5 !important;
+}
+
+:root[data-theme='dark'] .admin-dashboard-scope button:disabled,
+.dark .admin-dashboard-scope button:disabled {
+  opacity: 1 !important;
+  filter: saturate(0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  .admin-dashboard-scope {
+    color: #e5edf8 !important;
+  }
+
+  .admin-dashboard-scope :is(.bg-white, .bg-white\/90, .bg-white\/95, .bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80, .bg-slate-50\/90, .bg-slate-100) {
+    background-color: #1b2433 !important;
+  }
+
+  .admin-dashboard-scope :is(section, article, .rounded-2xl, .rounded-3xl, .rounded-\[2rem\], .rounded-\[1\.75rem\]) {
+    border-color: rgb(71 85 105 / 0.82) !important;
+  }
+
+  .admin-dashboard-scope :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700, .text-gray-900) {
+    color: #f8fafc !important;
+  }
+
+  .admin-dashboard-scope :is(.text-slate-600, .text-slate-500, .text-slate-400, .text-gray-600, .text-gray-500) {
+    color: #c9d4e5 !important;
+  }
+
+  .admin-dashboard-scope :is(.text-indigo-700, .text-indigo-600, .text-purple-700, .text-purple-600) {
+    color: #c7d2fe !important;
+  }
+
+  .admin-dashboard-scope :is(.text-emerald-900, .text-emerald-700, .text-emerald-600) {
+    color: #86efac !important;
+  }
+
+  .admin-dashboard-scope :is(.text-amber-700, .text-orange-700, .text-yellow-700) {
+    color: #fde68a !important;
+  }
+
+  .admin-dashboard-scope :is(.bg-indigo-50, .bg-violet-50, .bg-purple-50) {
+    background-color: rgb(79 70 229 / 0.24) !important;
+  }
+
+  .admin-dashboard-scope :is(.bg-emerald-50, .bg-teal-50) {
+    background-color: rgb(16 185 129 / 0.18) !important;
+  }
+
+  .admin-dashboard-scope :is(.bg-amber-50, .bg-orange-50, .bg-yellow-50) {
+    background-color: rgb(245 158 11 / 0.18) !important;
+  }
+
+  .admin-dashboard-scope :is(input, textarea, select, button.bg-white) {
+    background-color: #111827 !important;
+    border-color: rgb(71 85 105 / 0.86) !important;
+    color: #f1f5f9 !important;
+  }
+
+  .admin-dashboard-scope :is(input, textarea)::placeholder {
+    color: #b6c3d5 !important;
+  }
+
+  .admin-dashboard-scope button:disabled {
+    opacity: 1 !important;
+    filter: saturate(0.9);
+  }
+}
+
+
+

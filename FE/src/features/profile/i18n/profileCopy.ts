@@ -99,6 +99,36 @@ export const getProfileCopy = (language: string | null | undefined) => {
       'Avatar ändern',
       'Cambiar avatar'
     ), lang),
+    changeCover: pick(L(
+      'Đổi ảnh nền hồ sơ',
+      'Change profile background',
+      'プロフィール背景を変更',
+      '프로필 배경 변경',
+      '更换资料背景',
+      'Changer l’arrière-plan du profil',
+      'Profilhintergrund ändern',
+      'Cambiar fondo del perfil'
+    ), lang),
+    savingCover: pick(L(
+      'Đang lưu ảnh nền...',
+      'Saving background...',
+      '背景を保存中...',
+      '배경 저장 중...',
+      '正在保存背景...',
+      'Enregistrement de l’arrière-plan...',
+      'Hintergrund wird gespeichert...',
+      'Guardando fondo...'
+    ), lang),
+    coverSaveError: pick(L(
+      'Không thể lưu ảnh nền. Hãy chọn ảnh hợp lệ (tối đa 5 MB) và thử lại.',
+      'Could not save the background. Choose a valid image up to 5 MB and try again.',
+      '背景を保存できませんでした。5 MB以下の有効な画像を選んで再試行してください。',
+      '배경을 저장할 수 없습니다. 5MB 이하의 유효한 이미지를 선택해 다시 시도하세요.',
+      '无法保存背景。请选择不超过 5 MB 的有效图片后重试。',
+      'Impossible d’enregistrer l’arrière-plan. Choisissez une image valide (max. 5 Mo).',
+      'Hintergrund konnte nicht gespeichert werden. Wähle ein gültiges Bild bis 5 MB.',
+      'No se pudo guardar el fondo. Elige una imagen válida de hasta 5 MB e inténtalo de nuevo.'
+    ), lang),
     studying: pick(L(
       'Đang học',
       'Studying',

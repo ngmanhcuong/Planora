@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ProfileCard } from './components/ProfileCard';
 import { AcademicSummaryCard } from './components/AcademicSummaryCard';
 import { ProfileEditForm } from './components/ProfileEditForm';
@@ -13,6 +13,7 @@ export const ProfilePage: React.FC = () => {
   const copy = getProfileCopy(language);
   const { data: profileData, isLoading, isError } = useProfile();
   const updateProfileMutation = useUpdateProfile();
+  const [gradeScale, setGradeScale] = useState<'4' | '10'>('4');
   const normalizeProfileField = (value?: string) => {
     const trimmedValue = value?.trim();
     if (!trimmedValue || trimmedValue === 'Chưa cập nhật' || trimmedValue === copy.notUpdated) return null;
@@ -41,6 +42,7 @@ export const ProfilePage: React.FC = () => {
     name: profileData.name || copy.user,
     email: profileData.email || '',
     avatarUrl: profileData.avatarUrl || '',
+    coverUrl: profileData.coverUrl || '',
     studentId: profileData.studentId || copy.notUpdated,
     major: profileData.major || copy.notUpdated,
     university: profileData.university || copy.university,
@@ -62,15 +64,21 @@ export const ProfilePage: React.FC = () => {
       completedCredits: updated.completedCredits,
       totalCredits: updated.totalCredits,
       bio: normalizeProfileField(updated.bio),
+      coverUrl: updated.coverUrl,
     });
   };
 
   return (
     <div className="flex w-full flex-col gap-5 pb-10">
       <ProfileCard profile={profile} />
-      <AcademicSummaryCard profile={profile} />
+      <AcademicSummaryCard
+        profile={profile}
+        gradeScale={gradeScale}
+        onToggleGradeScale={() => setGradeScale((current) => (current === '4' ? '10' : '4'))}
+      />
       <ProfileEditForm
         profile={profile}
+        gradeScale={gradeScale}
         onSaveProfile={handleSaveProfile}
         isSaving={updateProfileMutation.isPending}
         saveError={(updateProfileMutation.error as any)?.response?.data?.message || null}
@@ -79,3 +87,6 @@ export const ProfilePage: React.FC = () => {
     </div>
   );
 };
+
+
+

@@ -261,6 +261,7 @@ const SelectableTextField: React.FC<SelectableTextFieldProps> = ({
 
 export interface ProfileEditFormProps {
   profile: UserProfileData;
+  gradeScale?: '4' | '10';
   onSaveProfile: (updated: Partial<UserProfileData>) => void;
   isSaving?: boolean;
   saveError?: string | null;
@@ -269,6 +270,7 @@ export interface ProfileEditFormProps {
 
 export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   profile,
+  gradeScale = '4',
   onSaveProfile,
   isSaving = false,
   saveError,
@@ -351,6 +353,8 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   const displayValue = (value?: string) => value?.trim() || copy.notUpdated;
   const selectedMajor = watch('major') || '';
   const selectedUniversity = watch('university') || '';
+  const equivalentTenPointGpa = Number.isFinite(profile.gpa) ? ((profile.gpa / 4) * 10).toFixed(1) : '0.0';
+  const displayGpa = gradeScale === '10' ? `${equivalentTenPointGpa} / 10` : `${profile.gpa} / 4.0`;
 
   return (
     <section className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
@@ -434,7 +438,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
                   [copy.studentId, profile.studentId],
                   [copy.major, translateProfileDisplayValue(language, profile.major)],
                   [copy.universityLabel, translateProfileDisplayValue(language, profile.university)],
-                  [copy.gpaLabel, `${profile.gpa} / 4.0`],
+                  [copy.gpaLabel, displayGpa],
                   [copy.completedCredits, `${profile.completedCredits} TC`],
                   [copy.totalCredits, `${profile.totalCredits} TC`],
                 ].map(([label, value]) => (
@@ -587,3 +591,4 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     </section>
   );
 };
+

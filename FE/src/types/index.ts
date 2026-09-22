@@ -8,6 +8,7 @@ export interface User {
   role?: string;
   isVerified?: boolean;
   avatarUrl?: string;
+  coverUrl?: string;
   studentId?: string;
   major?: string;
   university?: string;
@@ -241,6 +242,7 @@ export interface ApiProfile {
   totalCredits?: number | null;
   bio?: string | null;
   avatarUrl?: string | null;
+  coverUrl?: string | null;
 }
 
 export interface ApiUserSettings {
@@ -255,3 +257,5 @@ export interface ApiUserSettings {
   loginAlerts: boolean;
   autoSaveDrafts: boolean;
 }
+
+

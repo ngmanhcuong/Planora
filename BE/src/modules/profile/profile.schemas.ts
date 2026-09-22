@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+const imageDataOrUrlSchema = (message: string, maxLength = 180000) => z
+  .string()
+  .max(maxLength)
+  .refine((value) => /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value) || /^https?:\/\//.test(value) && z.url().safeParse(value).success, { message })
+  .optional()
+  .nullable()
+  .or(z.literal(''));
+
 export const updateProfileSchema = z
   .object({
     name: z
@@ -46,13 +54,8 @@ export const updateProfileSchema = z
       .max(200, { message: 'Tự giới thiệu tối đa 200 ký tự' })
       .optional()
       .nullable(),
-    avatarUrl: z
-      .string()
-      .max(60000)
-      .refine((value) => /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value) || /^https?:\/\//.test(value) && z.url().safeParse(value).success, { message: 'URL ảnh đại diện không hợp lệ' })
-      .optional()
-      .nullable()
-      .or(z.literal('')),
+    avatarUrl: imageDataOrUrlSchema('URL ảnh đại diện không hợp lệ'),
+    coverUrl: imageDataOrUrlSchema('URL ảnh nền không hợp lệ'),
   })
   .refine(
     (data) => {

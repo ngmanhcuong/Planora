@@ -10,4 +10,7 @@ export interface UserProfileResponse {
   totalCredits: number;
   bio: string | null;
   avatarUrl: string | null;
+  coverUrl: string | null;
 }
+
+

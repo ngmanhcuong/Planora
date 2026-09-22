@@ -51,7 +51,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   };
 
   return (
-    <div className="flex-1 w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+    <div className="calendar-week-shell calendar-soft-scrollbar flex-1 w-full overflow-hidden rounded-2xl border shadow-sm">
       {/* 7-Day Quick Selector Strip (Visible in Day View) */}
       {isDayView && fullWeekDays && fullWeekDays.length > 0 && (
         <div className="bg-gradient-to-r from-indigo-50 via-white to-violet-50 border-b border-slate-200/80 px-4 py-3 flex items-center gap-3 overflow-x-auto">
@@ -100,7 +100,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
       {isDayView ? (
         <div
           style={{ gridTemplateColumns: '64px 1fr' }}
-          className="grid items-center border-b border-slate-100 bg-white py-3 text-center"
+          className="calendar-week-header grid items-center border-b py-3 text-center"
         >
           <div className="flex items-center justify-center text-xs font-black text-slate-400">
             GMT+7
@@ -142,7 +142,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
       ) : (
         <div
           style={{ gridTemplateColumns: `64px repeat(${weekDays.length}, minmax(0, 1fr))` }}
-          className="grid border-b border-slate-100 bg-white py-3 text-center"
+          className="calendar-week-header grid border-b py-3 text-center"
         >
           <div className="flex items-center justify-center text-xs font-black text-slate-400">
             GMT+7
@@ -196,10 +196,10 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
       {/* Grid Body */}
       <div
         style={{ gridTemplateColumns: isDayView ? '64px 1fr' : `64px repeat(${weekDays.length}, minmax(0, 1fr))` }}
-        className="relative grid w-full min-h-[832px] bg-white"
+        className="calendar-week-body relative grid w-full min-h-[832px]"
       >
         {/* Left Time Labels */}
-        <div className="flex select-none flex-col border-r border-slate-200 bg-slate-50/70 py-2 pr-3 text-right">
+        <div className="calendar-week-time flex select-none flex-col border-r py-2 pr-3 text-right">
           {TIME_SLOTS.map((time, idx) => (
             <div key={idx} className="flex h-16 items-start justify-end text-xs font-bold text-slate-400">
               {time}
@@ -214,10 +214,10 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
           return (
             <div
               key={dayIndex}
-              className={`relative h-[832px] border-r border-slate-200 last:border-r-0 transition-colors ${
+              className={`calendar-week-day relative h-[832px] border-r last:border-r-0 transition-colors ${
                 day.isToday
-                  ? 'bg-cyan-50/45'
-                  : 'bg-white hover:bg-slate-50/60'
+                  ? 'calendar-week-day-today'
+                  : 'calendar-week-day-idle'
               }`}
               style={hourGridBackground}
             >
@@ -267,3 +267,4 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
     </div>
   );
 };
+

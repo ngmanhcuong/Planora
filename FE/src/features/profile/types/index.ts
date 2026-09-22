@@ -3,6 +3,7 @@ export interface UserProfileData {
   name: string;
   email: string;
   avatarUrl: string;
+  coverUrl: string;
   studentId: string;
   major: string;
   university: string;
@@ -12,3 +13,5 @@ export interface UserProfileData {
   bio: string;
   joinedDate: string;
 }
+
+

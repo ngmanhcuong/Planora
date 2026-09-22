@@ -34,9 +34,9 @@ const bannerTones: Record<NonNullable<UserHeroBannerProps['tone']>, { gradient: 
     icon: 'text-amber-100',
   },
   assistant: {
-    gradient: 'from-slate-950 via-blue-950 to-indigo-950',
-    glow: 'bg-blue-300/12',
-    icon: 'text-blue-100',
+    gradient: 'from-purple-950 via-violet-900 to-fuchsia-950',
+    glow: 'bg-fuchsia-300/12',
+    icon: 'text-fuchsia-100',
   },
   goals: {
     gradient: 'from-rose-950 via-pink-900 to-slate-950',
@@ -49,8 +49,8 @@ const bannerTones: Record<NonNullable<UserHeroBannerProps['tone']>, { gradient: 
     icon: 'text-teal-100',
   },
   reports: {
-    gradient: 'from-blue-950 via-indigo-950 to-slate-950',
-    glow: 'bg-sky-300/12',
+    gradient: 'from-sky-950 via-blue-900 to-cyan-950',
+    glow: 'bg-cyan-300/12',
     icon: 'text-sky-100',
   },
   notifications: {

@@ -18,6 +18,10 @@ export class ProfileService {
       throw new Error('Hồ sơ người dùng không tồn tại');
     }
 
+    const coverRows = await prisma.$queryRaw<Array<{ coverUrl: string | null }>>`
+      SELECT coverUrl FROM profiles WHERE userId = ${userId} LIMIT 1
+    `;
+
     return {
       userId: user.id,
       name: user.name,
@@ -30,6 +34,7 @@ export class ProfileService {
       totalCredits: user.profile.totalCredits,
       bio: user.profile.bio,
       avatarUrl: user.profile.avatarUrl,
+      coverUrl: coverRows[0]?.coverUrl ?? null,
     };
   }
 
@@ -53,7 +58,7 @@ export class ProfileService {
       throw new Error('Số tín chỉ đã hoàn thành không được vượt quá tổng số tín chỉ');
     }
 
-    const { name, email, ...profileFields } = input;
+    const { name, email, coverUrl, ...profileFields } = input;
 
     if (email !== undefined) {
       const normalizedEmail = email.trim().toLowerCase();
@@ -100,6 +105,14 @@ export class ProfileService {
           data: cleanData,
         });
       }
+
+      if (coverUrl !== undefined) {
+        await tx.$executeRaw`
+          UPDATE profiles
+          SET coverUrl = ${coverUrl === '' ? null : coverUrl}, updatedAt = NOW()
+          WHERE userId = ${userId}
+        `;
+      }
     });
 
     return this.getProfile(userId);
@@ -107,3 +120,5 @@ export class ProfileService {
 }
 
 export const profileService = new ProfileService();
+
+
