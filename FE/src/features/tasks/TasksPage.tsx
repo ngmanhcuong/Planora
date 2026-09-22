@@ -80,7 +80,7 @@ export const TasksPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-5 w-full min-h-screen pb-10">
+    <div className="flex w-full flex-col gap-6 pb-12">
       <TaskHeader
         stats={stats}
         searchQuery={searchQuery}

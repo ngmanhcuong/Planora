@@ -7,8 +7,10 @@ import { useSettings, useUpdateSettings } from './hooks/useSettings';
 import type { UserSettingsState } from './types';
 import { Loader2 } from 'lucide-react';
 import { normalizeLanguage, translate } from '@/lib/i18n';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 
 export const SettingsPage: React.FC = () => {
+  const currentLanguage = useCurrentLanguage();
   const { data: backendSettings, isLoading, isError } = useSettings();
   const updateSettingsMutation = useUpdateSettings();
   const [localSettings, setLocalSettings] = useState<UserSettingsState | null>(null);
@@ -47,7 +49,7 @@ export const SettingsPage: React.FC = () => {
       <div className="flex items-center justify-center p-12 bg-white rounded-xl border border-[#E2E8F0] shadow-xs min-h-[400px]">
         <Loader2 className="w-6 h-6 animate-spin text-[#4F46E5]" />
         <span className="ml-2 text-xs font-semibold text-[#64748B]">
-          {translate('vi', 'settings.loading')}
+          {translate(currentLanguage, 'settings.loading')}
         </span>
       </div>
     );
@@ -56,7 +58,7 @@ export const SettingsPage: React.FC = () => {
   if (isError) {
     return (
       <div className="p-4 bg-[#FFF1F2] border border-[#FFE4E6] rounded-xl text-xs text-[#BA1A1A]">
-        {translate('vi', 'settings.error')}
+        {translate(currentLanguage, 'settings.error')}
       </div>
     );
   }

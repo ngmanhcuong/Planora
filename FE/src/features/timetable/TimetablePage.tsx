@@ -6,11 +6,15 @@ import { AddSubjectModal } from './components/AddSubjectModal';
 import { useWeeklyTimetable, useCreateTimetableItem, useDeleteTimetableItem, useCreateTimetable } from './hooks/useTimetable';
 import type { TimetableClassItem } from './types';
 import { Loader2 } from 'lucide-react';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate } from '@/lib/i18n';
 
 export const TimetablePage: React.FC = () => {
+  const language = useCurrentLanguage();
   const [selectedClass, setSelectedClass] = useState<TimetableClassItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [isAddOpen, setIsAddOpen] = useState<boolean>(false);
+  const [quickAddPosition, setQuickAddPosition] = useState<{ dayIndex: number; startSlot: number } | null>(null);
 
   const { data: weeklyData, isLoading, isError } = useWeeklyTimetable();
   const createItemMutation = useCreateTimetableItem();
@@ -102,18 +106,26 @@ export const TimetablePage: React.FC = () => {
     }
   };
 
+  const handleQuickAdd = (dayIndex: number, startSlot: number) => {
+    setQuickAddPosition({ dayIndex, startSlot });
+    setIsAddOpen(true);
+  };
+
   const semesterInfo = {
-    termName: timetable?.termName || 'Học kỳ I',
+    termName: timetable?.termName || `${translate(language, 'timetable.semester')} I`,
     academicYear: timetable?.academicYear || '2026 - 2027',
     totalSubjects: convertedClasses.length,
     totalCredits: convertedClasses.reduce((sum, c) => sum + (c.slotSpan >= 3 ? 3 : 2), 0),
   };
 
   return (
-    <div className="flex flex-col gap-5 w-full min-h-screen pb-10">
+    <div className="flex w-full flex-col gap-6 pb-12">
       <TimetableHeader
         semesterInfo={semesterInfo}
-        onOpenAddModal={() => setIsAddOpen(true)}
+        onOpenAddModal={() => {
+          setQuickAddPosition(null);
+          setIsAddOpen(true);
+        }}
       />
 
       {isLoading ? (
@@ -127,7 +139,11 @@ export const TimetablePage: React.FC = () => {
         </div>
       ) : (
         <div className="w-full overflow-x-auto">
-          <TimetableGrid classes={convertedClasses} onSelectClass={handleSelectClass} />
+          <TimetableGrid
+            classes={convertedClasses}
+            onSelectClass={handleSelectClass}
+            onQuickAdd={handleQuickAdd}
+          />
         </div>
       )}
 
@@ -142,8 +158,9 @@ export const TimetablePage: React.FC = () => {
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         onAddClass={handleAddClass}
+        initialDayIndex={quickAddPosition?.dayIndex}
+        initialStartSlot={quickAddPosition?.startSlot}
       />
     </div>
   );
 };
-

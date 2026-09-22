@@ -87,16 +87,16 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="ai-assistant-panel fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-hidden border-l border-white/70 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] animate-in slide-in-from-right duration-200 sm:w-[460px]">
-      <div className="ai-assistant-bg pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(79,70,229,0.16),transparent_34%),radial-gradient(circle_at_88%_22%,rgba(245,158,11,0.14),transparent_28%),linear-gradient(180deg,#F8FAFF_0%,#FFFFFF_42%,#F8FAFC_100%)]" />
+    <div className="ai-assistant-panel fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-hidden border-l border-slate-200/80 bg-[#F8FAFF] shadow-[0_24px_80px_rgba(15,23,42,0.24)] animate-in slide-in-from-right duration-200 sm:w-[460px]">
+      <div className="ai-assistant-bg pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(99,102,241,0.15),transparent_34%),radial-gradient(circle_at_92%_18%,rgba(34,211,238,0.12),transparent_30%),linear-gradient(180deg,#F8FAFF_0%,#FFFFFF_48%,#F6F8FC_100%)]" />
 
       {/* Header */}
-      <div className="ai-assistant-header relative border-b border-white/70 bg-white/72 p-5 shadow-sm backdrop-blur-xl">
+      <div className="ai-assistant-header relative border-b border-slate-200/70 bg-white/82 p-5 shadow-sm backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-          <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-slate-900 text-white shadow-lg shadow-indigo-500/25">
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 text-white shadow-lg shadow-indigo-500/25">
             <Bot className="h-6 w-6" />
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[10px] text-slate-950 shadow-sm">
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-cyan-300 text-[10px] text-slate-950 shadow-sm ring-2 ring-white">
               <Sparkles className="h-3 w-3 fill-slate-950" />
             </span>
           </div>
@@ -111,18 +111,18 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
         </div>
         <button
           onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100"
         >
             <X className="h-5 w-5" />
         </button>
         </div>
         <div className="mt-4 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-extrabold text-emerald-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Online
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[11px] font-extrabold text-indigo-700">
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-bold text-blue-700">
+            <Sparkles className="h-3.5 w-3.5 text-cyan-500" />
             Context-aware
           </span>
         </div>
@@ -130,7 +130,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
 
       {/* Messages Scroll Area */}
       <div className="relative flex-1 overflow-y-auto px-5 py-5">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
         {messages.map((m) => (
           <div
             key={m.id}
@@ -139,10 +139,10 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             }`}
           >
             <div
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-xs font-bold shadow-sm ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-sm ${
                 m.sender === 'user'
                     ? 'bg-slate-950 text-white'
-                    : 'bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-indigo-500/20'
+                    : 'bg-white text-indigo-600 ring-1 ring-indigo-100'
               }`}
             >
               {m.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -150,10 +150,10 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
 
             <div className="flex flex-col gap-1">
               <div
-                  className={`rounded-[1.35rem] px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                  className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                   m.sender === 'user'
-                      ? 'rounded-tr-md bg-gradient-to-br from-indigo-600 to-violet-600 text-white'
-                      : 'ai-assistant-message rounded-tl-md border border-slate-200/80 bg-white/92 text-slate-800'
+                      ? 'rounded-tr-md bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-indigo-500/20'
+                      : 'ai-assistant-message rounded-tl-md border border-slate-200/80 bg-white/95 text-slate-800'
                 }`}
               >
                 {m.text}
@@ -176,17 +176,17 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
 
       {/* Quick Sample Prompts */}
       {showSuggestions && (
-        <div className="ai-assistant-suggestions relative border-t border-slate-200/80 bg-white/80 px-5 py-4 backdrop-blur-xl">
+        <div className="ai-assistant-suggestions relative border-t border-slate-200/80 bg-white/86 px-5 py-4 backdrop-blur-xl">
           <span className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
             {translate(language, 'assistant.panel.suggestions')}
           </span>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-3 grid gap-2">
             {samplePrompts.map((prompt, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(prompt)}
                 disabled={assistantMutation.isPending}
-                className="ai-assistant-suggestion rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-[11px] font-bold text-slate-600 transition-all hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-60"
+                className="ai-assistant-suggestion rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-left text-xs font-semibold text-slate-600 transition-all hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 hover:shadow-sm disabled:opacity-60"
               >
                 {prompt}
               </button>
@@ -196,7 +196,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
       )}
 
       {/* Input Form */}
-      <div className="ai-assistant-input-wrap relative border-t border-slate-200/80 bg-white px-4 py-4">
+      <div className="ai-assistant-input-wrap relative border-t border-slate-200/80 bg-white/92 px-4 py-4 backdrop-blur-xl">
         {errorMessage && (
           <div className="mb-3 flex items-center gap-1.5 rounded-2xl border border-rose-100 bg-rose-50 p-2.5 text-[11px] font-semibold text-rose-700">
             <AlertTriangle className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
@@ -209,7 +209,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             e.preventDefault();
             handleSend();
           }}
-          className="ai-assistant-form flex items-center gap-2 rounded-3xl border border-slate-200 bg-slate-50 p-2 shadow-[0_12px_34px_rgba(15,23,42,0.08)] transition-all focus-within:border-indigo-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100"
+          className="ai-assistant-form flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1.5 shadow-[0_12px_34px_rgba(15,23,42,0.08)] transition-all focus-within:border-indigo-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100"
         >
           <input
             type="text"
@@ -222,7 +222,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
           <button
             type="submit"
             disabled={assistantMutation.isPending || !inputMsg.trim()}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/35 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 hover:shadow-indigo-500/35 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             <Send className="w-4 h-4" />
           </button>

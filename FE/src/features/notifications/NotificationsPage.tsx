@@ -18,6 +18,7 @@ import {
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { getMultiLangText, translateRelativeTime } from '@/lib/i18n';
 import { clsx } from 'clsx';
+import { UserHeroBanner } from '@/components/ui/UserHeroBanner';
 
 const LOCALE_MAP: Record<string, string> = {
   vi: 'vi-VN',
@@ -257,45 +258,29 @@ export const NotificationsPage: React.FC = () => {
     <div className="flex w-full flex-col gap-6 pb-12">
       {isError && <p role="alert" className="text-sm text-red-600">{copy.loadError} <button onClick={() => void refetch()}>{copy.retry}</button></p>}
       {(markRead.isError || markAllRead.isError) && <p role="alert" className="text-sm text-red-600">{copy.readError}</p>}
-      {/* Header Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-6 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-indigo-200 shadow-lg shadow-black/10 backdrop-blur-md">
-            <Bell className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-heading">{copy.title}</h1>
-              {unreadCount > 0 && (
-                <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-rose-500 text-white shadow-sm animate-pulse">
-                  {unreadCount} {copy.unread}
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-indigo-100/90 mt-1">
-              {copy.subtitle}
-            </p>
-          </div>
-        </div>
-
-        {unreadCount > 0 && (
+      <UserHeroBanner
+        tone="notifications"
+        icon={Bell}
+        iconClassName="text-pink-100"
+        badge={copy.title}
+        badges={unreadCount > 0 ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300/40 bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
+            {unreadCount} {copy.unread}
+          </span>
+        ) : undefined}
+        title={copy.title}
+        subtitle={copy.subtitle}
+        actions={unreadCount > 0 ? (
           <button
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 text-indigo-100 hover:bg-white/20 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-black/10 border border-white/15 backdrop-blur-md active:scale-95 disabled:opacity-50"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white/85 shadow-sm backdrop-blur-md transition hover:bg-white/18 disabled:opacity-50"
           >
             <CheckCheck className="w-4 h-4" />
             <span>{copy.markAllRead}</span>
           </button>
-        )}
-        </div>
-      </div>
+        ) : undefined}
+      />
 
       {/* Filter Tabs */}
       <div className="flex items-center justify-between gap-4 flex-wrap bg-white rounded-3xl border border-slate-200/80 p-4 shadow-sm">

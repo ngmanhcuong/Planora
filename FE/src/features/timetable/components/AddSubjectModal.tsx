@@ -2,19 +2,23 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { BookOpen, MapPin, User, BookmarkPlus, ChevronDown } from 'lucide-react';
+import { BookOpen, MapPin, User, BookmarkPlus, ChevronDown, Check } from 'lucide-react';
 import type { TimetableClassItem } from '../types';
 
 export interface AddSubjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddClass: (cls: Omit<TimetableClassItem, 'id'>) => void;
+  initialDayIndex?: number;
+  initialStartSlot?: number;
 }
 
 export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
   isOpen,
   onClose,
   onAddClass,
+  initialDayIndex,
+  initialStartSlot,
 }) => {
   const [subjectName, setSubjectName] = useState('');
   const [courseCode, setCourseCode] = useState('');
@@ -24,6 +28,13 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
   const [room, setRoom] = useState('');
   const [lecturer, setLecturer] = useState('');
   const [type, setType] = useState<'theory' | 'practice' | 'exam'>('theory');
+  const [openSelect, setOpenSelect] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    if (typeof initialDayIndex === 'number') setDayIndex(initialDayIndex);
+    if (typeof initialStartSlot === 'number') setStartSlot(initialStartSlot);
+  }, [isOpen, initialDayIndex, initialStartSlot]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,12 +72,76 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
     onClose();
   };
 
-  const selectBaseClass =
-    'h-12 w-full appearance-none rounded-xl border border-[#E2E8F0] bg-white px-4 pr-10 text-sm font-semibold text-[#131B2E] shadow-sm transition-all focus:border-[#4F46E5] focus:outline-none focus:ring-4 focus:ring-[#4F46E5]/10';
+  React.useEffect(() => {
+    if (!isOpen) setOpenSelect(null);
+  }, [isOpen]);
 
-  const SelectChevron = () => (
-    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
-  );
+  type SelectOption = {
+    value: number;
+    label: string;
+  };
+
+  const FormSelect = ({
+    id,
+    label,
+    value,
+    options,
+    onChange,
+  }: {
+    id: string;
+    label: string;
+    value: number;
+    options: SelectOption[];
+    onChange: (value: number) => void;
+  }) => {
+    const selected = options.find((option) => option.value === value) || options[0];
+    const isOpenSelect = openSelect === id;
+
+    return (
+      <div className="relative flex flex-col gap-1.5">
+        <label className="text-xs font-semibold text-[#131B2E]">{label}</label>
+        <button
+          type="button"
+          onClick={() => setOpenSelect(isOpenSelect ? null : id)}
+          className={`flex h-12 w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-sm font-semibold text-[#131B2E] shadow-sm transition-all ${
+            isOpenSelect
+              ? 'border-[#4F46E5] ring-4 ring-[#4F46E5]/10'
+              : 'border-[#E2E8F0] hover:border-[#C7D2FE]'
+          }`}
+        >
+          <span>{selected.label}</span>
+          <ChevronDown className={`h-4 w-4 text-[#64748B] transition-transform ${isOpenSelect ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpenSelect && (
+          <div className="absolute left-0 right-0 top-[calc(100%+0.35rem)] z-50 max-h-56 overflow-y-auto overscroll-contain rounded-2xl border border-[#C7D2FE] bg-white p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.16)] [scrollbar-color:#A5B4FC_transparent] [scrollbar-width:thin]">
+            {options.map((option) => {
+              const active = option.value === value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpenSelect(null);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-all ${
+                    active
+                      ? 'bg-[#EEF2FF] text-[#4F46E5]'
+                      : 'text-[#334155] hover:bg-[#F8FAFC] hover:text-[#4F46E5]'
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {active && <Check className="h-4 w-4" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Modal
@@ -97,60 +172,42 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
 
         <div className="rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC]/70 p-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[#131B2E]">Thứ trong tuần</label>
-              <div className="relative">
-                <select
-                  value={dayIndex}
-                  onChange={(e) => setDayIndex(Number(e.target.value))}
-                  className={selectBaseClass}
-                >
-                  <option value={0}>Thứ Hai</option>
-                  <option value={1}>Thứ Ba</option>
-                  <option value={2}>Thứ Tư</option>
-                  <option value={3}>Thứ Năm</option>
-                  <option value={4}>Thứ Sáu</option>
-                  <option value={5}>Thứ Bảy</option>
-                  <option value={6}>Chủ Nhật</option>
-                </select>
-                <SelectChevron />
-              </div>
-            </div>
+            <FormSelect
+              id="day"
+              label="Thứ trong tuần"
+              value={dayIndex}
+              onChange={setDayIndex}
+              options={[
+                { value: 0, label: 'Thứ Hai' },
+                { value: 1, label: 'Thứ Ba' },
+                { value: 2, label: 'Thứ Tư' },
+                { value: 3, label: 'Thứ Năm' },
+                { value: 4, label: 'Thứ Sáu' },
+                { value: 5, label: 'Thứ Bảy' },
+                { value: 6, label: 'Chủ Nhật' },
+              ]}
+            />
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[#131B2E]">Tiết bắt đầu</label>
-              <div className="relative">
-                <select
-                  value={startSlot}
-                  onChange={(e) => setStartSlot(Number(e.target.value))}
-                  className={selectBaseClass}
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((slot) => (
-                    <option key={slot} value={slot}>
-                      Tiết {slot}
-                    </option>
-                  ))}
-                </select>
-                <SelectChevron />
-              </div>
-            </div>
+            <FormSelect
+              id="startSlot"
+              label="Tiết bắt đầu"
+              value={startSlot}
+              onChange={setStartSlot}
+              options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((slot) => ({ value: slot, label: `Tiết ${slot}` }))}
+            />
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[#131B2E]">Số tiết</label>
-              <div className="relative">
-                <select
-                  value={slotSpan}
-                  onChange={(e) => setSlotSpan(Number(e.target.value))}
-                  className={selectBaseClass}
-                >
-                  <option value={1}>1 tiết</option>
-                  <option value={2}>2 tiết</option>
-                  <option value={3}>3 tiết</option>
-                  <option value={4}>4 tiết</option>
-                </select>
-                <SelectChevron />
-              </div>
-            </div>
+            <FormSelect
+              id="slotSpan"
+              label="Số tiết"
+              value={slotSpan}
+              onChange={setSlotSpan}
+              options={[
+                { value: 1, label: '1 tiết' },
+                { value: 2, label: '2 tiết' },
+                { value: 3, label: '3 tiết' },
+                { value: 4, label: '4 tiết' },
+              ]}
+            />
           </div>
         </div>
 

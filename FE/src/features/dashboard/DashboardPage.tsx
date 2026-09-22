@@ -31,7 +31,7 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col w-full gap-6">
+    <div className="flex w-full flex-col gap-6 pb-12">
       {/* 1. Header Greeting Banner */}
       <WelcomeGreeting
         summary={dashboardData.summary}

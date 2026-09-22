@@ -50,6 +50,7 @@ import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, translateCategory, translateRelativeTime, getMultiLangText, getMultiLangArray } from '@/lib/i18n';
 import { clsx } from 'clsx';
+import { UserHeroBanner } from '@/components/ui/UserHeroBanner';
 
 const cardClass = 'rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-200';
 
@@ -277,31 +278,28 @@ export const AssistantPage: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white p-6 sm:p-10 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-indigo-200 backdrop-blur-md border border-white/15">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              {translate(language, 'assistant.badge')}
-            </div>
-            <h1 className="font-heading text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-              {translate(language, 'assistant.title')}
-            </h1>
-            <p className="mt-2.5 max-w-2xl text-xs sm:text-sm text-indigo-100/90 font-medium leading-relaxed">
-              {translate(language, 'assistant.subtitle')}
-            </p>
-          </div>
+      <UserHeroBanner
+        tone="assistant"
+        icon={Bot}
+        iconClassName="text-blue-100"
+        badge={(
+          <>
+            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+            {translate(language, 'assistant.badge')}
+          </>
+        )}
+        title={translate(language, 'assistant.title')}
+        subtitle={translate(language, 'assistant.subtitle')}
+        actions={(
           <button
             onClick={() => openAssistantWithPrompt()}
-            className="inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 py-3.5 text-xs sm:text-sm font-extrabold text-slate-950 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/25 transition hover:opacity-95"
           >
             <Send className="h-4 w-4 fill-slate-950" />
             {translate(language, 'assistant.open')}
           </button>
-        </div>
-      </section>
+        )}
+      />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {insightCards.map((item) => (
@@ -533,53 +531,28 @@ export const GoalsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      {/* Hero Header Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 text-white p-6 sm:p-8 shadow-xl shadow-indigo-950/15 border border-indigo-800/40">
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shadow-inner shrink-0">
-              <Target className="w-7 h-7" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                  Planora Goals KPI
-                </span>
-              </div>
-              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                {translate(language, 'goals.title')}
-              </h1>
-              <p className="text-xs sm:text-sm text-indigo-200/80 mt-1 max-w-xl font-medium">
-                {translate(language, 'goals.subtitle')}
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/15 p-3 rounded-2xl shrink-0">
-            <div className="px-4 py-2 text-center border-r border-white/15">
-              <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">
-                Điểm hệ thống
-              </span>
-              <span className="text-2xl font-black text-amber-300 font-heading">{averageProgress}%</span>
-            </div>
-            <div className="px-4 py-2 text-center border-r border-white/15">
-              <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">{goalsCopy.completed}</span>
-              <span className="text-2xl font-black text-emerald-400 font-heading">
-                {completedCount}/{evaluatedGoals.length}
-              </span>
-            </div>
-            <div className="px-4 py-2 text-center">
-              <span className="text-[11px] font-bold text-indigo-200 block uppercase tracking-wider">{goalsCopy.streak}</span>
-              <span className="text-2xl font-black text-rose-400 font-heading flex items-center justify-center gap-1">
-                <Flame className="w-5 h-5 fill-rose-400 inline" /> 7 {goalsCopy.days}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="flex w-full flex-col gap-6 pb-12">
+      <UserHeroBanner
+        tone="goals"
+        icon={Target}
+        iconClassName="text-rose-100"
+        badge="Planora Goals KPI"
+        badges={(
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-amber-300 backdrop-blur-md">
+              {averageProgress}% {translate(language, 'goals.averageProgress')}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 backdrop-blur-md">
+              {completedCount}/{evaluatedGoals.length} {goalsCopy.completed}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-rose-300 backdrop-blur-md">
+              <Flame className="h-3.5 w-3.5 fill-rose-300" /> 7 {goalsCopy.days}
+            </span>
+          </>
+        )}
+        title={translate(language, 'goals.title')}
+        subtitle={translate(language, 'goals.subtitle')}
+      />
 
       {/* Control Bar */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
@@ -1329,29 +1302,15 @@ export const NotesPage: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
-      {/* Hero Header */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-7 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="flex items-center gap-3.5">
-            <div className="w-13 h-13 rounded-2xl bg-white/10 text-indigo-200 border border-white/15 flex items-center justify-center shrink-0 backdrop-blur-md shadow-lg shadow-black/10">
-              <StickyNote className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                {translate(language, 'notes.title')}
-              </h1>
-              <p className="text-xs sm:text-sm text-indigo-100/90 font-medium mt-0.5">
-                {translate(language, 'notes.subtitle')}
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Stats Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto">
+      <UserHeroBanner
+        tone="notes"
+        icon={StickyNote}
+        iconClassName="text-teal-100"
+        badge={translate(language, 'notes.title')}
+        title={translate(language, 'notes.title')}
+        subtitle={translate(language, 'notes.subtitle')}
+        badges={(
+          <>
             <span className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-3.5 py-2 text-xs font-extrabold text-indigo-100 border border-white/15 backdrop-blur-md shrink-0">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
               {completedCount}/{notes.length} {getMultiLangText(language, { vi: 'hoàn thành', en: 'completed', ja: '完了', ko: '완료', zh: '已完成', fr: 'terminées', de: 'erledigt', es: 'completadas' })}
@@ -1360,9 +1319,9 @@ export const NotesPage: React.FC = () => {
               <Pin className="h-4 w-4 text-amber-400 fill-amber-400" />
               {pinnedCount} {getMultiLangText(language, { vi: 'đã ghim', en: 'pinned', ja: 'ピン留め', ko: '고정됨', zh: '已置顶', fr: 'épinglées', de: 'angeheftet', es: 'fijadas' })}
             </span>
-          </div>
-        </div>
-      </section>
+          </>
+        )}
+      />
 
       {/* Note Creator Input Form */}
       <section className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm space-y-4">
@@ -1895,36 +1854,20 @@ export const ReportsPage: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
-      {/* Hero Banner Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white p-5 sm:p-7 shadow-xl shadow-indigo-950/20 border border-indigo-800/40">
-        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="w-13 h-13 rounded-2xl bg-white/10 text-indigo-200 border border-white/15 flex items-center justify-center shrink-0 backdrop-blur-md shadow-lg shadow-black/10">
-              <BarChart3 className="w-6 h-6 text-indigo-300" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  {translate(language, 'reports.liveData')}
-                </span>
-              </div>
-              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                {translate(language, 'reports.title')}
-              </h1>
-              <p className="text-xs sm:text-sm text-indigo-100/90 font-medium mt-0.5">
-                {translate(language, 'reports.subtitle')}
-              </p>
-            </div>
-          </div>
-
-          {/* Time Filter Tabs & Export Button */}
-          <div className="flex items-center gap-3 flex-wrap">
+      <UserHeroBanner
+        tone="reports"
+        icon={BarChart3}
+        iconClassName="text-sky-100"
+        badge={(
+          <>
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            {translate(language, 'reports.liveData')}
+          </>
+        )}
+        title={translate(language, 'reports.title')}
+        subtitle={translate(language, 'reports.subtitle')}
+        actions={(
+          <>
             <div className="flex items-center bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
               <button
                 onClick={() => { setRange('week'); setSelectedDay(DAY_LABELS[4] || 'T6'); }}
@@ -1963,9 +1906,9 @@ export const ReportsPage: React.FC = () => {
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               <span>{translate(language, 'reports.exportPdf')}</span>
             </button>
-          </div>
-        </div>
-      </section>
+          </>
+        )}
+      />
 
       {/* Toast Banner on Export */}
       {exportedToast && (

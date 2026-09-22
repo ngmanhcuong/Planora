@@ -235,6 +235,8 @@ export type TranslationKey =
   | 'weekday.sat'
   | 'weekday.sun'
   | 'timetable.title'
+  | 'timetable.subtitle'
+  | 'timetable.semester'
   | 'timetable.subjects'
   | 'timetable.credits'
   | 'timetable.print'
@@ -337,8 +339,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'settings.appearance.theme.light': 'Giao diện Sáng',
     'settings.appearance.theme.dark': 'Giao diện Tối',
     'sidebar.dashboard': 'Tổng quan',
-    'sidebar.calendar': 'Lịch',
-    'sidebar.timetable': 'Lịch học',
+    'sidebar.calendar': 'Lịch riêng',
+    'sidebar.timetable': 'TKB',
     'sidebar.tasks': 'Công việc',
     'sidebar.assistant': 'Trợ lý AI',
     'sidebar.goals': 'Mục tiêu',
@@ -501,6 +503,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': 'T7',
     'weekday.sunShort': 'CN',
     'timetable.title': 'Thời khóa biểu học tập',
+    'timetable.subtitle': 'Quản lý môn học, lịch lên lớp và xuất lịch học từ dữ liệu thật của bạn.',
+    'timetable.semester': 'Học kỳ',
     'timetable.subjects': 'Môn học',
     'timetable.credits': 'Tín chỉ',
     'timetable.print': 'In TKB',
@@ -757,6 +761,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': 'Sat',
     'weekday.sunShort': 'Sun',
     'timetable.title': 'Study timetable',
+    'timetable.subtitle': 'Manage subjects, class sessions, and exports from your real schedule data.',
+    'timetable.semester': 'Semester',
     'timetable.subjects': 'Subjects',
     'timetable.credits': 'Credits',
     'timetable.print': 'Print',
@@ -1002,6 +1008,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': '土',
     'weekday.sunShort': '日',
     'timetable.title': '時間割',
+    'timetable.subtitle': '実際の予定データから科目、授業、エクスポートを管理します。',
+    'timetable.semester': '学期',
     'timetable.subjects': '科目',
     'timetable.credits': '単位',
     'timetable.print': '印刷',
@@ -1247,6 +1255,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': '토',
     'weekday.sunShort': '일',
     'timetable.title': '수업 시간표',
+    'timetable.subtitle': '실제 일정 데이터로 과목, 수업 시간, 내보내기를 관리합니다.',
+    'timetable.semester': '학기',
     'timetable.subjects': '과목',
     'timetable.credits': '학점',
     'timetable.print': '인쇄',
@@ -1492,6 +1502,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': '周六',
     'weekday.sunShort': '周日',
     'timetable.title': '课程表',
+    'timetable.subtitle': '根据真实课程数据管理科目、上课时间和导出。',
+    'timetable.semester': '学期',
     'timetable.subjects': '科目',
     'timetable.credits': '学分',
     'timetable.print': '打印',
@@ -1737,6 +1749,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': 'Sam',
     'weekday.sunShort': 'Dim',
     'timetable.title': 'Emploi du temps',
+    'timetable.subtitle': 'Gérez les matières, les cours et les exports à partir de vos données réelles.',
+    'timetable.semester': 'Semestre',
     'timetable.subjects': 'Matières',
     'timetable.credits': 'Crédits',
     'timetable.print': 'Imprimer',
@@ -1982,6 +1996,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': 'Sa',
     'weekday.sunShort': 'So',
     'timetable.title': 'Stundenplan',
+    'timetable.subtitle': 'Verwalte Fächer, Unterrichtseinheiten und Exporte aus deinen echten Plandaten.',
+    'timetable.semester': 'Semester',
     'timetable.subjects': 'Fächer',
     'timetable.credits': 'Credits',
     'timetable.print': 'Drucken',
@@ -2227,6 +2243,8 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'weekday.satShort': 'Sáb',
     'weekday.sunShort': 'Dom',
     'timetable.title': 'Horario de clases',
+    'timetable.subtitle': 'Gestiona asignaturas, clases y exportaciones con tus datos reales.',
+    'timetable.semester': 'Semestre',
     'timetable.subjects': 'Materias',
     'timetable.credits': 'Créditos',
     'timetable.print': 'Imprimir',

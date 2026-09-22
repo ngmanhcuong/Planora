@@ -107,7 +107,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
       {error && <span className="text-xs font-medium text-[#F43F5E]">{error}</span>}
 
       {isOpen && (
-        <div className={clsx("absolute top-[calc(100%+6px)] z-50 w-full min-w-[200px] overflow-hidden rounded-2xl", align === "right" ? "right-0" : "left-0") + " border border-slate-200 bg-white shadow-[0_20px_45px_rgba(15,23,42,0.18)] animate-in fade-in zoom-in-95 duration-150"}>
+        <div className={clsx("absolute top-[calc(100%+6px)] z-50 w-[280px] overflow-hidden rounded-2xl", align === "right" ? "right-0" : "left-0") + " border border-slate-200 bg-white shadow-[0_20px_45px_rgba(15,23,42,0.18)] animate-in fade-in zoom-in-95 duration-150"}>
           {/* Header Toolbar */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-2.5 py-2">
             <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -146,14 +146,14 @@ export const TimePicker: React.FC<TimePickerProps> = ({
           </div>
 
           {/* Hour & Minute Scroll Columns */}
-          <div className="p-2">
-            <div className="relative rounded-xl border border-slate-100 bg-slate-50/90 p-2">
+          <div className="p-3">
+            <div className="relative rounded-2xl border border-slate-200 bg-slate-50/90 p-3">
               <div className="grid grid-cols-[1fr_auto_1fr] gap-1 px-1 pb-1 text-center text-[10px] font-black uppercase tracking-wider text-slate-400">
                 <div>Giờ</div>
                 <div className="w-3" />
                 <div>Phút</div>
               </div>
-              <div className="pointer-events-none absolute left-2 right-2 top-[58px] h-9 rounded-lg bg-white ring-1 ring-indigo-100" />
+              <div className="pointer-events-none absolute left-3 right-3 top-[76px] h-9 rounded-xl bg-white ring-1 ring-indigo-300 shadow-sm" />
               <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
                 <TimeWheel
                   label="Giờ"

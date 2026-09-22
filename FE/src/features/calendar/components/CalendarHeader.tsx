@@ -6,6 +6,7 @@ import type { CalendarViewMode } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, getMultiLangText, type TranslationKey } from '@/lib/i18n';
 import { getWeekNumber, getStartOfWeek } from '@/utils/dateUtils';
+import { UserHeroBanner } from '@/components/ui/UserHeroBanner';
 
 const LOCALE_MAP: Record<string, string> = {
   vi: 'vi-VN',
@@ -87,40 +88,30 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-indigo-900 to-slate-900 text-white border border-indigo-800/40 p-5 sm:p-6 shadow-xl shadow-indigo-950/20">
-      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-blue-500/10 blur-2xl pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col gap-5">
-        {/* Top Row: Page Title & Main Actions */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 text-indigo-200 flex items-center justify-center border border-white/15 backdrop-blur-md shadow-lg shadow-black/10 shrink-0">
-              <CalendarIcon className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading text-white">
-                {translate(language, 'calendar.title')}
-              </h1>
-              <p className="text-xs sm:text-sm font-medium text-indigo-100/90 mt-0.5">
-                {getMultiLangText(language, {
-                  vi: 'Quản lý lịch học, deadline và sự kiện trong một không gian đồng bộ.',
-                  en: 'Manage classes, deadlines, and events in one synchronized workspace.',
-                  ja: '授業、締切、イベントを一元管理。',
-                  ko: '수업, 마감일, 이벤트를 하나의 동기화된 공간에서 관리하세요.',
-                  zh: '在一个同步的空间中管理课程、截止日期和事件。',
-                  fr: 'Gérez cours, échéances et événements dans un espace synchronisé.',
-                  de: 'Verwalten Sie Kurse, Fristen und Termine an einem Ort.',
-                  es: 'Gestiona clases, fechas límite y eventos en un espacio sincronizado.',
-                })}
-              </p>
-            </div>
-          </div>
-
-          {/* Action Controls Group */}
-          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+    <div className="flex flex-col gap-4">
+      <UserHeroBanner
+        tone="calendar"
+        icon={CalendarIcon}
+        iconClassName="text-cyan-100"
+        badge={formatBadgeText()}
+        badges={(
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/85 backdrop-blur-md">
+            {formatDateTitle()}
+          </span>
+        )}
+        title={translate(language, 'calendar.title')}
+        subtitle={getMultiLangText(language, {
+          vi: 'Quản lý lịch học, deadline và sự kiện trong một không gian đồng bộ.',
+          en: 'Manage classes, deadlines, and events in one synchronized workspace.',
+          ja: '授業、締切、イベントを一元管理。',
+          ko: '수업, 마감일, 이벤트를 하나의 동기화된 공간에서 관리하세요.',
+          zh: '在一个同步的空间中管理课程、截止日期和事件。',
+          fr: 'Gérez cours, échéances et événements dans un espace synchronisé.',
+          de: 'Verwalten Sie Kurse, Fristen und Termine an einem Ort.',
+          es: 'Gestiona clases, fechas límite y eventos en un espacio sincronizado.',
+        })}
+        actions={(
+          <>
             {/* Today & Arrow Nav */}
             <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
               <button
@@ -180,24 +171,13 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               <PlusCircle className="w-4 h-4" />
               <span>{translate(language, 'calendar.newSchedule')}</span>
             </button>
-          </div>
-        </div>
+          </>
+        )}
+      />
 
-        {/* Bottom Row: Active Date Banner & Category Filters */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-white/10">
-          {/* Active Date Title */}
-          <div className="flex items-center gap-3">
-            <span className="text-base sm:text-xl font-black text-white tracking-tight font-heading">
-              {formatDateTitle()}
-            </span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-white/10 text-indigo-200 border border-white/15 backdrop-blur-md">
-              {formatBadgeText()}
-            </span>
-          </div>
-
-          {/* Category Filters */}
+      <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-3 shadow-sm backdrop-blur">
           <div className="flex items-center gap-2 overflow-x-auto">
-            <span className="text-[11px] text-indigo-200 uppercase tracking-wider font-extrabold shrink-0 mr-1">
+            <span className="shrink-0 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
               {translate(language, 'calendar.filterBy')}:
             </span>
             {categories.map((cat) => {
@@ -209,8 +189,8 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                     onClick={() => onCategoryChange('all')}
                     className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                       isActive
-                        ? 'bg-white text-indigo-700 shadow-md shadow-black/10'
-                        : 'bg-white/10 text-indigo-100 hover:bg-white/20 border border-white/10'
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
                     }`}
                   >
                     {isActive && <Check className="w-3.5 h-3.5" />}
@@ -225,8 +205,8 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                   onClick={() => onCategoryChange(cat)}
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                     isActive
-                      ? 'bg-white text-indigo-700 shadow-md shadow-black/10'
-                      : 'bg-white/10 text-indigo-100 hover:bg-white/20 border border-white/10'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
                   <span
@@ -238,7 +218,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               );
             })}
           </div>
-        </div>
       </div>
     </div>
   );

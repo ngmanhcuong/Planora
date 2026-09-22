@@ -80,16 +80,16 @@ export const CalendarPage: React.FC = () => {
       const startD = new Date(item.start);
       const endD = new Date(item.end);
       const durationHours = (endD.getTime() - startD.getTime()) / (1000 * 60 * 60);
-      heightPx = Math.max(32, Math.min(300, Math.round(durationHours * 64)));
+      heightPx = Math.max(76, Math.min(300, Math.round(durationHours * 64)));
       timeRange = `${String(startD.getHours()).padStart(2, '0')}:${String(startD.getMinutes()).padStart(2, '0')} – ${String(endD.getHours()).padStart(2, '0')}:${String(endD.getMinutes()).padStart(2, '0')}`;
     }
 
     const isTask = item.sourceType === 'TASK';
     const isTimetable = item.sourceType === 'TIMETABLE';
     const catName = item.category?.name || (isTask ? 'Deadline' : isTimetable ? 'Thời khóa biểu' : 'Sự kiện');
-    const catBg = item.category?.bgColor || (isTask ? '#FFE4E6' : isTimetable ? '#D8E2FF' : '#EEF2FF');
-    const catText = item.category?.textColor || (isTask ? '#991B1B' : isTimetable ? '#001A42' : '#312E81');
-    const catColor = item.category?.color || (isTask ? '#E11D48' : isTimetable ? '#0058BE' : '#4F46E5');
+    const catBg = item.category?.bgColor || (isTask ? '#FFF7ED' : isTimetable ? '#ECFDF5' : '#EFF6FF');
+    const catText = item.category?.textColor || (isTask ? '#9A3412' : isTimetable ? '#065F46' : '#1E3A8A');
+    const catColor = item.category?.color || (isTask ? '#F97316' : isTimetable ? '#10B981' : '#2563EB');
 
     return {
       id: item.id || `evt_${idx}`,
@@ -116,7 +116,7 @@ export const CalendarPage: React.FC = () => {
   const todayItemsCount = filteredEvents.filter((evt) => evt.dateKey === todayKey).length;
 
   return (
-    <div className="flex flex-col gap-6 w-full min-h-screen pb-10">
+    <div className="flex w-full flex-col gap-6 pb-12">
       <CalendarHeader
         currentDate={currentDate}
         onPrevWeek={handlePrevWeek}
