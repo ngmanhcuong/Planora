@@ -36,10 +36,29 @@ export interface UpdateTimetableItemPayload {
   color?: string;
 }
 
+type WeeklyTimetableApiPayload = {
+  timetable: ApiTimetable | null;
+  items?: ApiTimetableItem[];
+  days?: { dayOfWeek: number; dayName: string; items: ApiTimetableItem[] }[];
+};
+
+const normalizeWeeklyItems = (payload: WeeklyTimetableApiPayload): ApiTimetableItem[] => {
+  if (payload.items?.length) return payload.items;
+  if (payload.days?.length) {
+    return payload.days.flatMap((day) => day.items ?? []);
+  }
+  if (payload.timetable?.items?.length) return payload.timetable.items;
+  return [];
+};
+
 export const timetableApi = {
   getWeeklyTimetable: async (): Promise<{ timetable: ApiTimetable | null; items: ApiTimetableItem[] }> => {
-    const response = await apiClient.get<ApiResponse<{ timetable: ApiTimetable | null; items: ApiTimetableItem[] }>>('/timetable/week');
-    return response.data.data;
+    const response = await apiClient.get<ApiResponse<WeeklyTimetableApiPayload>>('/timetable/week');
+    const payload = response.data.data;
+    return {
+      timetable: payload.timetable,
+      items: normalizeWeeklyItems(payload),
+    };
   },
 
   getTimetables: async (): Promise<ApiTimetable[]> => {

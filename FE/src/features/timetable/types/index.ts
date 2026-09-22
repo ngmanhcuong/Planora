@@ -2,10 +2,10 @@ export interface TimetableClassItem {
   id: string;
   subjectName: string;
   courseCode: string;
-  dayIndex: number; // 0 = Mon, 1 = Tue, 2 = Wed, 3 = Thu, 4 = Fri, 5 = Sat
+  dayIndex: number; // 0 = Mon … 6 = Sun
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
   timeRange: string;
-  startSlot: number; // 1 to 10
-  slotSpan: number; // e.g. 3 slots
   room: string;
   lecturer: string;
   color: string;

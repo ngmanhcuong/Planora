@@ -1,7 +1,7 @@
 import { Award, BookOpenCheck, Flame, TrendingUp } from 'lucide-react';
 import type { UserProfileData } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { getMultiLangText } from '@/lib/i18n';
+import { getProfileCopy } from '../i18n/profileCopy';
 
 export interface AcademicSummaryCardProps {
   profile: UserProfileData;
@@ -9,25 +9,13 @@ export interface AcademicSummaryCardProps {
 
 export const AcademicSummaryCard: React.FC<AcademicSummaryCardProps> = ({ profile }) => {
   const language = useCurrentLanguage();
+  const copy = getProfileCopy(language);
   const creditPercent = Math.round((profile.completedCredits / profile.totalCredits) * 100);
   const equivalentTenPointGpa = Number.isFinite(profile.gpa) ? ((profile.gpa / 4) * 10).toFixed(1) : '0.0';
-  const copy = {
-    title: getMultiLangText(language, { vi: 'Tóm tắt học tập', en: 'Academic summary', es: 'Resumen académico' }),
-    subtitle: getMultiLangText(language, { vi: 'Theo dõi GPA, tín chỉ và nhịp học hiện tại.', en: 'Track GPA, credits, and your current study rhythm.', es: 'Sigue tu GPA, créditos y ritmo académico actual.' }),
-    gpa: getMultiLangText(language, { vi: 'Điểm trung bình', en: 'Average grade', es: 'Promedio' }),
-    credits: getMultiLangText(language, { vi: 'Tín chỉ tích lũy', en: 'Completed credits', es: 'Créditos acumulados' }),
-    habit: getMultiLangText(language, { vi: 'Chuỗi thói quen', en: 'Habit streak', es: 'Racha de hábitos' }),
-    equivalent: getMultiLangText(language, { vi: 'Tương đương', en: 'Equivalent to', es: 'Equivale a' }),
-    scale10: getMultiLangText(language, { vi: 'hệ 10', en: 'on 10-point scale', es: 'en escala de 10' }),
-    program: getMultiLangText(language, { vi: 'chương trình', en: 'program', es: 'del programa' }),
-    days: getMultiLangText(language, { vi: 'ngày', en: 'days', es: 'días' }),
-    habitHelper: getMultiLangText(language, { vi: 'Hoàn thành mục tiêu liên tục', en: 'Complete goals consistently', es: 'Objetivos completados de forma continua' }),
-    ranking: getMultiLangText(language, { vi: 'Xếp loại: Xuất sắc', en: 'Ranking: Excellent', es: 'Clasificación: Excelente' }),
-  };
 
   const summaryItems = [
     {
-      label: copy.gpa,
+      label: copy.averageGrade,
       value: profile.gpa,
       suffix: '/ 4.0',
       helper: `${copy.equivalent} ${equivalentTenPointGpa} ${copy.scale10}`,
@@ -37,7 +25,7 @@ export const AcademicSummaryCard: React.FC<AcademicSummaryCardProps> = ({ profil
       border: 'border-[#C7D2FE]',
     },
     {
-      label: copy.credits,
+      label: copy.completedCredits,
       value: profile.completedCredits,
       suffix: `/ ${profile.totalCredits} TC`,
       helper: `${creditPercent}% ${copy.program}`,
@@ -47,7 +35,7 @@ export const AcademicSummaryCard: React.FC<AcademicSummaryCardProps> = ({ profil
       border: 'border-[#99F6E4]',
     },
     {
-      label: copy.habit,
+      label: copy.habitStreak,
       value: '14',
       suffix: copy.days,
       helper: copy.habitHelper,
@@ -62,12 +50,12 @@ export const AcademicSummaryCard: React.FC<AcademicSummaryCardProps> = ({ profil
     <section className="rounded-2xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="font-heading text-lg font-bold text-[#131B2E]">{copy.title}</h3>
-          <p className="mt-1 text-sm text-[#64748B]">{copy.subtitle}</p>
+          <h3 className="font-heading text-lg font-bold text-[#131B2E]">{copy.academicSummaryTitle}</h3>
+          <p className="mt-1 text-sm text-[#64748B]">{copy.academicSummarySubtitle}</p>
         </div>
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#ECFDF5] px-3 py-1.5 text-xs font-bold text-[#047857] ring-1 ring-[#A7F3D0]">
           <TrendingUp className="h-3.5 w-3.5" />
-          {copy.ranking}
+          {copy.rankingExcellent}
         </span>
       </div>
 
@@ -83,7 +71,7 @@ export const AcademicSummaryCard: React.FC<AcademicSummaryCardProps> = ({ profil
               <span className="text-sm font-semibold text-[#64748B]">{item.suffix}</span>
             </div>
             <p className="mt-2 text-xs font-medium text-[#64748B]">{item.helper}</p>
-            {item.label === copy.credits && (
+            {item.label === copy.completedCredits && (
               <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/80">
                 <div
                   className="h-full rounded-full bg-[#0F766E] transition-all duration-500"

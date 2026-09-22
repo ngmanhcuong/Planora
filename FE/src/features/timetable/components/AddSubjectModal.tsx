@@ -2,61 +2,83 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { BookOpen, MapPin, User, BookmarkPlus, ChevronDown, Check } from 'lucide-react';
+import { BookOpen, MapPin, User, BookmarkPlus, ChevronDown, Check, Clock } from 'lucide-react';
 import type { TimetableClassItem } from '../types';
+import { defaultEndTime } from '../utils/timetableTime';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { translate, type TranslationKey } from '@/lib/i18n';
 
 export interface AddSubjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddClass: (cls: Omit<TimetableClassItem, 'id'>) => void;
   initialDayIndex?: number;
-  initialStartSlot?: number;
+  initialStartTime?: string;
 }
+
+const WEEKDAY_KEYS: TranslationKey[] = [
+  'weekday.mon',
+  'weekday.tue',
+  'weekday.wed',
+  'weekday.thu',
+  'weekday.fri',
+  'weekday.sat',
+  'weekday.sun',
+];
 
 export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
   isOpen,
   onClose,
   onAddClass,
   initialDayIndex,
-  initialStartSlot,
+  initialStartTime,
 }) => {
+  const language = useCurrentLanguage();
   const [subjectName, setSubjectName] = useState('');
   const [courseCode, setCourseCode] = useState('');
   const [dayIndex, setDayIndex] = useState<number>(0);
-  const [startSlot, setStartSlot] = useState<number>(1);
-  const [slotSpan, setSlotSpan] = useState<number>(3);
+  const [startTime, setStartTime] = useState('09:00');
+  const [endTime, setEndTime] = useState('10:30');
   const [room, setRoom] = useState('');
   const [lecturer, setLecturer] = useState('');
   const [type, setType] = useState<'theory' | 'practice' | 'exam'>('theory');
   const [openSelect, setOpenSelect] = useState<string | null>(null);
+  const [timeError, setTimeError] = useState('');
 
   React.useEffect(() => {
     if (!isOpen) return;
     if (typeof initialDayIndex === 'number') setDayIndex(initialDayIndex);
-    if (typeof initialStartSlot === 'number') setStartSlot(initialStartSlot);
-  }, [isOpen, initialDayIndex, initialStartSlot]);
+    if (initialStartTime) {
+      setStartTime(initialStartTime);
+      setEndTime(defaultEndTime(initialStartTime, 60));
+    }
+  }, [isOpen, initialDayIndex, initialStartTime]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectName.trim()) return;
 
-    const typeLabelMap = {
-      theory: 'Lý thuyết',
-      practice: 'Thực hành',
-      exam: 'Thi / Kiểm tra',
-    };
+    if (endTime <= startTime) {
+      setTimeError(translate(language, 'timetable.timeInvalid'));
+      return;
+    }
+    setTimeError('');
 
-    const endSlot = startSlot + slotSpan - 1;
+    const typeLabelMap = {
+      theory: translate(language, 'timetable.type.theory'),
+      practice: translate(language, 'timetable.type.practice'),
+      exam: translate(language, 'timetable.type.exam'),
+    };
 
     onAddClass({
       subjectName,
-      courseCode: courseCode || 'IT-SUBJ',
+      courseCode: courseCode || 'EVENT',
       dayIndex,
-      startSlot,
-      slotSpan,
-      timeRange: `Tiết ${startSlot} - ${endSlot}`,
-      room: room || 'Phòng học chưa xếp',
-      lecturer: lecturer || 'Chưa cập nhật',
+      startTime,
+      endTime,
+      timeRange: `${startTime} – ${endTime}`,
+      room: room || translate(language, 'timetable.defaultRoom'),
+      lecturer: lecturer || translate(language, 'timetable.defaultLecturer'),
       color: type === 'practice' ? '#006E4B' : type === 'exam' ? '#BA1A1A' : '#0058BE',
       bgColor: type === 'practice' ? '#D7E8CD' : type === 'exam' ? '#FFDAD6' : '#D8E2FF',
       textColor: type === 'practice' ? '#002113' : type === 'exam' ? '#93000A' : '#001A42',
@@ -64,11 +86,12 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
       typeLabel: typeLabelMap[type],
     });
 
-    // Reset
     setSubjectName('');
     setCourseCode('');
     setRoom('');
     setLecturer('');
+    setStartTime('09:00');
+    setEndTime('10:30');
     onClose();
   };
 
@@ -143,29 +166,35 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
     );
   };
 
+  const classTypes: { id: 'theory' | 'practice' | 'exam'; labelKey: TranslationKey }[] = [
+    { id: 'theory', labelKey: 'timetable.type.theory' },
+    { id: 'practice', labelKey: 'timetable.type.practice' },
+    { id: 'exam', labelKey: 'timetable.type.exam' },
+  ];
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Thêm môn học mới vào TKB"
+      title={translate(language, 'timetable.addModalTitle')}
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.45fr_0.85fr]">
           <Input
-            label="Tên môn học *"
+            label={`${translate(language, 'timetable.field.name')} *`}
             value={subjectName}
             onChange={(e) => setSubjectName(e.target.value)}
-            placeholder="VD: Kiểm thử phần mềm"
+            placeholder={translate(language, 'timetable.field.namePlaceholder')}
             leftIcon={<BookOpen className="w-4 h-4" />}
             className="h-12 rounded-xl"
             required
           />
           <Input
-            label="Mã môn học"
+            label={translate(language, 'timetable.field.code')}
             value={courseCode}
             onChange={(e) => setCourseCode(e.target.value)}
-            placeholder="VD: IT4010"
+            placeholder={translate(language, 'timetable.field.codePlaceholder')}
             className="h-12 rounded-xl"
           />
         </div>
@@ -174,73 +203,79 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <FormSelect
               id="day"
-              label="Thứ trong tuần"
+              label={translate(language, 'timetable.field.weekday')}
               value={dayIndex}
               onChange={setDayIndex}
-              options={[
-                { value: 0, label: 'Thứ Hai' },
-                { value: 1, label: 'Thứ Ba' },
-                { value: 2, label: 'Thứ Tư' },
-                { value: 3, label: 'Thứ Năm' },
-                { value: 4, label: 'Thứ Sáu' },
-                { value: 5, label: 'Thứ Bảy' },
-                { value: 6, label: 'Chủ Nhật' },
-              ]}
+              options={WEEKDAY_KEYS.map((key, value) => ({
+                value,
+                label: translate(language, key),
+              }))}
             />
 
-            <FormSelect
-              id="startSlot"
-              label="Tiết bắt đầu"
-              value={startSlot}
-              onChange={setStartSlot}
-              options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((slot) => ({ value: slot, label: `Tiết ${slot}` }))}
-            />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-[#131B2E]">{translate(language, 'timetable.field.startTime')}</label>
+              <div className="relative">
+                <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => {
+                    setStartTime(e.target.value);
+                    if (endTime <= e.target.value) {
+                      setEndTime(defaultEndTime(e.target.value, 60));
+                    }
+                  }}
+                  className="h-12 w-full rounded-xl border border-[#E2E8F0] bg-white pl-10 pr-3 text-sm font-semibold text-[#131B2E] shadow-sm outline-none transition focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/10"
+                  required
+                />
+              </div>
+            </div>
 
-            <FormSelect
-              id="slotSpan"
-              label="Số tiết"
-              value={slotSpan}
-              onChange={setSlotSpan}
-              options={[
-                { value: 1, label: '1 tiết' },
-                { value: 2, label: '2 tiết' },
-                { value: 3, label: '3 tiết' },
-                { value: 4, label: '4 tiết' },
-              ]}
-            />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-[#131B2E]">{translate(language, 'timetable.field.endTime')}</label>
+              <div className="relative">
+                <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
+                <input
+                  type="time"
+                  value={endTime}
+                  min={startTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="h-12 w-full rounded-xl border border-[#E2E8F0] bg-white pl-10 pr-3 text-sm font-semibold text-[#131B2E] shadow-sm outline-none transition focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/10"
+                  required
+                />
+              </div>
+            </div>
           </div>
+          {timeError && <p className="mt-2 text-xs font-semibold text-[#BA1A1A]">{timeError}</p>}
+          <p className="mt-2 text-[11px] leading-relaxed text-[#64748B]">{translate(language, 'timetable.timeHint')}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input
-            label="Phòng học"
+            label={translate(language, 'timetable.field.location')}
             value={room}
             onChange={(e) => setRoom(e.target.value)}
-            placeholder="VD: Phòng A2-304 / Lab 02"
+            placeholder={translate(language, 'timetable.field.locationPlaceholder')}
             leftIcon={<MapPin className="w-4 h-4" />}
             className="h-12 rounded-xl"
           />
           <Input
-            label="Giảng viên"
+            label={translate(language, 'timetable.field.instructor')}
             value={lecturer}
             onChange={(e) => setLecturer(e.target.value)}
-            placeholder="VD: TS. Nguyễn Văn A"
+            placeholder={translate(language, 'timetable.field.instructorPlaceholder')}
             leftIcon={<User className="w-4 h-4" />}
             className="h-12 rounded-xl"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold text-[#131B2E]">Loại hình lớp học</label>
+          <label className="text-xs font-semibold text-[#131B2E]">{translate(language, 'timetable.field.type')}</label>
           <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] p-1.5">
-            {[
-              { id: 'theory', label: 'Lý thuyết' },
-              { id: 'practice', label: 'Thực hành' },
-              { id: 'exam', label: 'Thi / Kiểm tra' },
-            ].map((t) => (
+            {classTypes.map((t) => (
               <label
                 key={t.id}
-                className={`flex h-10 items-center justify-center rounded-xl px-3 text-sm font-bold cursor-pointer transition-all ${
+                className={`flex h-10 cursor-pointer items-center justify-center rounded-xl px-3 text-sm font-bold transition-all ${
                   type === t.id
                     ? 'bg-[#4F46E5] text-white shadow-md shadow-[#4F46E5]/20'
                     : 'text-[#64748B] hover:bg-white hover:text-[#4F46E5]'
@@ -251,23 +286,22 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
                   name="classType"
                   value={t.id}
                   checked={type === t.id}
-                  onChange={() => setType(t.id as any)}
+                  onChange={() => setType(t.id)}
                   className="hidden"
                 />
-                <span>{t.label}</span>
+                <span>{translate(language, t.labelKey)}</span>
               </label>
             ))}
           </div>
         </div>
 
-        {/* Modal Footer Actions */}
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8F0] mt-1">
+        <div className="mt-1 flex items-center justify-end gap-2 border-t border-[#E2E8F0] pt-3">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Hủy bỏ
+            {translate(language, 'timetable.cancel')}
           </Button>
           <Button type="submit" variant="primary">
             <BookmarkPlus className="w-4 h-4" />
-            <span>Thêm môn học</span>
+            <span>{translate(language, 'timetable.addSubject')}</span>
           </Button>
         </div>
       </form>

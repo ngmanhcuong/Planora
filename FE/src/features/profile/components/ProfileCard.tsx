@@ -4,7 +4,7 @@ import type { UserProfileData } from '../types';
 import { useUpdateProfile } from '../hooks/useProfile';
 import { prepareAvatar } from '../utils/prepareAvatar';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { getMultiLangText } from '@/lib/i18n';
+import { getProfileCopy } from '../i18n/profileCopy';
 import { translateProfileDisplayValue } from '../utils/profileDisplay';
 
 export interface ProfileCardProps {
@@ -13,6 +13,7 @@ export interface ProfileCardProps {
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
   const language = useCurrentLanguage();
+  const copy = getProfileCopy(language);
   const [brokenAvatar, setBrokenAvatar] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState('');
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
@@ -35,11 +36,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
       await updateProfile.mutateAsync({ avatarUrl });
       setBrokenAvatar(null);
     } catch {
-      setAvatarError(getMultiLangText(language, {
-        vi: 'Không thể lưu ảnh. Hãy chọn ảnh hợp lệ (tối đa 5 MB) và thử lại.',
-        en: 'Could not save the image. Choose a valid image up to 5 MB and try again.',
-        es: 'No se pudo guardar la imagen. Elige una imagen válida de hasta 5 MB e inténtalo de nuevo.',
-      }));
+      setAvatarError(copy.avatarSaveError);
     } finally {
       setIsSavingAvatar(false);
     }
@@ -51,7 +48,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
         <div className="absolute right-5 top-5 hidden rounded-full bg-white/18 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/25 backdrop-blur-sm sm:inline-flex items-center gap-1.5">
           <Award className="h-3.5 w-3.5" />
-          {getMultiLangText(language, { vi: 'Sinh viên Ưu tú', en: 'Excellent student', es: 'Estudiante destacado' })}
+          {copy.excellentStudent}
         </div>
       </div>
 
@@ -74,7 +71,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
               <label
                 htmlFor="avatar-upload"
                 className="absolute bottom-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl bg-[#4F46E5] text-white shadow-md transition hover:bg-[#4338CA]"
-                title={getMultiLangText(language, { vi: 'Đổi ảnh đại diện', en: 'Change avatar', es: 'Cambiar avatar' })}
+                title={copy.changeAvatar}
               >
                 <Camera className="h-4 w-4" />
                 <input
@@ -95,7 +92,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
                 </h2>
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF5] px-2.5 py-1 text-xs font-bold text-[#047857] ring-1 ring-[#A7F3D0]">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  {getMultiLangText(language, { vi: 'Đang học', en: 'Studying', es: 'Estudiando' })}
+                  {copy.studying}
                 </span>
               </div>
               <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-[#64748B]">
@@ -105,13 +102,13 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
             </div>
           </div>
 
-          {isSavingAvatar && <p role="status" className="text-sm text-[#64748B]">{getMultiLangText(language, { vi: 'Đang lưu ảnh đại diện...', en: 'Saving avatar...', es: 'Guardando avatar...' })}</p>}
+          {isSavingAvatar && <p role="status" className="text-sm text-[#64748B]">{copy.savingAvatar}</p>}
           {avatarError && <p role="alert" className="text-sm text-red-600">{avatarError}</p>}
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { label: 'MSSV', value: profile.studentId, icon: GraduationCap },
-              { label: getMultiLangText(language, { vi: 'Ngành học', en: 'Major', es: 'Carrera' }), value: translateProfileDisplayValue(language, profile.major), icon: Building2 },
-              { label: getMultiLangText(language, { vi: 'Tham gia', en: 'Joined', es: 'Ingreso' }), value: profile.joinedDate, icon: Calendar },
+              { label: copy.studentId, value: profile.studentId, icon: GraduationCap },
+              { label: copy.major, value: translateProfileDisplayValue(language, profile.major), icon: Building2 },
+              { label: copy.joined, value: profile.joinedDate, icon: Calendar },
             ].map((item) => (
               <div
                 key={item.label}

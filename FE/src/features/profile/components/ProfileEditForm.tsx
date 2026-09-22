@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { type FieldErrors, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { AlertCircle, BookOpen, Check, CheckCircle2, ChevronDown, Edit3, GraduationCap, Mail, Plus, Save, Search, School, User, X } from 'lucide-react';
-import { updateProfileSchema, type UpdateProfileInput } from '../validations/profileSchemas';
+import { createUpdateProfileSchema, type UpdateProfileInput } from '../validations/profileSchemas';
 import type { UserProfileData } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
-import { getMultiLangText } from '@/lib/i18n';
+import { getProfileCopy } from '../i18n/profileCopy';
 import { translateProfileDisplayValue } from '../utils/profileDisplay';
 
 const MAJOR_OPTIONS = [
@@ -58,6 +58,7 @@ const SelectableTextField: React.FC<SelectableTextFieldProps> = ({
   onChange,
 }) => {
   const language = useCurrentLanguage();
+  const selectCopy = getProfileCopy(language);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -67,13 +68,6 @@ const SelectableTextField: React.FC<SelectableTextFieldProps> = ({
   const trimmedQuery = query.trim().toLowerCase();
   const filteredOptions = options.filter((option) => option.toLowerCase().includes(trimmedQuery));
   const hasCustomValue = value && !options.includes(value);
-  const selectCopy = {
-    notUpdated: getMultiLangText(language, { vi: 'Chưa cập nhật', en: 'Not updated', es: 'Sin actualizar' }),
-    search: getMultiLangText(language, { vi: 'Tìm trong danh sách...', en: 'Search the list...', es: 'Buscar en la lista...' }),
-    noResult: getMultiLangText(language, { vi: 'Không có trong danh sách.', en: 'No matching option.', es: 'No está en la lista.' }),
-    custom: getMultiLangText(language, { vi: 'Thêm tùy chỉnh', en: 'Add custom value', es: 'Agregar personalizado' }),
-    chooseFromList: getMultiLangText(language, { vi: 'Chọn từ danh sách', en: 'Choose from list', es: 'Elegir de la lista' }),
-  };
   const listMaxHeight = typeof panelStyle.maxHeight === 'number'
     ? Math.max(120, panelStyle.maxHeight - 112)
     : 208;
@@ -158,7 +152,7 @@ const SelectableTextField: React.FC<SelectableTextFieldProps> = ({
               setIsOpen(true);
             }}
             className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#F1F5F9]"
-            title={selectCopy.chooseFromList}
+            title={selectCopy.selectChooseFromList}
           >
             <ChevronDown className="h-4 w-4" />
           </button>
@@ -197,7 +191,7 @@ const SelectableTextField: React.FC<SelectableTextFieldProps> = ({
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder={selectCopy.search}
+                placeholder={selectCopy.selectSearch}
                 className="h-9 w-full rounded-xl bg-[#F8FAFC] pl-9 pr-3 text-sm text-[#131B2E] outline-none ring-1 ring-[#E2E8F0] transition focus:bg-white focus:ring-[#4F46E5]"
                 autoFocus
               />
@@ -238,7 +232,7 @@ const SelectableTextField: React.FC<SelectableTextFieldProps> = ({
             ))}
 
             {filteredOptions.length === 0 && (
-              <p className="px-3 py-2 text-xs text-[#64748B]">{selectCopy.noResult}</p>
+              <p className="px-3 py-2 text-xs text-[#64748B]">{selectCopy.selectNoResult}</p>
             )}
             </div>
 
@@ -253,7 +247,7 @@ const SelectableTextField: React.FC<SelectableTextFieldProps> = ({
               className="flex w-full items-center gap-2 rounded-xl bg-[#EEF2FF] px-3 py-2 text-sm font-semibold text-[#4F46E5] hover:bg-[#E0E7FF]"
             >
               <Plus className="h-4 w-4" />
-              {selectCopy.custom}
+              {selectCopy.selectCustom}
             </button>
             </div>
           </div>
@@ -281,31 +275,13 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   saveSuccess = false,
 }) => {
   const language = useCurrentLanguage();
+  const copy = getProfileCopy(language);
+  const profileSchema = useMemo(() => createUpdateProfileSchema(language), [language]);
   const [isEditing, setIsEditing] = useState(false);
   const [validationPopup, setValidationPopup] = useState<string | null>(null);
-  const formValue = (value?: string) => value === 'Chưa cập nhật' ? '' : value;
-  const copy = {
-    notUpdated: getMultiLangText(language, { vi: 'Chưa cập nhật', en: 'Not updated', es: 'Sin actualizar' }),
-    title: getMultiLangText(language, { vi: 'Thông tin cá nhân', en: 'Personal information', es: 'Información personal' }),
-    subtitle: getMultiLangText(language, { vi: 'Xem và cập nhật thông tin hồ sơ hiển thị trên Planora.', en: 'View and update the profile information shown on Planora.', es: 'Consulta y actualiza la información del perfil que se muestra en Planora.' }),
-    saved: getMultiLangText(language, { vi: 'Đã lưu', en: 'Saved', es: 'Guardado' }),
-    cancel: getMultiLangText(language, { vi: 'Hủy', en: 'Cancel', es: 'Cancelar' }),
-    save: getMultiLangText(language, { vi: 'Lưu thay đổi', en: 'Save changes', es: 'Guardar cambios' }),
-    edit: getMultiLangText(language, { vi: 'Chỉnh sửa', en: 'Edit', es: 'Editar' }),
-    contact: getMultiLangText(language, { vi: 'Thông tin liên hệ', en: 'Contact information', es: 'Información de contacto' }),
-    academic: getMultiLangText(language, { vi: 'Thông tin học tập', en: 'Academic information', es: 'Información académica' }),
-    fullName: getMultiLangText(language, { vi: 'Họ và tên', en: 'Full name', es: 'Nombre completo' }),
-    email: getMultiLangText(language, { vi: 'Email', en: 'Email', es: 'Email' }),
-    major: getMultiLangText(language, { vi: 'Ngành học', en: 'Major', es: 'Carrera' }),
-    university: getMultiLangText(language, { vi: 'Trường Đại học', en: 'University', es: 'Universidad' }),
-    completedCredits: getMultiLangText(language, { vi: 'Tín chỉ tích lũy', en: 'Completed credits', es: 'Créditos acumulados' }),
-    totalCredits: getMultiLangText(language, { vi: 'Tổng tín chỉ', en: 'Total credits', es: 'Créditos totales' }),
-    bioTitle: getMultiLangText(language, { vi: 'Giới thiệu bản thân', en: 'About me', es: 'Presentación personal' }),
-    fullNamePlaceholder: getMultiLangText(language, { vi: 'Nhập họ và tên...', en: 'Enter your full name...', es: 'Introduce tu nombre completo...' }),
-    majorPlaceholder: getMultiLangText(language, { vi: 'Nhập ngành học của bạn...', en: 'Enter your major...', es: 'Introduce tu carrera...' }),
-    universityPlaceholder: getMultiLangText(language, { vi: 'Nhập tên trường của bạn...', en: 'Enter your university...', es: 'Introduce el nombre de tu universidad...' }),
-    bioPlaceholder: getMultiLangText(language, { vi: 'Mô tả ngắn về sở thích, định hướng học tập...', en: 'Write a short note about your interests or study goals...', es: 'Describe brevemente tus intereses u objetivos académicos...' }),
-    bioTip: getMultiLangText(language, { vi: 'Mẹo: phần giới thiệu nên ngắn gọn, nêu mục tiêu học tập hoặc phong cách làm việc của bạn.', en: 'Tip: keep the introduction short and mention your study goals or working style.', es: 'Consejo: mantén la presentación breve y menciona tus objetivos académicos o estilo de trabajo.' }),
+  const formValue = (value?: string) => {
+    if (!value || value === 'Chưa cập nhật' || value === copy.notUpdated) return '';
+    return value;
   };
 
   const {
@@ -316,7 +292,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     watch,
     formState: { errors },
   } = useForm<UpdateProfileInput>({
-    resolver: zodResolver(updateProfileSchema),
+    resolver: zodResolver(profileSchema),
     defaultValues: {
       name: profile.name,
       email: profile.email,
@@ -357,7 +333,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
 
   const showValidationPopup = (formErrors: FieldErrors<UpdateProfileInput>) => {
     const firstError = Object.values(formErrors).find((error) => error?.message);
-    setValidationPopup(firstError?.message?.toString() || 'Vui lòng kiểm tra lại thông tin vừa nhập.');
+    setValidationPopup(firstError?.message?.toString() || copy.validationCheck);
   };
 
   const handleCancel = () => {
@@ -390,8 +366,8 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
 
       <div className="mb-5 flex flex-col gap-3 border-b border-[#F1F5F9] pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="font-heading text-lg font-bold text-[#131B2E]">{copy.title}</h3>
-          <p className="mt-1 text-sm text-[#64748B]">{copy.subtitle}</p>
+          <h3 className="font-heading text-lg font-bold text-[#131B2E]">{copy.personalInfoTitle}</h3>
+          <p className="mt-1 text-sm text-[#64748B]">{copy.personalInfoSubtitle}</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -416,7 +392,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
                 className="rounded-xl px-5"
               >
                 <Save className="h-4 w-4" />
-                <span>{copy.save}</span>
+                <span>{copy.saveChanges}</span>
               </Button>
             </>
           ) : (
@@ -434,7 +410,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
             <div className="rounded-2xl bg-[#F8FAFC] p-4 ring-1 ring-[#E2E8F0]">
               <h4 className="mb-4 flex items-center gap-2 text-sm font-bold text-[#131B2E]">
                 <User className="h-4 w-4 text-[#4F46E5]" />
-                {copy.contact}
+                {copy.contactInfo}
               </h4>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="rounded-xl bg-white p-3 ring-1 ring-[#E2E8F0]">
@@ -442,7 +418,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
                   <p className="mt-1 truncate text-sm font-bold text-[#131B2E]">{displayValue(profile.name)}</p>
                 </div>
                 <div className="rounded-xl bg-white p-3 ring-1 ring-[#E2E8F0]">
-                  <p className="text-xs font-semibold text-[#64748B]">Email</p>
+                  <p className="text-xs font-semibold text-[#64748B]">{copy.email}</p>
                   <p className="mt-1 truncate text-sm font-bold text-[#131B2E]">{displayValue(profile.email)}</p>
                 </div>
               </div>
@@ -451,14 +427,14 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
             <div className="rounded-2xl bg-[#F8FAFC] p-4 ring-1 ring-[#E2E8F0]">
               <h4 className="mb-4 flex items-center gap-2 text-sm font-bold text-[#131B2E]">
                 <GraduationCap className="h-4 w-4 text-[#4F46E5]" />
-                {copy.academic}
+                {copy.academicInfo}
               </h4>
               <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
                 {[
-                  ['MSSV', profile.studentId],
+                  [copy.studentId, profile.studentId],
                   [copy.major, translateProfileDisplayValue(language, profile.major)],
-                  [copy.university, translateProfileDisplayValue(language, profile.university)],
-                  ['GPA', `${profile.gpa} / 4.0`],
+                  [copy.universityLabel, translateProfileDisplayValue(language, profile.university)],
+                  [copy.gpaLabel, `${profile.gpa} / 4.0`],
                   [copy.completedCredits, `${profile.completedCredits} TC`],
                   [copy.totalCredits, `${profile.totalCredits} TC`],
                 ].map(([label, value]) => (
@@ -474,7 +450,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
           <div className="rounded-2xl bg-[#F8FAFC] p-4 ring-1 ring-[#E2E8F0] xl:col-span-5">
             <h4 className="mb-4 flex items-center gap-2 text-sm font-bold text-[#131B2E]">
               <BookOpen className="h-4 w-4 text-[#4F46E5]" />
-              {copy.bioTitle}
+              {copy.aboutMe}
             </h4>
             <p className="min-h-[132px] rounded-xl bg-white p-3 text-sm leading-relaxed text-[#131B2E] ring-1 ring-[#E2E8F0]">
               {displayValue(profile.bio)}
@@ -488,7 +464,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
               <div className="rounded-2xl bg-[#F8FAFC] p-4 ring-1 ring-[#E2E8F0]">
                 <h4 className="mb-4 flex items-center gap-2 text-sm font-bold text-[#131B2E]">
                   <User className="h-4 w-4 text-[#4F46E5]" />
-                  {copy.contact}
+                  {copy.contactInfo}
                 </h4>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Input
@@ -514,11 +490,11 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
               <div className="rounded-2xl bg-[#F8FAFC] p-4 ring-1 ring-[#E2E8F0]">
                 <h4 className="mb-4 flex items-center gap-2 text-sm font-bold text-[#131B2E]">
                   <GraduationCap className="h-4 w-4 text-[#4F46E5]" />
-                  {copy.academic}
+                  {copy.academicInfo}
                 </h4>
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                   <Input
-                    label="MSSV"
+                    label={copy.studentId}
                     placeholder="VD: 2023601234"
                     leftIcon={<GraduationCap className="h-4 w-4" />}
                     {...register('studentId')}
@@ -537,7 +513,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
 
                   <input type="hidden" {...register('university')} />
                   <SelectableTextField
-                    label={copy.university}
+                    label={copy.universityLabel}
                     icon={<School className="h-4 w-4" />}
                     options={UNIVERSITY_OPTIONS}
                     value={selectedUniversity}
@@ -546,7 +522,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
                     onChange={(value) => setValue('university', value, { shouldDirty: true, shouldValidate: true })}
                   />
                   <Input
-                    label="GPA"
+                    label={copy.gpaLabel}
                     type="number"
                     min="0"
                     max="4"
@@ -583,10 +559,10 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
             <div className="rounded-2xl bg-[#F8FAFC] p-4 ring-1 ring-[#E2E8F0] xl:col-span-5">
               <h4 className="mb-4 flex items-center gap-2 text-sm font-bold text-[#131B2E]">
                 <BookOpen className="h-4 w-4 text-[#4F46E5]" />
-                {copy.bioTitle}
+                {copy.aboutMe}
               </h4>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#131B2E]">Bio</label>
+                <label className="text-xs font-semibold text-[#131B2E]">{copy.bioField}</label>
                 <textarea
                   {...register('bio')}
                   rows={8}
