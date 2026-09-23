@@ -1,9 +1,15 @@
 import { z } from 'zod';
 
-const imageDataOrUrlSchema = (message: string, maxLength = 180000) => z
+const imageDataOrUrlSchema = (message: string, maxLength = 1000000) => z
   .string()
   .max(maxLength)
-  .refine((value) => /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value) || /^https?:\/\//.test(value) && z.url().safeParse(value).success, { message })
+  .refine(
+    (value) =>
+      /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value) ||
+      (/^https?:\/\//.test(value) && z.url().safeParse(value).success) ||
+      /^\/profile-backgrounds\/[A-Za-z0-9._-]+\.(jpg|jpeg|png|webp|svg)$/i.test(value),
+    { message }
+  )
   .optional()
   .nullable()
   .or(z.literal(''));
@@ -71,3 +77,6 @@ export const updateProfileSchema = z
   );
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+
+

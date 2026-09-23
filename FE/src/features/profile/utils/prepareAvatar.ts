@@ -5,7 +5,7 @@ export type AvatarCropOptions = {
 };
 
 export async function prepareAvatar(file: File, options: AvatarCropOptions = {}): Promise<string> {
-  if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+  if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
     throw new Error('Invalid image');
   }
   const url = URL.createObjectURL(file);

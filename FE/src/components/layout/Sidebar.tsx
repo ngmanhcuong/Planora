@@ -98,7 +98,7 @@ export const Sidebar: React.FC = () => {
       <button
         onClick={toggleSidebar}
         className="absolute -right-4 top-1/2 z-40 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[#64748B] shadow-md shadow-slate-900/10 transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
-        title={isSidebarCollapsed ? translate(language, 'sidebar.expand') : translate(language, 'sidebar.collapse')}
+        aria-label={isSidebarCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
       >
         {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
       </button>

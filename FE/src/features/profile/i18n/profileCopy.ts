@@ -120,14 +120,14 @@ export const getProfileCopy = (language: string | null | undefined) => {
       'Guardando fondo...'
     ), lang),
     coverSaveError: pick(L(
-      'Không thể lưu ảnh nền. Hãy chọn ảnh hợp lệ (tối đa 5 MB) và thử lại.',
-      'Could not save the background. Choose a valid image up to 5 MB and try again.',
-      '背景を保存できませんでした。5 MB以下の有効な画像を選んで再試行してください。',
-      '배경을 저장할 수 없습니다. 5MB 이하의 유효한 이미지를 선택해 다시 시도하세요.',
-      '无法保存背景。请选择不超过 5 MB 的有效图片后重试。',
-      'Impossible d’enregistrer l’arrière-plan. Choisissez une image valide (max. 5 Mo).',
-      'Hintergrund konnte nicht gespeichert werden. Wähle ein gültiges Bild bis 5 MB.',
-      'No se pudo guardar el fondo. Elige una imagen válida de hasta 5 MB e inténtalo de nuevo.'
+      'Không thể lưu ảnh nền. Hãy chọn ảnh hợp lệ (tối đa 20 MB) và thử lại.',
+      'Could not save the background. Choose a valid image up to 20 MB and try again.',
+      '背景を保存できませんでした。20 MB以下の有効な画像を選んで再試行してください。',
+      '배경을 저장할 수 없습니다. 20MB 이하의 유효한 이미지를 선택해 다시 시도하세요.',
+      '无法保存背景。请选择不超过 20 MB 的有效图片后重试。',
+      'Impossible d’enregistrer l’arrière-plan. Choisissez une image valide (max. 20 Mo).',
+      'Hintergrund konnte nicht gespeichert werden. Wähle ein gültiges Bild bis 20 MB.',
+      'No se pudo guardar el fondo. Elige una imagen válida de hasta 20 MB e inténtalo de nuevo.'
     ), lang),
     studying: pick(L(
       'Đang học',
@@ -180,14 +180,14 @@ export const getProfileCopy = (language: string | null | undefined) => {
       'Guardando avatar...'
     ), lang),
     avatarSaveError: pick(L(
-      'Không thể lưu ảnh. Hãy chọn ảnh hợp lệ (tối đa 5 MB) và thử lại.',
-      'Could not save the image. Choose a valid image up to 5 MB and try again.',
-      '画像を保存できませんでした。5 MB以下の有効な画像を選んで再試行してください。',
-      '이미지를 저장할 수 없습니다. 5MB 이하의 유효한 이미지를 선택해 다시 시도하세요.',
-      '无法保存图片。请选择不超过 5 MB 的有效图片后重试。',
-      'Impossible d’enregistrer l’image. Choisissez une image valide (max. 5 Mo).',
-      'Bild konnte nicht gespeichert werden. Wähle ein gültiges Bild bis 5 MB.',
-      'No se pudo guardar la imagen. Elige una imagen válida de hasta 5 MB e inténtalo de nuevo.'
+      'Không thể lưu ảnh. Hãy chọn ảnh hợp lệ (tối đa 20 MB) và thử lại.',
+      'Could not save the image. Choose a valid image up to 20 MB and try again.',
+      '画像を保存できませんでした。20 MB以下の有効な画像を選んで再試行してください。',
+      '이미지를 저장할 수 없습니다. 20MB 이하의 유효한 이미지를 선택해 다시 시도하세요.',
+      '无法保存图片。请选择不超过 20 MB 的有效图片后重试。',
+      'Impossible d’enregistrer l’image. Choisissez une image valide (max. 20 Mo).',
+      'Bild konnte nicht gespeichert werden. Wähle ein gültiges Bild bis 20 MB.',
+      'No se pudo guardar la imagen. Elige una imagen válida de hasta 20 MB e inténtalo de nuevo.'
     ), lang),
     academicSummaryTitle: pick(L(
       'Tóm tắt học tập',

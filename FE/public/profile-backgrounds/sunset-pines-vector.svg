@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 640" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3a27f"/><stop offset=".5" stop-color="#ffd7a6"/><stop offset="1" stop-color="#78b7b0"/></linearGradient></defs>
+  <rect width="2560" height="640" fill="url(#sky)"/>
+  <circle cx="1890" cy="155" r="78" fill="#ffe6af" opacity=".8"/>
+  <path d="M0 418 L310 280 L430 345 L660 160 L870 360 L1110 210 L1380 425 L1600 245 L1840 415 L2110 185 L2560 390 L2560 640 L0 640 Z" fill="#28565a"/>
+  <path d="M610 160 L745 305 L660 245 L570 315 Z M1110 210 L1215 330 L1110 275 L1035 345 Z M2110 185 L2255 352 L2110 280 L1985 360 Z" fill="#ffd0bd"/>
+  <path d="M0 385 C420 330 760 350 1050 390 C1340 430 1680 360 2080 390 C2280 405 2430 410 2560 400 L2560 640 L0 640 Z" fill="#123638" opacity=".85"/>
+  <g fill="#132b2e"><path d="M105 440 l45-95 l45 95 h-30 l35 65 h-34 l42 78 h-116 l42-78 h-34 l35-65z"/><path d="M238 455 l58-140 l58 140 h-38 l45 82 h-43 l50 92 h-144 l50-92 h-43 l45-82z"/><path d="M2220 445 l48-110 l48 110 h-31 l38 68 h-36 l44 82 h-126 l44-82 h-36 l38-68z"/></g>
+  <rect y="426" width="2560" height="214" fill="#2f8584" opacity=".72"/>
+  <path d="M0 430 C500 470 980 445 1280 462 C1600 482 2020 450 2560 470" stroke="#ffe1b3" stroke-width="8" fill="none" opacity=".45"/>
+</svg>

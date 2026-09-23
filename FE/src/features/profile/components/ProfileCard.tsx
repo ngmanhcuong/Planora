@@ -12,6 +12,34 @@ export interface ProfileCardProps {
   profile: UserProfileData;
 }
 
+const PROFILE_BACKGROUND_PRESETS = [
+  { id: 'misty-lake', label: 'Misty Lake', url: '/profile-backgrounds/misty-lake-ai.png' },
+  { id: 'sunset-pines', label: 'Sunset Pines', url: '/profile-backgrounds/sunset-pines-ai.png' },
+  { id: 'grey-forest', label: 'Grey Forest', url: '/profile-backgrounds/grey-forest-ai.png' },
+  { id: 'blue-mountains', label: 'Blue Mountains', url: '/profile-backgrounds/blue-mountains-ai.png' },
+  { id: 'pine-forest', label: 'Pine Forest', url: '/profile-backgrounds/pine-forest-ai.png' },
+];
+
+const normalizeCoverUrl = (coverUrl?: string | null) => {
+  if (!coverUrl) return '';
+  return coverUrl
+    .replace('/profile-backgrounds/misty-lake-vector.svg', '/profile-backgrounds/misty-lake-ai.png')
+    .replace('/profile-backgrounds/sunset-pines-vector.svg', '/profile-backgrounds/sunset-pines-ai.png')
+    .replace('/profile-backgrounds/grey-forest-vector.svg', '/profile-backgrounds/grey-forest-ai.png')
+    .replace('/profile-backgrounds/blue-mountains-vector.svg', '/profile-backgrounds/blue-mountains-ai.png')
+    .replace('/profile-backgrounds/pine-forest-vector.svg', '/profile-backgrounds/pine-forest-ai.png')
+    .replace('/profile-backgrounds/misty-lake-hd.jpg', '/profile-backgrounds/misty-lake-ai.png')
+    .replace('/profile-backgrounds/sunset-pines-hd.jpg', '/profile-backgrounds/sunset-pines-ai.png')
+    .replace('/profile-backgrounds/grey-forest-hd.jpg', '/profile-backgrounds/grey-forest-ai.png')
+    .replace('/profile-backgrounds/blue-mountains-hd.jpg', '/profile-backgrounds/blue-mountains-ai.png')
+    .replace('/profile-backgrounds/pine-forest-hd.jpg', '/profile-backgrounds/pine-forest-ai.png')
+    .replace('/profile-backgrounds/misty-lake.jpg', '/profile-backgrounds/misty-lake-ai.png')
+    .replace('/profile-backgrounds/sunset-pines.jpg', '/profile-backgrounds/sunset-pines-ai.png')
+    .replace('/profile-backgrounds/grey-forest.jpg', '/profile-backgrounds/grey-forest-ai.png')
+    .replace('/profile-backgrounds/blue-mountains.jpg', '/profile-backgrounds/blue-mountains-ai.png')
+    .replace('/profile-backgrounds/pine-forest.jpg', '/profile-backgrounds/pine-forest-ai.png');
+};
+
 export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
   const language = useCurrentLanguage();
   const copy = getProfileCopy(language);
@@ -21,6 +49,8 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
   const [coverError, setCoverError] = useState('');
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [isSavingCover, setIsSavingCover] = useState(false);
+  const [showBackgroundLibrary, setShowBackgroundLibrary] = useState(false);
+  const [selectedPresetCover, setSelectedPresetCover] = useState('');
   const [pendingAvatar, setPendingAvatar] = useState<{ file: File; url: string } | null>(null);
   const [avatarZoom, setAvatarZoom] = useState(1.2);
   const [avatarOffsetX, setAvatarOffsetX] = useState(0);
@@ -32,6 +62,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
   const [coverOffsetY, setCoverOffsetY] = useState(0);
   const [coverDrag, setCoverDrag] = useState<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
   const updateProfile = useUpdateProfile();
+  const coverUrl = normalizeCoverUrl(profile.coverUrl);
   const initials = profile.name
     .split(' ')
     .filter(Boolean)
@@ -44,7 +75,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
     e.target.value = '';
     if (!file) return;
     setAvatarError('');
-    if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+    if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
       setAvatarError(copy.avatarSaveError);
       return;
     }
@@ -101,7 +132,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
     e.target.value = '';
     if (!file) return;
     setCoverError('');
-    if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+    if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
       setCoverError(copy.coverSaveError);
       return;
     }
@@ -110,6 +141,29 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
     setCoverOffsetX(0);
     setCoverOffsetY(0);
     setPendingCover({ file, url: URL.createObjectURL(file) });
+    setSelectedPresetCover('');
+    setShowBackgroundLibrary(false);
+  };
+
+  const handlePresetCoverSelect = (coverUrl: string) => {
+    setCoverError('');
+    setSelectedPresetCover(coverUrl);
+  };
+
+  const handleSavePresetCover = async () => {
+    if (!selectedPresetCover) return;
+    setCoverError('');
+    setIsSavingCover(true);
+    try {
+      await updateProfile.mutateAsync({ coverUrl: selectedPresetCover });
+      setBrokenCover(null);
+      setShowBackgroundLibrary(false);
+      setSelectedPresetCover('');
+    } catch {
+      setCoverError(copy.coverSaveError);
+    } finally {
+      setIsSavingCover(false);
+    }
   };
 
   const handleSaveCover = async () => {
@@ -170,37 +224,34 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
 
   return (
     <section className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
-      <div className="relative h-44 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.28),transparent_24%),linear-gradient(135deg,#4F46E5_0%,#6366F1_48%,#3B82F6_100%)] sm:h-52">
-        {profile.coverUrl && brokenCover !== profile.coverUrl ? (
+      <div className="relative h-56 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.28),transparent_24%),linear-gradient(135deg,#4F46E5_0%,#6366F1_48%,#3B82F6_100%)] sm:h-64">
+        {coverUrl && brokenCover !== coverUrl ? (
           <img
-            src={profile.coverUrl}
+            src={coverUrl}
             alt=""
-            onError={() => setBrokenCover(profile.coverUrl)}
-            className="absolute inset-0 h-full w-full object-cover"
+            onError={() => setBrokenCover(coverUrl)}
+            className="absolute inset-0 h-full w-full object-cover [image-rendering:auto]"
           />
         ) : null}
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/20 via-transparent to-slate-950/20" />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/45 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/5 via-transparent to-slate-950/5" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/22 to-transparent" />
         <div className="absolute right-5 top-5 hidden rounded-full bg-white/18 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/25 backdrop-blur-sm sm:inline-flex items-center gap-1.5">
           <Award className="h-3.5 w-3.5" />
           {copy.excellentStudent}
         </div>
-        <label
-          htmlFor="cover-upload"
+        <button
+          type="button"
+          onClick={() => {
+            setCoverError('');
+            setSelectedPresetCover(coverUrl);
+            setShowBackgroundLibrary(true);
+          }}
           className="absolute bottom-4 right-5 inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-950/55 px-3 py-2 text-xs font-bold text-white shadow-lg ring-1 ring-white/20 backdrop-blur-md transition hover:bg-slate-950/70"
           title={copy.changeCover}
         >
           <Camera className="h-4 w-4" />
           <span className="hidden sm:inline">{copy.changeCover}</span>
-          <input
-            id="cover-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleCoverChange}
-            disabled={isSavingCover}
-            className="hidden"
-          />
-        </label>
+        </button>
       </div>
 
       <div className="px-5 pb-5 sm:px-6">
@@ -279,6 +330,83 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
           </div>
         </div>
       </div>
+      {showBackgroundLibrary && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-950 dark:text-white">{copy.changeCover}</h3>
+                <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-300">Chọn ảnh nền có sẵn hoặc tải ảnh riêng của bạn lên.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBackgroundLibrary(false);
+                  setSelectedPresetCover('');
+                }}
+                className="rounded-2xl border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                aria-label={copy.cancel}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-5 p-5">
+              {coverError && <p role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-500 dark:text-red-300">{coverError}</p>}
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {PROFILE_BACKGROUND_PRESETS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handlePresetCoverSelect(item.url)}
+                    disabled={isSavingCover}
+                    className={`group overflow-hidden rounded-2xl border bg-slate-100 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg disabled:opacity-70 dark:bg-slate-800 ${
+                      selectedPresetCover === item.url
+                        ? 'border-indigo-500 ring-2 ring-indigo-500/50'
+                        : 'border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <div className="aspect-[4/1] overflow-hidden bg-slate-950">
+                      <img src={item.url} alt={item.label} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                    </div>
+                    <div className="flex items-center justify-between px-3 py-2">
+                      <span className="text-xs font-extrabold text-slate-700 dark:text-slate-100">{item.label}</span>
+                      {selectedPresetCover === item.url && (
+                        <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-300">Đã chọn</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-300">Ảnh trong kho đã được tối ưu đúng kích thước banner để hạn chế mờ/vỡ nét.</p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800">
+                    <Camera className="h-4 w-4" />
+                    Tải ảnh riêng
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverChange}
+                      disabled={isSavingCover}
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => void handleSavePresetCover()}
+                    disabled={!selectedPresetCover || isSavingCover}
+                    className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSavingCover ? copy.savingCover : copy.saveChanges}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {pendingAvatar && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl dark:bg-slate-900">
@@ -361,7 +489,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
       )}
       {pendingCover && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl dark:bg-slate-900">
+          <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-700">
               <div>
                 <h3 className="text-base font-extrabold text-slate-950 dark:text-white">{copy.changeCover}</h3>
@@ -398,7 +526,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
                   }}
                 />
                 <div className="absolute inset-0 bg-slate-950/45" />
-                <div className="absolute left-1/2 top-1/2 aspect-[6/1] w-[88%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl shadow-2xl ring-2 ring-white">
+                <div className="absolute left-1/2 top-1/2 aspect-[4/1] w-[94%] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl shadow-2xl ring-2 ring-white">
                   <img
                     src={pendingCover.url}
                     alt=""
@@ -447,6 +575,9 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
     </section>
   );
 };
+
+
+
 
 
 

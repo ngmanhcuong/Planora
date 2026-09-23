@@ -5,7 +5,7 @@ export type CoverCropOptions = {
 };
 
 export async function prepareCover(file: File, options: CoverCropOptions = {}): Promise<string> {
-  if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) {
+  if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) {
     throw new Error('Invalid image');
   }
 
@@ -16,8 +16,8 @@ export async function prepareCover(file: File, options: CoverCropOptions = {}): 
     await image.decode();
 
     const canvas = document.createElement('canvas');
-    canvas.width = 1200;
-    canvas.height = 200;
+    canvas.width = 2560;
+    canvas.height = 640;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Image processing unavailable');
 
@@ -48,9 +48,9 @@ export async function prepareCover(file: File, options: CoverCropOptions = {}): 
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
 
-    for (const quality of [0.72, 0.56, 0.42, 0.30, 0.22, 0.16]) {
+    for (const quality of [0.88, 0.78, 0.68, 0.58, 0.48, 0.38, 0.30, 0.22]) {
       const result = canvas.toDataURL('image/jpeg', quality);
-      if (result.length <= 120000) return result;
+      if (result.length <= 900000) return result;
     }
 
     throw new Error('Image too large');
@@ -58,4 +58,7 @@ export async function prepareCover(file: File, options: CoverCropOptions = {}): 
     URL.revokeObjectURL(url);
   }
 }
+
+
+
 

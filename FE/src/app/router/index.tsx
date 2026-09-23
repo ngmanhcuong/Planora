@@ -84,7 +84,7 @@ export const AppRouter: React.FC = () => {
           <Route path="/goals" element={<UserOnlyRoute><GoalsPage /></UserOnlyRoute>} />
           <Route path="/notes" element={<UserOnlyRoute><NotesPage /></UserOnlyRoute>} />
           <Route path="/reports" element={<UserOnlyRoute><ReportsPage /></UserOnlyRoute>} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile" element={<UserOnlyRoute><ProfilePage /></UserOnlyRoute>} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 

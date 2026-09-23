@@ -14,6 +14,7 @@ export const UserMenu: React.FC = () => {
   const { data: settings } = useSettings();
   const language = normalizeLanguage(settings?.language);
   const initials = user?.name.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || 'P';
+  const isStaffOrAdmin = ['ADMIN', 'CONTENT_MANAGER', 'CUSTOMER_SUPPORT', 'ENTERPRISE_LEAD'].includes(user?.role || '');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -51,16 +52,18 @@ export const UserMenu: React.FC = () => {
             <p className="text-[11px] text-[#64748B] truncate">{user?.email}</p>
           </div>
 
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              navigate('/profile');
-            }}
-            className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-[#131B2E] hover:bg-[#F8FAFC] transition-colors"
-          >
-            <UserIcon className="w-4 h-4 text-[#64748B]" />
-            {getMultiLangText(language, { vi: 'Hồ sơ cá nhân', en: 'Profile', ja: 'プロフィール', ko: '프로필', zh: '个人资料', fr: 'Profil', de: 'Profil', es: 'Perfil' })}
-          </button>
+          {!isStaffOrAdmin && (
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                navigate('/profile');
+              }}
+              className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium text-[#131B2E] hover:bg-[#F8FAFC] transition-colors"
+            >
+              <UserIcon className="w-4 h-4 text-[#64748B]" />
+              {getMultiLangText(language, { vi: 'Hồ sơ cá nhân', en: 'Profile', ja: 'プロフィール', ko: '프로필', zh: '个人资料', fr: 'Profil', de: 'Profil', es: 'Perfil' })}
+            </button>
+          )}
 
           <button
             onClick={() => {
