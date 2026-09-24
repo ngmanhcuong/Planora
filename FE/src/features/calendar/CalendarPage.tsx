@@ -3,11 +3,12 @@ import { CalendarHeader } from './components/CalendarHeader';
 import { WeekGrid } from './components/WeekGrid';
 import { MonthGrid } from './components/MonthGrid';
 import { CreateEventDrawer } from './components/CreateEventDrawer';
-import { useCalendarRange, useCreateEvent } from './hooks/useCalendar';
+import { useCalendarRange, useCreateEvent, useUpdateEvent } from './hooks/useCalendar';
 import type { CalendarEventItem, CalendarViewMode } from './types';
 import type { CategoryType, ApiCalendarItem } from '@/types';
 import { Loader2 } from 'lucide-react';
 import { getStartOfWeek, getEndOfWeek, getWeekDays } from '@/utils/dateUtils';
+import { useUpdateTask } from '@/features/tasks/hooks/useTasks';
 
 export const CalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -28,6 +29,8 @@ export const CalendarPage: React.FC = () => {
 
   const { data: calendarData, isLoading, isError } = useCalendarRange(rangeParams);
   const createEventMutation = useCreateEvent();
+  const updateEventMutation = useUpdateEvent();
+  const updateTaskMutation = useUpdateTask();
 
   const handlePrevWeek = () => {
     setCurrentDate((prev) => {
@@ -57,7 +60,7 @@ export const CalendarPage: React.FC = () => {
   const convertedEvents: CalendarEventItem[] = rawItems.map((item: ApiCalendarItem, idx: number) => {
     let dayIndex = 0;
     let startTopPx = 448; // default 14:00
-    let heightPx = 64; // default 1 hour
+    let heightPx = 44; // compact default for items without an end time
     let timeRange = '14:00 – 15:00';
 
     const itemDateStr = item.start;
@@ -80,7 +83,7 @@ export const CalendarPage: React.FC = () => {
       const startD = new Date(item.start);
       const endD = new Date(item.end);
       const durationHours = (endD.getTime() - startD.getTime()) / (1000 * 60 * 60);
-      heightPx = Math.max(76, Math.min(300, Math.round(durationHours * 64)));
+      heightPx = Math.max(44, Math.min(300, Math.round(durationHours * 64) - 18));
       timeRange = `${String(startD.getHours()).padStart(2, '0')}:${String(startD.getMinutes()).padStart(2, '0')} – ${String(endD.getHours()).padStart(2, '0')}:${String(endD.getMinutes()).padStart(2, '0')}`;
     }
 
@@ -93,12 +96,15 @@ export const CalendarPage: React.FC = () => {
 
     return {
       id: item.id || `evt_${idx}`,
+      sourceType: item.sourceType,
       title: item.title,
       dateKey: new Date(item.start).toDateString(),
       timeRange,
       dayIndex,
       startTopPx,
       heightPx,
+      startAt: item.start,
+      endAt: item.end,
       category: (item.category?.type?.toLowerCase() || (isTask ? 'deadline' : 'study')) as CategoryType,
       categoryLabel: catName,
       location: item.location || item.room || undefined,
@@ -114,6 +120,36 @@ export const CalendarPage: React.FC = () => {
   });
   const todayKey = new Date().toDateString();
   const todayItemsCount = filteredEvents.filter((evt) => evt.dateKey === todayKey).length;
+
+  const handleMoveCalendarItem = (eventItem: CalendarEventItem, targetDate: Date) => {
+    const currentStart = new Date(eventItem.startAt);
+    const nextStart = new Date(targetDate);
+    if (currentStart.getTime() === nextStart.getTime()) return;
+
+    if (eventItem.sourceType === 'EVENT') {
+      const currentEnd = eventItem.endAt ? new Date(eventItem.endAt) : new Date(currentStart.getTime() + 60 * 60 * 1000);
+      const durationMs = Math.max(15 * 60 * 1000, currentEnd.getTime() - currentStart.getTime());
+      const nextEnd = new Date(nextStart.getTime() + durationMs);
+
+      updateEventMutation.mutate({
+        id: eventItem.id,
+        data: {
+          startAt: nextStart.toISOString(),
+          endAt: nextEnd.toISOString(),
+        },
+      });
+      return;
+    }
+
+    if (eventItem.sourceType === 'TASK') {
+      updateTaskMutation.mutate({
+        id: eventItem.id,
+        data: {
+          dueDate: nextStart.toISOString(),
+        },
+      });
+    }
+  };
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
@@ -163,6 +199,9 @@ export const CalendarPage: React.FC = () => {
               onSelectDate={(date) => {
                 setCurrentDate(date);
               }}
+              onPrevRange={handlePrevWeek}
+              onNextRange={handleNextWeek}
+              onMoveEvent={handleMoveCalendarItem}
             />
           )}
 
@@ -179,3 +218,7 @@ export const CalendarPage: React.FC = () => {
     </div>
   );
 };
+
+
+
+
