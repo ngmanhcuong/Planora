@@ -130,6 +130,8 @@ export interface ApiCalendarItem {
   courseCode?: string | null;
   lecturer?: string | null;
   room?: string | null;
+  timetableId?: string | null;
+  timetableItemId?: string | null;
   category?: ApiCategory | null;
   recurrenceType?: string;
 }
@@ -257,5 +259,4 @@ export interface ApiUserSettings {
   loginAlerts: boolean;
   autoSaveDrafts: boolean;
 }
-
 

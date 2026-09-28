@@ -16,6 +16,8 @@ export interface CalendarEventItem {
   category: CategoryType;
   categoryLabel: string;
   location?: string;
+  timetableId?: string | null;
+  timetableItemId?: string | null;
   speaker?: string;
   notes?: string;
   hasConflict?: boolean;

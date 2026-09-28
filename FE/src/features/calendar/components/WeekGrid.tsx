@@ -17,8 +17,8 @@ export interface WeekGridProps {
   onMoveEvent?: (event: CalendarEventItem, targetDate: Date) => void;
 }
 
-const SLOT_HEIGHT_PX = 64;
-const GRID_HEIGHT_PX = 768;
+const SLOT_HEIGHT_PX = 80;
+const GRID_HEIGHT_PX = 960;
 
 const TIME_SLOTS = [
   '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
@@ -27,7 +27,7 @@ const TIME_SLOTS = [
 
 const hourGridBackground = {
   backgroundImage: 'linear-gradient(to bottom, rgba(148, 163, 184, 0.34) 1px, transparent 1px)',
-  backgroundSize: '100% 64px',
+  backgroundSize: '100% 80px',
 };
 
 export const WeekGrid: React.FC<WeekGridProps> = ({
@@ -65,7 +65,8 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
     next.setDate(next.getDate() + 1);
     onSelectDate(next);
   };
-  const canDragEvent = (event: CalendarEventItem) => event.sourceType === 'EVENT' || event.sourceType === 'TASK';
+  // Calendar cards can all be moved by dragging, including timetable-backed cards.
+  const canDragEvent = (_event: CalendarEventItem) => true;
 
   useEffect(() => {
     if (!draggedEvent) return;
@@ -187,12 +188,8 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
       {/* Grid Header Row (Aligned 1-to-1 with grid columns below) */}
       {isDayView ? (
         <div
-          style={{ gridTemplateColumns: '64px 1fr' }}
           className="calendar-week-header grid items-center border-b py-3 text-center"
         >
-          <div className="flex items-center justify-center text-xs font-black text-slate-400">
-            GMT+7
-          </div>
           <div className="flex items-center justify-center gap-3 px-4">
             <button
               onClick={handlePrevDay}
@@ -228,11 +225,8 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
           </div>
         </div>
       ) : (
-        <div
-          style={{ gridTemplateColumns: `64px repeat(${weekDays.length}, minmax(0, 1fr))` }}
-          className="calendar-week-header relative grid border-b p-2 text-center"
-        >
-          <div className="flex items-center justify-center">
+        <div className="calendar-week-header border-b py-2 text-center">
+          <div className="flex items-center justify-between px-3 pb-2">
             <button
               type="button"
               onClick={onPrevRange}
@@ -241,7 +235,16 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
+            <button
+              type="button"
+              onClick={onNextRange}
+              className="calendar-week-nav-button flex h-9 w-9 items-center justify-center rounded-2xl border transition-all active:scale-95"
+              title="Tuần tới"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
+          <div className="grid" style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}>
           {weekDays.map((d, index) => {
             const isSelected = selectedDate
               ? d.dateObj.toDateString() === selectedDate.toDateString()
@@ -298,35 +301,15 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
               </button>
             );
           })}
-          <div className="pointer-events-none absolute inset-y-0 right-3 z-20 flex items-center">
-            <button
-              type="button"
-              onClick={onNextRange}
-              className="calendar-week-nav-button pointer-events-auto flex h-9 w-9 items-center justify-center rounded-2xl border transition-all active:scale-95"
-              title="Tuần tới"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
           </div>
         </div>
       )}
 
       {/* Grid Body */}
       <div
-        style={{ gridTemplateColumns: isDayView ? '64px 1fr' : `64px repeat(${weekDays.length}, minmax(0, 1fr))` }}
-        className="calendar-week-body relative grid w-full h-[768px]"
+        style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}
+        className="calendar-week-body relative grid w-full h-[960px]"
       >
-        {/* Left Time Labels */}
-        <div className="calendar-week-time flex select-none flex-col border-r px-2 py-2 text-right">
-          {TIME_SLOTS.map((time, idx) => (
-            <div key={idx} className="flex h-16 items-start justify-center pt-2">
-              <span className="calendar-time-pill rounded-full px-2 py-1 text-[11px] font-black tabular-nums text-slate-500">
-                {time}
-              </span>
-            </div>
-          ))}
-        </div>
-
         {/* Day Columns */}
         {weekDays.map((day, dayIndex) => {
           const dayKey = day.dateObj.toDateString();
@@ -337,7 +320,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
             <div
               key={dayIndex}
               onDragOver={(event) => {
-                if (!draggedEventId) return;
+                if (!draggedEventId && !draggedEvent) return;
                 event.preventDefault();
                 setDragOverDayKey(dayKey);
               }}
@@ -348,7 +331,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                 event.preventDefault();
                 handleDropOnDay(day.dateObj, event.clientY, event.currentTarget);
               }}
-              className={`calendar-week-day relative h-[768px] border-r last:border-r-0 transition-colors ${
+              className={`calendar-week-day relative h-[960px] border-r last:border-r-0 transition-colors ${
                 day.isToday
                   ? 'calendar-week-day-today'
                   : 'calendar-week-day-idle'
@@ -357,7 +340,6 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
             >
               {dayEvents.map((evt) => (
                 (() => {
-                  const isCompact = evt.heightPx <= 48;
                   const isDraggable = canDragEvent(evt);
                   return (
                     <div
@@ -378,34 +360,32 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                       }}
                       onClick={() => onSelectEvent?.(evt)}
                       title={isDraggable ? 'Kéo sang ô ngày/giờ khác' : undefined}
-                      className={`group absolute left-2.5 right-2.5 z-10 flex ${isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} ${isCompact ? 'flex-col justify-center gap-0.5' : 'flex-col justify-between'} overflow-hidden rounded-lg border-l-[4px] shadow-md shadow-slate-950/10 ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${draggedEventId === evt.id ? 'opacity-60 ring-2 ring-cyan-300' : ''} ${isCompact ? 'px-2.5 py-1' : 'p-3'}`}
+                      className={`group absolute left-2.5 right-2.5 z-10 flex ${isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} flex-col justify-between overflow-hidden rounded-lg border-l-[4px] p-3 shadow-md shadow-slate-950/10 ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${draggedEventId === evt.id ? 'opacity-60 ring-2 ring-cyan-300' : ''}`}
                       style={{
                         top: `${evt.startTopPx + 8}px`,
-                        height: `${evt.heightPx}px`,
+                        height: '72px',
                         backgroundColor: evt.bgColor,
                         color: evt.textColor,
                         borderColor: evt.color,
                       }}
                     >
-                      <div className={isCompact ? 'min-w-0 flex-1' : 'flex min-w-0 flex-col'}>
+                      <div className="flex min-w-0 flex-col">
                         <div className="flex items-start justify-between gap-2">
-                          <span className={`${isCompact ? 'block truncate text-[11px] leading-tight' : 'line-clamp-2 text-xs leading-snug sm:text-sm'} font-extrabold`}>{evt.title}</span>
+                          <span className="line-clamp-2 text-xs leading-snug sm:text-sm font-extrabold">{evt.title}</span>
                           {evt.hasConflict && (
                             <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                           )}
                         </div>
-                        {evt.location && !isCompact && (
                           <span className="text-xs font-medium opacity-90 truncate flex items-center gap-1.5 mt-1">
-                            {evt.location.includes('Meet') || evt.location.includes('Online') ? (
+                            {evt.location?.includes('Meet') || evt.location?.includes('Online') ? (
                               <Video className="w-3.5 h-3.5 shrink-0" />
                             ) : (
                               <MapPin className="w-3.5 h-3.5 shrink-0" />
                             )}
-                            {evt.location}
+                            {evt.location || 'Chưa xếp địa điểm'}
                           </span>
-                        )}
                       </div>
-                      <span className={`${isCompact ? 'truncate text-[10px] leading-none' : 'text-[11px] mt-1'} font-black opacity-85`}>{evt.timeRange}</span>
+                      <span className="text-[11px] mt-1 font-black opacity-85">{evt.timeRange}</span>
                     </div>
                   );
                 })()
@@ -417,13 +397,4 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
 

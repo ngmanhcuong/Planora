@@ -84,6 +84,8 @@ export interface CalendarItemResponse {
   courseCode?: string | null;
   lecturer?: string | null;
   room?: string | null;
+  timetableId?: string | null;
+  timetableItemId?: string | null;
   category?: {
     id: string;
     name: string;

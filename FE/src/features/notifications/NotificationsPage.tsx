@@ -347,13 +347,13 @@ export const NotificationsPage: React.FC = () => {
                 className={clsx(
                   'group relative flex items-start gap-4 p-4 md:p-5 rounded-3xl border transition-all duration-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5',
                   notification.isRead
-                    ? 'bg-white border-slate-200/80 hover:border-slate-300'
-                    : 'bg-indigo-50/60 border-indigo-100/80 hover:border-indigo-200'
+                    ? 'bg-white border-slate-200/80 hover:border-slate-300 dark:bg-slate-900 dark:border-slate-700 dark:hover:border-slate-600'
+                    : 'bg-indigo-50/60 border-indigo-100/80 hover:border-indigo-200 dark:bg-indigo-950/35 dark:border-indigo-800/70 dark:hover:border-indigo-700'
                 )}
               >
                 {/* Status Dot */}
                 {!notification.isRead && (
-                  <span className="absolute top-6 right-16 w-2.5 h-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100" />
+                  <span className="absolute top-6 right-16 w-2.5 h-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100 dark:ring-rose-950/70" />
                 )}
                 <button
                   type="button"
@@ -361,7 +361,7 @@ export const NotificationsPage: React.FC = () => {
                   aria-haspopup="dialog"
                   title={detailLabel}
                   onClick={() => setSelectedNotification(notification)}
-                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-indigo-100 hover:text-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-indigo-100 hover:text-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </button>
@@ -369,7 +369,7 @@ export const NotificationsPage: React.FC = () => {
                 {/* Icon Box */}
                 <div
                   className={clsx(
-                    'w-11 h-11 rounded-2xl border flex items-center justify-center shrink-0 shadow-sm mt-0.5 ring-1 ring-black/5',
+                    'w-11 h-11 rounded-2xl border flex items-center justify-center shrink-0 shadow-sm mt-0.5 ring-1 ring-black/5 dark:border-slate-700 dark:bg-slate-800/80 dark:ring-white/5',
                     config.bgColor
                   )}
                 >
@@ -379,10 +379,10 @@ export const NotificationsPage: React.FC = () => {
                 {/* Main Content */}
                 <div className="flex-1 min-w-0 pr-14">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className={clsx('px-2 py-0.5 rounded-md text-[11px] font-semibold', config.badgeColor)}>
+                    <span className={clsx('px-2 py-0.5 rounded-md text-[11px] font-semibold dark:bg-indigo-900/70 dark:text-indigo-100 dark:ring-1 dark:ring-indigo-700/70', config.badgeColor)}>
                       {config.label}
                     </span>
-                    <span className="text-xs text-slate-400 font-medium">
+                    <span className="text-xs text-slate-400 font-medium dark:text-slate-300">
                       {formatTimeAgo(notification.createdAt)}
                     </span>
                   </div>
@@ -390,13 +390,13 @@ export const NotificationsPage: React.FC = () => {
                   <h4
                     className={clsx(
                       'text-sm font-semibold leading-tight',
-                      notification.isRead ? 'text-slate-800' : 'text-slate-900 font-bold'
+                      notification.isRead ? 'text-slate-800 dark:text-slate-100' : 'text-slate-900 font-bold dark:text-white'
                     )}
                   >
                     {notification.title}
                   </h4>
 
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">{notification.message}</p>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed dark:text-slate-300">{notification.message}</p>
 
                   {/* Actions */}
                   {!notification.isRead && (
@@ -404,7 +404,7 @@ export const NotificationsPage: React.FC = () => {
                       <button
                         onClick={() => markRead.mutate(notification.id)}
                         disabled={markRead.isPending}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-indigo-600 hover:bg-indigo-100/70 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-indigo-600 hover:bg-indigo-100/70 transition-colors dark:text-indigo-300 dark:hover:bg-indigo-950/70"
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>{copy.markRead}</span>

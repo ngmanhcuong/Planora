@@ -50,8 +50,8 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
     hour < 12
       ? getMultiLangText(language, { vi: 'Buổi sáng tốt lành', en: 'Good Morning', ja: 'おはようございます', ko: '좋은 아침입니다', zh: '早上好', fr: 'Bonjour', de: 'Guten Morgen', es: 'Buenos días' })
       : hour < 18
-      ? getMultiLangText(language, { vi: 'Buổi chiều hiệu quả', en: 'Good Afternoon', ja: 'こんにちは', ko: '즐거운 오후입니다', zh: '下午好', fr: 'Bon après-midi', de: 'Guten Tag', es: 'Buenas tardes' })
-      : getMultiLangText(language, { vi: 'Buổi tối vui vẻ', en: 'Good Evening', ja: 'こんばんは', ko: '편안한 저녁입니다', zh: '晚上好', fr: 'Bonsoir', de: 'Guten Abend', es: 'Buenas noches' });
+        ? getMultiLangText(language, { vi: 'Buổi chiều hiệu quả', en: 'Good Afternoon', ja: 'こんにちは', ko: '즐거운 오후입니다', zh: '下午好', fr: 'Bon après-midi', de: 'Guten Tag', es: 'Buenas tardes' })
+        : getMultiLangText(language, { vi: 'Buổi tối vui vẻ', en: 'Good Evening', ja: 'こんばんは', ko: '편안한 저녁입니다', zh: '晚上好', fr: 'Bonsoir', de: 'Guten Abend', es: 'Buenas noches' });
 
   const tasksToday = summary?.tasksToday || 0;
   const eventsCount = summary?.upcomingEvents || 0;

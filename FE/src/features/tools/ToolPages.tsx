@@ -158,10 +158,10 @@ const calculateGoalEvaluation = (goal: GoalItem, tasks: Array<any>) => {
   const timeScore = completedTasks.length > 0
     ? (onTimeCompleted / completedTasks.length) * 100
     : overdueTasks.length > 0
-    ? 0
-    : relatedTasks.length > 0
-    ? 50
-    : 0;
+      ? 0
+      : relatedTasks.length > 0
+        ? 50
+        : 0;
 
   const progress = clampPercent(taskProgress * 0.4 + timeScore * 0.3 + workloadScore * 0.3);
 
@@ -327,9 +327,8 @@ export const AssistantPage: React.FC = () => {
                 <p className="text-xs font-medium text-slate-500">{assistantCopy.centerSubtitle}</p>
               </div>
             </div>
-            <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-extrabold ${
-              aiStatus?.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-200'
-            }`}>
+            <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-extrabold ${aiStatus?.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-200'
+              }`}>
               <ShieldCheck className="h-3.5 w-3.5" />
               {isAiStatusLoading ? assistantCopy.checking : aiStatus?.enabled ? `AI ${aiStatus.provider}` : assistantCopy.disabled}
             </span>
@@ -457,6 +456,30 @@ export const GoalsPage: React.FC = () => {
     completed: getMultiLangText(language, { vi: 'Đã hoàn thành', en: 'Completed', ja: '完了', ko: '완료됨', zh: '已完成', fr: 'Terminé', de: 'Abgeschlossen', es: 'Completado' }),
     streak: getMultiLangText(language, { vi: 'Chuỗi duy trì', en: 'Streak', ja: '連続達成', ko: '연속 달성', zh: '连续天数', fr: 'Série', de: 'Strähne', es: 'Racha' }),
     days: getMultiLangText(language, { vi: 'ngày', en: 'days', ja: '日', ko: '일', zh: '天', fr: 'jours', de: 'Tage', es: 'días' }),
+    createTitle: getMultiLangText(language, { vi: 'Tạo mục tiêu mới', en: 'Create new goal', ja: '新しい目標を作成', ko: '새 목표 만들기', zh: '创建新目标', fr: 'Créer un nouvel objectif', de: 'Neues Ziel erstellen', es: 'Crear nuevo objetivo' }),
+    createSubtitle: getMultiLangText(language, { vi: 'Thiết lập chỉ số KPI & hạn chót hoàn thành', en: 'Set KPI indicators and completion deadline', ja: 'KPI指標と完了期限を設定', ko: 'KPI 지표와 완료 기한 설정', zh: '设置 KPI 指标和完成截止日期', fr: 'Définissez les KPI et l’échéance', de: 'KPI-Werte und Frist festlegen', es: 'Define KPI y fecha límite' }),
+    goalName: getMultiLangText(language, { vi: 'Tên mục tiêu *', en: 'Goal name *', ja: '目標名 *', ko: '목표 이름 *', zh: '目标名称 *', fr: 'Nom de l’objectif *', de: 'Zielname *', es: 'Nombre del objetivo *' }),
+    goalNamePlaceholder: getMultiLangText(language, { vi: 'VD: Đạt 8.0 GPA học kỳ này', en: 'Ex: Reach 8.0 GPA this semester', ja: '例：今学期GPA 8.0を達成', ko: '예: 이번 학기 GPA 8.0 달성', zh: '例如：本学期 GPA 达到 8.0', fr: 'Ex : atteindre 8.0 de GPA ce semestre', de: 'z. B. GPA 8,0 in diesem Semester erreichen', es: 'Ej.: alcanzar GPA 8.0 este semestre' }),
+    description: getMultiLangText(language, { vi: 'Mô tả / Ghi chú', en: 'Description / Notes', ja: '説明 / メモ', ko: '설명 / 메모', zh: '描述 / 备注', fr: 'Description / Notes', de: 'Beschreibung / Notizen', es: 'Descripción / Notas' }),
+    descriptionPlaceholder: getMultiLangText(language, { vi: 'Nhập chi tiết về cách thực hiện mục tiêu...', en: 'Enter details about how to complete this goal...', ja: '目標達成方法の詳細を入力...', ko: '목표 달성 방법을 입력하세요...', zh: '输入完成目标的方法详情...', fr: 'Saisissez les détails pour atteindre cet objectif...', de: 'Details zur Umsetzung dieses Ziels eingeben...', es: 'Ingresa detalles sobre cómo lograr este objetivo...' }),
+    category: getMultiLangText(language, { vi: 'Danh mục', en: 'Category', ja: 'カテゴリー', ko: '카테고리', zh: '类别', fr: 'Catégorie', de: 'Kategorie', es: 'Categoría' }),
+    addNewCategory: getMultiLangText(language, { vi: 'Thêm mục mới', en: 'Add new', ja: '新規追加', ko: '새 항목 추가', zh: '新增类别', fr: 'Ajouter', de: 'Neu hinzufügen', es: 'Agregar nuevo' }),
+    addCategoryOption: getMultiLangText(language, { vi: '➕ Thêm danh mục mới...', en: '➕ Add new category...', ja: '➕ 新しいカテゴリーを追加...', ko: '➕ 새 카테고리 추가...', zh: '➕ 添加新类别...', fr: '➕ Ajouter une catégorie...', de: '➕ Neue Kategorie hinzufügen...', es: '➕ Agregar nueva categoría...' }),
+    newCategory: getMultiLangText(language, { vi: 'Tạo danh mục mới', en: 'Create new category', ja: '新しいカテゴリーを作成', ko: '새 카테고리 만들기', zh: '创建新类别', fr: 'Créer une catégorie', de: 'Neue Kategorie erstellen', es: 'Crear nueva categoría' }),
+    categoryNamePlaceholder: getMultiLangText(language, { vi: 'Tên danh mục (VD: Tài chính)', en: 'Category name (Ex: Finance)', ja: 'カテゴリー名（例：財務）', ko: '카테고리 이름 (예: 재무)', zh: '类别名称（例如：财务）', fr: 'Nom de catégorie (ex : Finance)', de: 'Kategoriename (z. B. Finanzen)', es: 'Nombre de categoría (ej.: Finanzas)' }),
+    save: getMultiLangText(language, { vi: 'Lưu', en: 'Save', ja: '保存', ko: '저장', zh: '保存', fr: 'Enregistrer', de: 'Speichern', es: 'Guardar' }),
+    targetDate: getMultiLangText(language, { vi: 'Hạn chót mục tiêu', en: 'Goal deadline', ja: '目標期限', ko: '목표 마감일', zh: '目标截止日期', fr: 'Échéance de l’objectif', de: 'Zielfrist', es: 'Fecha límite del objetivo' }),
+    cancelLong: getMultiLangText(language, { vi: 'Hủy bỏ', en: 'Cancel', ja: 'キャンセル', ko: '취소', zh: '取消', fr: 'Annuler', de: 'Abbrechen', es: 'Cancelar' }),
+    createGoal: getMultiLangText(language, { vi: 'Tạo mục tiêu', en: 'Create goal', ja: '目標を作成', ko: '목표 만들기', zh: '创建目标', fr: 'Créer l’objectif', de: 'Ziel erstellen', es: 'Crear objetivo' }),
+    emptyTitle: getMultiLangText(language, { vi: 'Chưa có mục tiêu thật nào', en: 'No real goals yet', ja: '実際の目標はまだありません', ko: '아직 실제 목표가 없습니다', zh: '还没有真实目标', fr: 'Aucun objectif réel pour le moment', de: 'Noch keine echten Ziele', es: 'Aún no hay objetivos reales' }),
+    emptyDesc: getMultiLangText(language, { vi: 'Hãy tạo mục tiêu mới. Hệ thống sẽ tự đánh giá tiến độ dựa trên công việc thật, thời gian hoàn thành và khối lượng task liên quan.', en: 'Create a new goal. The system will evaluate progress from real tasks, completion time, and related workload.', ja: '新しい目標を作成しましょう。実際のタスク、完了時間、関連作業量に基づいて進捗を評価します。', ko: '새 목표를 만드세요. 실제 작업, 완료 시간, 관련 업무량을 기준으로 진행률을 평가합니다.', zh: '请创建新目标。系统会根据真实任务、完成时间和相关任务量自动评估进度。', fr: 'Créez un nouvel objectif. Le système évaluera la progression avec les tâches réelles, les délais et la charge associée.', de: 'Erstelle ein neues Ziel. Das System bewertet den Fortschritt anhand echter Aufgaben, Abschlusszeiten und zugehöriger Arbeitslast.', es: 'Crea un nuevo objetivo. El sistema evaluará el progreso según tareas reales, tiempos de finalización y carga relacionada.' }),
+    firstGoal: getMultiLangText(language, { vi: 'Tạo mục tiêu đầu tiên', en: 'Create first goal', ja: '最初の目標を作成', ko: '첫 목표 만들기', zh: '创建第一个目标', fr: 'Créer le premier objectif', de: 'Erstes Ziel erstellen', es: 'Crear primer objetivo' }),
+    deleteGoal: getMultiLangText(language, { vi: 'Xóa mục tiêu', en: 'Delete goal', ja: '目標を削除', ko: '목표 삭제', zh: '删除目标', fr: 'Supprimer l’objectif', de: 'Ziel löschen', es: 'Eliminar objetivo' }),
+    progressLabel: getMultiLangText(language, { vi: 'Tiến độ', en: 'Progress', ja: '進捗', ko: '진행률', zh: '进度', fr: 'Progression', de: 'Fortschritt', es: 'Progreso' }),
+    timeLabel: getMultiLangText(language, { vi: 'Thời gian', en: 'Time', ja: '時間', ko: '시간', zh: '时间', fr: 'Temps', de: 'Zeit', es: 'Tiempo' }),
+    workload: getMultiLangText(language, { vi: 'Khối lượng', en: 'Workload', ja: '作業量', ko: '업무량', zh: '任务量', fr: 'Charge', de: 'Arbeitslast', es: 'Carga' }),
+    tasksCompleted: getMultiLangText(language, { vi: 'task hoàn thành', en: 'tasks completed', ja: 'タスク完了', ko: '작업 완료', zh: '个任务已完成', fr: 'tâches terminées', de: 'Aufgaben erledigt', es: 'tareas completadas' }),
+    overdue: getMultiLangText(language, { vi: 'quá hạn', en: 'overdue', ja: '期限超過', ko: '기한 초과', zh: '已逾期', fr: 'en retard', de: 'überfällig', es: 'vencidas' }),
   };
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -468,6 +491,20 @@ export const GoalsPage: React.FC = () => {
     { id: 'personal', label: goalsCopy.personal, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100', icon: User },
     { id: 'health', label: goalsCopy.health, color: 'text-rose-600', bg: 'bg-rose-50 border-rose-100', icon: HeartPulse },
   ]);
+
+  useEffect(() => {
+    const defaultLabels: Record<string, string> = {
+      study: goalsCopy.study,
+      work: goalsCopy.work,
+      personal: goalsCopy.personal,
+      health: goalsCopy.health,
+    };
+    setCategories((prev) => prev.map((category) => (
+      defaultLabels[category.id]
+        ? { ...category, label: defaultLabels[category.id] }
+        : category
+    )));
+  }, [goalsCopy.study, goalsCopy.work, goalsCopy.personal, goalsCopy.health]);
 
   const [isCreatingCategory, setIsCreatingCategory] = useState<boolean>(false);
   const [customCategoryName, setCustomCategoryName] = useState<string>('');
@@ -629,10 +666,10 @@ export const GoalsPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-base font-extrabold text-slate-900 font-heading">
-                      Tạo mục tiêu mới
+                      {goalsCopy.createTitle}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium mt-0.5">
-                      Thiết lập chỉ số KPI & hạn chót hoàn thành
+                      {goalsCopy.createSubtitle}
                     </p>
                   </div>
                 </div>
@@ -648,24 +685,24 @@ export const GoalsPage: React.FC = () => {
               {/* Form */}
               <form onSubmit={handleAddGoal} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-extrabold text-slate-700">Tên mục tiêu *</label>
+                  <label className="text-xs font-extrabold text-slate-700">{goalsCopy.goalName}</label>
                   <input
                     type="text"
                     required
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="VD: Đạt 8.0 GPA học kỳ này"
+                    placeholder={goalsCopy.goalNamePlaceholder}
                     className="w-full h-11 px-4 rounded-2xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-extrabold text-slate-700">Mô tả / Ghi chú</label>
+                  <label className="text-xs font-extrabold text-slate-700">{goalsCopy.description}</label>
                   <textarea
                     rows={2}
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}
-                    placeholder="Nhập chi tiết về cách thực hiện mục tiêu..."
+                    placeholder={goalsCopy.descriptionPlaceholder}
                     className="w-full p-3 rounded-2xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50 resize-none"
                   />
                 </div>
@@ -673,14 +710,14 @@ export const GoalsPage: React.FC = () => {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-extrabold text-slate-700">Danh mục</label>
+                      <label className="text-xs font-extrabold text-slate-700">{goalsCopy.category}</label>
                       <button
                         type="button"
                         onClick={() => setIsCreatingCategory(!isCreatingCategory)}
                         className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
                       >
                         <Plus className="w-3 h-3" />
-                        <span>{isCreatingCategory ? 'Hủy' : 'Thêm mục mới'}</span>
+                        <span>{isCreatingCategory ? goalsCopy.cancel : goalsCopy.addNewCategory}</span>
                       </button>
                     </div>
 
@@ -701,14 +738,14 @@ export const GoalsPage: React.FC = () => {
                             {c.label}
                           </option>
                         ))}
-                        <option value="__add_new__">➕ Thêm danh mục mới...</option>
+                        <option value="__add_new__">{goalsCopy.addCategoryOption}</option>
                       </select>
                     ) : (
                       <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-2xl space-y-2.5 animate-in fade-in duration-200">
                         <div className="flex items-center justify-between text-xs font-extrabold text-indigo-950">
                           <span className="flex items-center gap-1">
                             <FolderPlus className="w-3.5 h-3.5 text-indigo-600" />
-                            Tạo danh mục mới
+                            {goalsCopy.newCategory}
                           </span>
                           <button
                             type="button"
@@ -723,7 +760,7 @@ export const GoalsPage: React.FC = () => {
                           type="text"
                           value={customCategoryName}
                           onChange={(e) => setCustomCategoryName(e.target.value)}
-                          placeholder="Tên danh mục (VD: Tài chính)"
+                          placeholder={goalsCopy.categoryNamePlaceholder}
                           className="w-full h-9 px-3 rounded-xl border border-indigo-200 text-xs bg-white focus:outline-none focus:border-indigo-600 font-medium"
                         />
 
@@ -750,7 +787,7 @@ export const GoalsPage: React.FC = () => {
                             disabled={!customCategoryName.trim()}
                             className="px-3 py-1 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 transition-all cursor-pointer"
                           >
-                            Lưu
+                            {goalsCopy.save}
                           </button>
                         </div>
                       </div>
@@ -758,7 +795,7 @@ export const GoalsPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-slate-700">Hạn chót mục tiêu</label>
+                    <label className="text-xs font-extrabold text-slate-700">{goalsCopy.targetDate}</label>
                     <input
                       type="date"
                       value={newTargetDate}
@@ -775,14 +812,14 @@ export const GoalsPage: React.FC = () => {
                     onClick={() => setIsAddingGoal(false)}
                     className="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                   >
-                    Hủy bỏ
+                    {goalsCopy.cancelLong}
                   </button>
                   <button
                     type="submit"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer active:scale-95"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Tạo mục tiêu</span>
+                    <span>{goalsCopy.createGoal}</span>
                   </button>
                 </div>
               </form>
@@ -798,10 +835,10 @@ export const GoalsPage: React.FC = () => {
             <Target className="h-7 w-7" />
           </div>
           <h3 className="font-heading text-lg font-extrabold text-slate-900">
-            Chưa có mục tiêu thật nào
+            {goalsCopy.emptyTitle}
           </h3>
           <p className="mx-auto mt-2 max-w-md text-sm font-medium text-slate-500">
-            Hãy tạo mục tiêu mới. Hệ thống sẽ tự đánh giá tiến độ dựa trên công việc thật, thời gian hoàn thành và khối lượng task liên quan.
+            {goalsCopy.emptyDesc}
           </p>
           <button
             type="button"
@@ -809,7 +846,7 @@ export const GoalsPage: React.FC = () => {
             className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-extrabold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" />
-            <span>Tạo mục tiêu đầu tiên</span>
+            <span>{goalsCopy.firstGoal}</span>
           </button>
         </div>
       )}
@@ -852,7 +889,7 @@ export const GoalsPage: React.FC = () => {
                       notifyLocalActivity('goal', 'delete');
                     }}
                     className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
-                    title="Xóa mục tiêu"
+                    title={goalsCopy.deleteGoal}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -889,15 +926,15 @@ export const GoalsPage: React.FC = () => {
 
                 <div className="grid grid-cols-3 gap-2 text-[10px]">
                   <div className="rounded-xl bg-slate-50 border border-slate-100 px-2 py-2">
-                    <div className="font-extrabold text-slate-500">Tiến độ</div>
+                    <div className="font-extrabold text-slate-500">{goalsCopy.progressLabel}</div>
                     <div className="mt-1 font-black text-slate-900">{goal.metrics?.taskProgress ?? 0}%</div>
                   </div>
                   <div className="rounded-xl bg-slate-50 border border-slate-100 px-2 py-2">
-                    <div className="font-extrabold text-slate-500">Thời gian</div>
+                    <div className="font-extrabold text-slate-500">{goalsCopy.timeLabel}</div>
                     <div className="mt-1 font-black text-slate-900">{goal.metrics?.timeScore ?? 0}%</div>
                   </div>
                   <div className="rounded-xl bg-slate-50 border border-slate-100 px-2 py-2">
-                    <div className="font-extrabold text-slate-500">Khối lượng</div>
+                    <div className="font-extrabold text-slate-500">{goalsCopy.workload}</div>
                     <div className="mt-1 font-black text-slate-900">{goal.metrics?.workloadScore ?? 0}%</div>
                   </div>
                 </div>
@@ -916,8 +953,8 @@ export const GoalsPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between pt-1 text-[11px] font-bold text-slate-500">
-                  <span>{goal.metrics?.completedTasks ?? 0}/{goal.metrics?.relatedTasks ?? 0} task hoàn thành</span>
-                  <span>{goal.metrics?.overdueTasks ?? 0} quá hạn</span>
+                  <span>{goal.metrics?.completedTasks ?? 0}/{goal.metrics?.relatedTasks ?? 0} {goalsCopy.tasksCompleted}</span>
+                  <span>{goal.metrics?.overdueTasks ?? 0} {goalsCopy.overdue}</span>
                 </div>
               </div>
             </article>
@@ -1184,25 +1221,25 @@ export const NotesPage: React.FC = () => {
                 title={
                   note.done
                     ? getMultiLangText(language, {
-                        vi: 'Đánh dấu chưa xong',
-                        en: 'Mark incomplete',
-                        ja: '未完了にする',
-                        ko: '미완료로 표시',
-                        zh: '标记为未完成',
-                        fr: 'Marquer comme non terminé',
-                        de: 'Als unvollständig markieren',
-                        es: 'Marcar como incompleto',
-                      })
+                      vi: 'Đánh dấu chưa xong',
+                      en: 'Mark incomplete',
+                      ja: '未完了にする',
+                      ko: '미완료로 표시',
+                      zh: '标记为未完成',
+                      fr: 'Marquer comme non terminé',
+                      de: 'Als unvollständig markieren',
+                      es: 'Marcar como incompleto',
+                    })
                     : getMultiLangText(language, {
-                        vi: 'Đánh dấu hoàn thành',
-                        en: 'Mark complete',
-                        ja: '完了にする',
-                        ko: '완료로 표시',
-                        zh: '标记为完成',
-                        fr: 'Marquer comme terminé',
-                        de: 'Als abgeschlossen markieren',
-                        es: 'Marcar como completado',
-                      })
+                      vi: 'Đánh dấu hoàn thành',
+                      en: 'Mark complete',
+                      ja: '完了にする',
+                      ko: '완료로 표시',
+                      zh: '标记为完成',
+                      fr: 'Marquer comme terminé',
+                      de: 'Als abgeschlossen markieren',
+                      es: 'Marcar como completado',
+                    })
                 }
               >
                 {note.done ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
@@ -1665,25 +1702,25 @@ export const ReportsPage: React.FC = () => {
         date: label,
         detail: totalOnDay > 0
           ? getMultiLangText(language, {
-              vi: `${completedOnDay}/${totalOnDay} công việc đã xong`,
-              en: `${completedOnDay}/${totalOnDay} tasks completed`,
-              ja: `${completedOnDay}/${totalOnDay} タスク完了`,
-              ko: `${completedOnDay}/${totalOnDay} 작업 완료`,
-              zh: `${completedOnDay}/${totalOnDay} 任务已完成`,
-              fr: `${completedOnDay}/${totalOnDay} tâches terminées`,
-              de: `${completedOnDay}/${totalOnDay} Aufgaben erledigt`,
-              es: `${completedOnDay}/${totalOnDay} tareas completadas`,
-            })
+            vi: `${completedOnDay}/${totalOnDay} công việc đã xong`,
+            en: `${completedOnDay}/${totalOnDay} tasks completed`,
+            ja: `${completedOnDay}/${totalOnDay} タスク完了`,
+            ko: `${completedOnDay}/${totalOnDay} 작업 완료`,
+            zh: `${completedOnDay}/${totalOnDay} 任务已完成`,
+            fr: `${completedOnDay}/${totalOnDay} tâches terminées`,
+            de: `${completedOnDay}/${totalOnDay} Aufgaben erledigt`,
+            es: `${completedOnDay}/${totalOnDay} tareas completadas`,
+          })
           : getMultiLangText(language, {
-              vi: 'Chưa có hoạt động',
-              en: 'No activity yet',
-              ja: 'まだアクティビティがありません',
-              ko: '아직 활동 없음',
-              zh: '暂无活动',
-              fr: 'Aucune activité pour le moment',
-              de: 'Noch keine Aktivität',
-              es: 'Sin actividad aún',
-            }),
+            vi: 'Chưa có hoạt động',
+            en: 'No activity yet',
+            ja: 'まだアクティビティがありません',
+            ko: '아직 활동 없음',
+            zh: '暂无活动',
+            fr: 'Aucune activité pour le moment',
+            de: 'Noch keine Aktivität',
+            es: 'Sin actividad aún',
+          }),
       };
     });
   }, [weeklyStats, allTasks, dashboardData, completedTasksCount, language, DAY_LABELS, DAY_NAMES_FULL]);
@@ -2096,10 +2133,10 @@ export const ReportsPage: React.FC = () => {
                           isBest
                             ? 'bg-gradient-to-t from-amber-500 via-amber-400 to-amber-300 shadow-[0_4px_20px_rgba(245,158,11,0.45)] ring-2 ring-amber-400/80'
                             : isSelected
-                            ? 'bg-gradient-to-t from-indigo-700 via-indigo-600 to-violet-500 shadow-[0_4px_20px_rgba(79,70,229,0.45)] ring-2 ring-indigo-600 ring-offset-2 scale-[1.03]'
-                            : item.value > 0
-                            ? 'bg-gradient-to-t from-indigo-500 via-indigo-400 to-violet-400 opacity-75 group-hover:opacity-100 group-hover:shadow-md'
-                            : 'report-empty-bar bg-slate-200/60'
+                              ? 'bg-gradient-to-t from-indigo-700 via-indigo-600 to-violet-500 shadow-[0_4px_20px_rgba(79,70,229,0.45)] ring-2 ring-indigo-600 ring-offset-2 scale-[1.03]'
+                              : item.value > 0
+                                ? 'bg-gradient-to-t from-indigo-500 via-indigo-400 to-violet-400 opacity-75 group-hover:opacity-100 group-hover:shadow-md'
+                                : 'report-empty-bar bg-slate-200/60'
                         )}
                         style={{ height: `${Math.max(8, item.value)}%` }}
                       >
@@ -2277,25 +2314,25 @@ export const ReportsPage: React.FC = () => {
                   </strong>
                   {bestItem.value > 0
                     ? getMultiLangText(language, {
-                        vi: `Ngày ${bestItem.fullName} bạn đạt điểm hiệu suất cao nhất (${bestItem.value}đ). Hãy duy trì đà làm việc này!`,
-                        en: `On ${bestItem.fullName} you achieved your peak productivity score (${bestItem.value} pts). Keep up the momentum!`,
-                        ja: `${bestItem.fullName} に最高の生産性スコア（${bestItem.value} pt）を記録しました。この調子を維持しましょう！`,
-                        ko: `${bestItem.fullName}에 최고 생산성 점수(${bestItem.value}점)를 달성했습니다. 이 기세를 유지하세요!`,
-                        zh: `在${bestItem.fullName}，您达到了最高生产力得分（${bestItem.value}分）。保持这个势头！`,
-                        fr: `Le ${bestItem.fullName}, vous avez atteint votre score maximal de productivité (${bestItem.value} pts). Continuez sur cette lancée !`,
-                        de: `Am ${bestItem.fullName} haben Sie Ihren Höchstwert an Produktivität erreicht (${bestItem.value} Pkt). Behalten Sie dieses Schwungrad bei!`,
-                        es: `El ${bestItem.fullName} alcanzaste tu puntuación máxima de productividad (${bestItem.value} pts). ¡Mantén el ritmo!`,
-                      })
+                      vi: `Ngày ${bestItem.fullName} bạn đạt điểm hiệu suất cao nhất (${bestItem.value}đ). Hãy duy trì đà làm việc này!`,
+                      en: `On ${bestItem.fullName} you achieved your peak productivity score (${bestItem.value} pts). Keep up the momentum!`,
+                      ja: `${bestItem.fullName} に最高の生産性スコア（${bestItem.value} pt）を記録しました。この調子を維持しましょう！`,
+                      ko: `${bestItem.fullName}에 최고 생산성 점수(${bestItem.value}점)를 달성했습니다. 이 기세를 유지하세요!`,
+                      zh: `在${bestItem.fullName}，您达到了最高生产力得分（${bestItem.value}分）。保持这个势头！`,
+                      fr: `Le ${bestItem.fullName}, vous avez atteint votre score maximal de productivité (${bestItem.value} pts). Continuez sur cette lancée !`,
+                      de: `Am ${bestItem.fullName} haben Sie Ihren Höchstwert an Produktivität erreicht (${bestItem.value} Pkt). Behalten Sie dieses Schwungrad bei!`,
+                      es: `El ${bestItem.fullName} alcanzaste tu puntuación máxima de productividad (${bestItem.value} pts). ¡Mantén el ritmo!`,
+                    })
                     : getMultiLangText(language, {
-                        vi: 'Tạo thêm task và hoàn thành lịch trình hôm nay để AI ghi nhận điểm số năng suất đầu tiên!',
-                        en: "Create tasks and complete today's schedule for AI to calculate your first productivity score!",
-                        ja: 'タスクを作成して今日のスケジュールを完了し、AIに最初の生産性スコアを計算させましょう！',
-                        ko: '작업을 생성하고 오늘 일정을 완료하여 AI가 첫 생산성 점수를 계산하도록 하세요!',
-                        zh: '创建任务并完成今天的日程，让 AI 计算您的第一个生产力得分！',
-                        fr: "Créez des tâches et terminez le programme d'aujourd'hui pour que l'IA calcule votre premier score !",
-                        de: 'Erstellen Sie Aufgaben und schließen Sie den heutigen Zeitplan ab, damit die KI Ihren ersten Produktivitätswert berechnet!',
-                        es: '¡Crea tareas y completa la agenda de hoy para que la IA calcule tu primera puntuación de productividad!',
-                      })}
+                      vi: 'Tạo thêm task và hoàn thành lịch trình hôm nay để AI ghi nhận điểm số năng suất đầu tiên!',
+                      en: "Create tasks and complete today's schedule for AI to calculate your first productivity score!",
+                      ja: 'タスクを作成して今日のスケジュールを完了し、AIに最初の生産性スコアを計算させましょう！',
+                      ko: '작업을 생성하고 오늘 일정을 완료하여 AI가 첫 생산성 점수를 계산하도록 하세요!',
+                      zh: '创建任务并完成今天的日程，让 AI 计算您的第一个生产力得分！',
+                      fr: "Créez des tâches et terminez le programme d'aujourd'hui pour que l'IA calcule votre premier score !",
+                      de: 'Erstellen Sie Aufgaben und schließen Sie den heutigen Zeitplan ab, damit die KI Ihren ersten Produktivitätswert berechnet!',
+                      es: '¡Crea tareas y completa la agenda de hoy para que la IA calcule tu primera puntuación de productividad!',
+                    })}
                 </div>
               </div>
             </div>
@@ -2315,3 +2352,4 @@ export const ReportsPage: React.FC = () => {
     </div>
   );
 };
+

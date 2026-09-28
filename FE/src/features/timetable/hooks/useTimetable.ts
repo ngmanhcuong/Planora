@@ -86,6 +86,7 @@ export const useDeleteTimetableItem = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: timetableKeys.all });
       queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['calendar'] });
     },
   });
 };

@@ -163,6 +163,8 @@ function expandTimetableItems(items: any[], rangeStart: Date, rangeEnd: Date): C
           courseCode: item.courseCode || null,
           lecturer: item.lecturer || null,
           room: item.room || null,
+          timetableId: item.timetableId || null,
+          timetableItemId: item.id || null,
           category: {
             id: item.id,
             name: 'Thời khóa biểu',
