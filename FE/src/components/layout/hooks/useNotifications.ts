@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsApi } from '../api/notificationsApi';
 import { dashboardKeys } from '@/features/dashboard/hooks/useDashboard';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
+import { localizeNotification } from '@/lib/notificationLanguage';
 
 export const notificationKeys = {
   all: ['notifications'] as const,
@@ -8,9 +10,11 @@ export const notificationKeys = {
 };
 
 export const useNotifications = () => {
+  const language = useCurrentLanguage();
   return useQuery({
     queryKey: [...notificationKeys.all, 'list'],
     queryFn: () => notificationsApi.getNotifications(),
+    select: (items) => items.map(item => localizeNotification(item, language)),
     refetchInterval: 60000,
   });
 };

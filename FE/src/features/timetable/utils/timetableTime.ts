@@ -1,11 +1,11 @@
 /** Visible day range for the weekly grid (minutes from midnight). */
 export const TIMETABLE_GRID_START = 7 * 60; // 07:00
 export const TIMETABLE_GRID_END = 21 * 60; // 21:00 (last row 20:00)
-export const TIMETABLE_HOUR_HEIGHT_PX = 48;
+export const TIMETABLE_HOUR_HEIGHT_PX = 72;
 /** Max height of the scrollable grid — header + body share width (no column drift). */
 export const TIMETABLE_GRID_MAX_HEIGHT_PX = 560;
-/** Fixed time column + 7 equal day columns. */
-export const TIMETABLE_GRID_TEMPLATE = '3.25rem repeat(7, minmax(0, 1fr))';
+/** Seven equal day columns; time labels are shown in class details. */
+export const TIMETABLE_GRID_TEMPLATE = 'repeat(7, minmax(0, 1fr))';
 
 export const parseTimeToMinutes = (time?: string | null): number => {
   if (!time) return TIMETABLE_GRID_START;

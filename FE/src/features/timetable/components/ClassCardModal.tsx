@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { MapPin, User, Clock, Calendar, FileText, Trash2, Edit3 } from 'lucide-react';
+import { MapPin, User, Clock, Calendar, FileText, Trash2 } from 'lucide-react';
 import type { TimetableClassItem } from '../types';
 
 export interface ClassCardModalProps {
@@ -10,6 +10,7 @@ export interface ClassCardModalProps {
   onClose: () => void;
   selectedClass: TimetableClassItem | null;
   onDeleteClass?: (id: string) => void;
+  onEditClass?: (cls: TimetableClassItem) => void;
 }
 
 export const ClassCardModal: React.FC<ClassCardModalProps> = ({
@@ -17,6 +18,7 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
   onClose,
   selectedClass,
   onDeleteClass,
+  onEditClass,
 }) => {
   if (!selectedClass) return null;
 
@@ -26,10 +28,10 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Chi tiết môn học"
+      title="Chi tiết lịch đã thêm"
       maxWidth="md"
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex max-h-[70dvh] flex-col gap-4 overflow-y-auto break-words pr-1">
         {/* Class Header Banner */}
         <div
           className="p-4 rounded-xl flex flex-col gap-2 border border-black/10"
@@ -43,7 +45,7 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
             <Badge customBg="#FFFFFF" customColor={selectedClass.color} size="sm">
               {selectedClass.typeLabel}
             </Badge>
-            <span className="text-xs font-mono font-bold tracking-wider opacity-80">
+            <span className="min-w-0 break-all text-xs font-mono font-bold tracking-wider opacity-80">
               {selectedClass.courseCode}
             </span>
           </div>
@@ -55,7 +57,7 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#131B2E]">
           <div className="flex items-center gap-2.5 p-3 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
             <Calendar className="w-4 h-4 text-[#4F46E5] shrink-0" />
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <span className="text-[11px] text-[#64748B] font-semibold">Thứ trong tuần</span>
               <span className="font-bold">{dayNames[selectedClass.dayIndex]}</span>
             </div>
@@ -63,25 +65,25 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
 
           <div className="flex items-center gap-2.5 p-3 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
             <Clock className="w-4 h-4 text-[#4F46E5] shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-[11px] text-[#64748B] font-semibold">Khung giờ tiết học</span>
+            <div className="flex min-w-0 flex-col">
+              <span className="text-[11px] text-[#64748B] font-semibold">Thời gian bắt đầu – kết thúc</span>
               <span className="font-bold">{selectedClass.timeRange}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 p-3 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
             <MapPin className="w-4 h-4 text-[#006E4B] shrink-0" />
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <span className="text-[11px] text-[#64748B] font-semibold">Phòng học / Địa điểm</span>
-              <span className="font-bold">{selectedClass.room}</span>
+              <span className="font-bold">{selectedClass.room || 'Chưa có địa điểm'}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 p-3 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
             <User className="w-4 h-4 text-[#0058BE] shrink-0" />
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <span className="text-[11px] text-[#64748B] font-semibold">Giảng viên phụ trách</span>
-              <span className="font-bold">{selectedClass.lecturer}</span>
+              <span className="font-bold">{selectedClass.lecturer || 'Chưa có thông tin'}</span>
             </div>
           </div>
         </div>
@@ -93,7 +95,7 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
               <FileText className="w-3.5 h-3.5" />
               Ghi chú môn học:
             </span>
-            <p className="text-[#131B2E] leading-relaxed">{selectedClass.notes}</p>
+            <p className="whitespace-pre-wrap text-[#131B2E] leading-relaxed">{selectedClass.notes}</p>
           </div>
         )}
         {/* Modal Footer Actions */}
@@ -111,12 +113,9 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
           </Button>
 
           <div className="flex items-center gap-2">
+            {onEditClass && <Button variant="primary" size="sm" onClick={() => onEditClass(selectedClass)}>Chỉnh sửa</Button>}
             <Button variant="secondary" size="sm" onClick={onClose}>
               Đóng
-            </Button>
-            <Button variant="primary" size="sm" onClick={onClose}>
-              <Edit3 className="w-4 h-4" />
-              <span>Chỉnh sửa</span>
             </Button>
           </div>
         </div>

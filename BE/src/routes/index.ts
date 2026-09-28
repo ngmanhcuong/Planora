@@ -11,8 +11,10 @@ import { notificationRoutes } from '../modules/notifications';
 import { dashboardRoutes } from '../modules/dashboard';
 import { aiRoutes } from '../modules/ai';
 import { adminRoutes } from '../modules/admin';
+import { activityNotifications } from '../middlewares/activityNotifications';
 
 const router = Router();
+router.use(activityNotifications);
 
 router.use('/', healthRoutes);
 router.use('/auth', authRoutes);

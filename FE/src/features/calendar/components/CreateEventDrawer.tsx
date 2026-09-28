@@ -104,7 +104,7 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
               setAllowConflict(false);
             }}
           />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
             <TimePicker
               label="Bắt đầu"
               value={startTime}

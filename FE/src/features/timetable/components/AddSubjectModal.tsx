@@ -11,7 +11,8 @@ import { translate, type TranslationKey } from '@/lib/i18n';
 export interface AddSubjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddClass: (cls: Omit<TimetableClassItem, 'id'>) => void;
+  onAddClass: (cls: Omit<TimetableClassItem, 'id'>) => void | Promise<void>;
+  editingClass?: TimetableClassItem | null;
   initialDayIndex?: number;
   initialStartTime?: string;
 }
@@ -32,6 +33,7 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
   onAddClass,
   initialDayIndex,
   initialStartTime,
+  editingClass,
 }) => {
   const language = useCurrentLanguage();
   const [subjectName, setSubjectName] = useState('');
@@ -44,18 +46,30 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
   const [type, setType] = useState<'theory' | 'practice' | 'exam'>('theory');
   const [openSelect, setOpenSelect] = useState<string | null>(null);
   const [timeError, setTimeError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   React.useEffect(() => {
     if (!isOpen) return;
+    setTimeError('');
+    setSubjectName(editingClass?.subjectName || '');
+    setCourseCode(editingClass?.courseCode || '');
+    setRoom(editingClass?.room || '');
+    setLecturer(editingClass?.lecturer || '');
+    setType(editingClass?.type || 'theory');
+    setDayIndex(editingClass?.dayIndex ?? initialDayIndex ?? 0);
+    setStartTime(editingClass?.startTime || initialStartTime || '09:00');
+    setEndTime(editingClass?.endTime || (initialStartTime ? defaultEndTime(initialStartTime, 60) : '10:30'));
+    if (editingClass) return;
     if (typeof initialDayIndex === 'number') setDayIndex(initialDayIndex);
     if (initialStartTime) {
       setStartTime(initialStartTime);
       setEndTime(defaultEndTime(initialStartTime, 60));
     }
-  }, [isOpen, initialDayIndex, initialStartTime]);
+  }, [isOpen, initialDayIndex, initialStartTime, editingClass]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     if (!subjectName.trim()) return;
 
     if (endTime <= startTime) {
@@ -70,7 +84,9 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
       exam: translate(language, 'timetable.type.exam'),
     };
 
-    onAddClass({
+    setSaving(true);
+    try {
+    await onAddClass({
       subjectName,
       courseCode: courseCode || 'EVENT',
       dayIndex,
@@ -93,6 +109,11 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
     setStartTime('09:00');
     setEndTime('10:30');
     onClose();
+    } catch {
+      setTimeError('Không lưu được thay đổi. Vui lòng kiểm tra thông tin và thử lại.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   React.useEffect(() => {
@@ -176,7 +197,7 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={translate(language, 'timetable.addModalTitle')}
+      title={editingClass ? 'Chỉnh sửa lịch' : translate(language, 'timetable.addModalTitle')}
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -299,9 +320,9 @@ export const AddSubjectModal: React.FC<AddSubjectModalProps> = ({
           <Button type="button" variant="secondary" onClick={onClose}>
             {translate(language, 'timetable.cancel')}
           </Button>
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" disabled={saving}>
             <BookmarkPlus className="w-4 h-4" />
-            <span>{translate(language, 'timetable.addSubject')}</span>
+            <span>{saving ? 'Đang lưu…' : editingClass ? 'Lưu thay đổi' : translate(language, 'timetable.addSubject')}</span>
           </Button>
         </div>
       </form>

@@ -8,6 +8,7 @@ import {
   Check,
   CheckCheck,
   Inbox,
+  ExternalLink,
 } from 'lucide-react';
 import {
   useNotifications,
@@ -19,6 +20,9 @@ import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { getMultiLangText, translateRelativeTime } from '@/lib/i18n';
 import { clsx } from 'clsx';
 import { UserHeroBanner } from '@/components/ui/UserHeroBanner';
+import { Modal } from '@/components/ui/Modal';
+import type { ApiNotification } from '@/types';
+import { notificationText } from '@/lib/notificationLanguage';
 
 const LOCALE_MAP: Record<string, string> = {
   vi: 'vi-VN',
@@ -36,10 +40,14 @@ type FilterType = 'all' | 'unread' | 'tasks' | 'events' | 'system';
 export const NotificationsPage: React.FC = () => {
   const language = useCurrentLanguage();
   const [filter, setFilter] = useState<FilterType>('all');
+  const [selectedSnapshot, setSelectedNotification] = useState<ApiNotification | null>(null);
   const { data: notificationsData, isLoading, isError, refetch } = useNotifications();
   const { data: unreadData } = useUnreadCount();
   const markRead = useMarkReadNotification();
   const markAllRead = useMarkAllReadNotifications();
+  const selectedNotification = notificationsData?.find(item => item.id === selectedSnapshot?.id) || selectedSnapshot;
+  const detailLabel = notificationText(language, 'Chi tiết thông báo');
+  const closeLabel = notificationText(language, 'Đóng');
 
   const notifications = useMemo(() => {
     if (!notificationsData) return [];
@@ -345,8 +353,18 @@ export const NotificationsPage: React.FC = () => {
               >
                 {/* Status Dot */}
                 {!notification.isRead && (
-                  <span className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100" />
+                  <span className="absolute top-6 right-16 w-2.5 h-2.5 rounded-full bg-rose-500 ring-4 ring-rose-100" />
                 )}
+                <button
+                  type="button"
+                  aria-label={`${detailLabel}: ${notification.title}`}
+                  aria-haspopup="dialog"
+                  title={detailLabel}
+                  onClick={() => setSelectedNotification(notification)}
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-indigo-100 hover:text-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </button>
 
                 {/* Icon Box */}
                 <div
@@ -359,7 +377,7 @@ export const NotificationsPage: React.FC = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 min-w-0 pr-6">
+                <div className="flex-1 min-w-0 pr-14">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className={clsx('px-2 py-0.5 rounded-md text-[11px] font-semibold', config.badgeColor)}>
                       {config.label}
@@ -399,6 +417,41 @@ export const NotificationsPage: React.FC = () => {
           })}
         </div>
       )}
+      <Modal
+        isOpen={selectedNotification !== null}
+        onClose={() => setSelectedNotification(null)}
+        title={detailLabel}
+        maxWidth="lg"
+      >
+        {selectedNotification && (
+          <div className="max-h-[65dvh] space-y-4 overflow-y-auto break-words text-slate-800">
+            <div className="flex items-center gap-3">
+              <div className={clsx('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border', getNotificationConfig(selectedNotification.type).bgColor)}>
+                {getNotificationConfig(selectedNotification.type).icon}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-slate-500">{getNotificationConfig(selectedNotification.type).label}</p>
+                <time dateTime={selectedNotification.createdAt} className="text-xs text-slate-500">
+                  {new Date(selectedNotification.createdAt).toLocaleString(LOCALE_MAP[language || 'vi'] || 'en-US')}
+                </time>
+              </div>
+            </div>
+            <h4 className="text-lg font-bold leading-snug">{selectedNotification.title}</h4>
+            {selectedNotification.message && <p className="whitespace-pre-wrap text-sm leading-relaxed">{selectedNotification.message}</p>}
+            {markRead.isError && <p role="alert" className="text-sm text-rose-600">{copy.readError}</p>}
+            <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 pt-4">
+              {!(notifications.find(item => item.id === selectedNotification.id) || selectedNotification).isRead && (
+                <button type="button" disabled={markRead.isPending} onClick={() => markRead.mutate(selectedNotification.id)} className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                  {copy.markRead}
+                </button>
+              )}
+              <button type="button" onClick={() => setSelectedNotification(null)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold hover:bg-slate-100">
+                {closeLabel}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

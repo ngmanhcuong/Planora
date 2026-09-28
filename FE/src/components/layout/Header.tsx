@@ -20,7 +20,7 @@ export const Header: React.FC = () => {
   return (
     <header
       className={clsx(
-        'fixed top-0 right-0 h-16 bg-[var(--color-surface)]/80 backdrop-blur-md border-b border-[var(--color-border)] z-20 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 transition-all duration-300 ease-in-out',
+        'fixed top-0 right-0 h-16 bg-[var(--color-surface)]/80 backdrop-blur-md border-b border-[var(--color-border)] z-40 grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 transition-all duration-300 ease-in-out',
         isSidebarCollapsed ? 'left-20' : 'left-64'
       )}
     >

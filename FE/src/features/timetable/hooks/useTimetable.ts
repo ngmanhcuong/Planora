@@ -48,12 +48,32 @@ export const useCreateTimetableItem = () => {
 
 export const useUpdateTimetableItem = () => {
   const queryClient = useQueryClient();
+  type WeeklyData = Awaited<ReturnType<typeof timetableApi.getWeeklyTimetable>>;
   return useMutation({
     mutationFn: ({ timetableId, itemId, data }: { timetableId: string; itemId: string; data: UpdateTimetableItemPayload }) =>
       timetableApi.updateTimetableItem(timetableId, itemId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: timetableKeys.all });
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+    onMutate: async ({ itemId, data }) => {
+      await queryClient.cancelQueries({ queryKey: timetableKeys.weekly });
+      const previous = queryClient.getQueryData<WeeklyData>(timetableKeys.weekly);
+      queryClient.setQueryData<WeeklyData>(timetableKeys.weekly, (current) => current ? {
+        ...current,
+        items: current.items.map(item => item.id === itemId ? { ...item, ...data } : item),
+      } : current);
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) queryClient.setQueryData(timetableKeys.weekly, context.previous);
+    },
+    onSuccess: (saved, { itemId }) => {
+      queryClient.setQueryData<WeeklyData>(timetableKeys.weekly, (current) => current ? {
+        ...current,
+        items: current.items.map(item => item.id === itemId ? saved : item),
+      } : current);
+      void queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ['calendar'] });
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: timetableKeys.all });
     },
   });
 };

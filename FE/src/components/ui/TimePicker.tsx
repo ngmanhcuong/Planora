@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Clock, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { TimeWheel } from './TimeWheel';
@@ -28,6 +29,45 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 280, maxHeight: 320 });
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const reposition = () => {
+      const trigger = triggerRef.current;
+      const popup = popupRef.current;
+      if (!trigger || !popup) return;
+      const rect = trigger.getBoundingClientRect();
+      const panel = trigger.closest('[data-modal-panel]')?.getBoundingClientRect();
+      const leftEdge = Math.max(8, panel ? panel.left + 16 : 8);
+      const rightEdge = Math.min(window.innerWidth - 8, panel ? panel.right - 16 : window.innerWidth - 8);
+      const topEdge = Math.max(8, panel ? panel.top + 64 : 8);
+      // Reserve the modal footer so the picker does not cover Save/Cancel.
+      const bottomEdge = Math.min(window.innerHeight - 8, panel ? panel.bottom - 76 : window.innerHeight - 8);
+      const width = Math.min(280, rightEdge - leftEdge);
+      const below = Math.max(0, bottomEdge - rect.bottom - 6);
+      const above = Math.max(0, rect.top - topEdge - 6);
+      const naturalHeight = popup.scrollHeight;
+      const openBelow = below >= naturalHeight || below >= above;
+      const maxHeight = Math.max(80, openBelow ? below : above);
+      const height = Math.min(naturalHeight, maxHeight);
+      const left = Math.max(leftEdge, Math.min(align === 'right' ? rect.right - width : rect.left, rightEdge - width));
+      const top = Math.max(topEdge, openBelow ? rect.bottom + 6 : rect.top - height - 6);
+      setPosition({ top, left, width, maxHeight });
+    };
+    reposition();
+    const onScroll = (event: Event) => {
+      if (!popupRef.current?.contains(event.target as Node)) reposition();
+    };
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [isOpen, align]);
 
   const parseTime = (val: string) => {
     if (!val || !val.includes(':')) {
@@ -53,13 +93,26 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node) && !popupRef.current?.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    };
+    window.addEventListener('keydown', escape, true);
+    return () => window.removeEventListener('keydown', escape, true);
+  }, [isOpen]);
 
   const updateTime = (h12: string, min: string, mer: string) => {
     let h24 = parseInt(h12, 10);
@@ -81,6 +134,9 @@ export const TimePicker: React.FC<TimePickerProps> = ({
         </label>
       )}
       <button
+        ref={triggerRef}
+        aria-expanded={isOpen}
+        aria-haspopup="dialog"
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen((prev) => !prev)}
@@ -106,18 +162,18 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 
       {error && <span className="text-xs font-medium text-[#F43F5E]">{error}</span>}
 
-      {isOpen && (
-        <div className={clsx("absolute top-[calc(100%+6px)] z-50 w-[280px] overflow-hidden rounded-2xl", align === "right" ? "right-0" : "left-0") + " border border-slate-200 bg-white shadow-[0_20px_45px_rgba(15,23,42,0.18)] animate-in fade-in zoom-in-95 duration-150"}>
+      {isOpen && createPortal(
+        <div ref={popupRef} role="dialog" aria-label={label || 'Chọn giờ'} style={position} className="fixed z-[100] max-h-[calc(100dvh-16px)] overflow-y-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-main)] shadow-[0_20px_45px_rgba(15,23,42,0.25)]">
           {/* Header Toolbar */}
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-2.5 py-2">
-            <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              <Clock className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
+          <div className="flex items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-container)] px-2.5 py-2">
+            <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-sub)]">
+              <Clock className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" />
               <span>Giờ</span>
             </div>
 
             <div className="flex items-center gap-1.5">
               {/* AM / PM Toggle */}
-              <div className="flex shrink-0 rounded-lg border border-slate-200/80 bg-white p-0.5 shadow-xs">
+              <div className="flex shrink-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5 shadow-xs">
                 {['AM', 'PM'].map((period) => (
                   <button
                     key={period}
@@ -127,7 +183,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                       'h-6 rounded-md px-2 text-[11px] font-black transition-all cursor-pointer',
                       meridiem === period
                         ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-indigo-600 hover:bg-indigo-50'
+                        : 'text-[var(--color-text-main)] hover:bg-indigo-500/15'
                     )}
                   >
                     {period}
@@ -138,7 +194,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="h-6 shrink-0 rounded-lg bg-indigo-50 px-2 text-[11px] font-extrabold text-indigo-600 transition-colors hover:bg-indigo-100 cursor-pointer"
+                className="h-6 shrink-0 rounded-lg bg-indigo-600 px-2 text-[11px] font-extrabold text-white transition-colors hover:bg-indigo-700 cursor-pointer"
               >
                 Xong
               </button>
@@ -147,13 +203,13 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 
           {/* Hour & Minute Scroll Columns */}
           <div className="p-3">
-            <div className="relative rounded-2xl border border-slate-200 bg-slate-50/90 p-3">
+            <div className="relative rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-container)] p-3">
               <div className="grid grid-cols-[1fr_auto_1fr] gap-1 px-1 pb-1 text-center text-[10px] font-black uppercase tracking-wider text-slate-400">
                 <div>Giờ</div>
                 <div className="w-3" />
                 <div>Phút</div>
               </div>
-              <div className="pointer-events-none absolute left-3 right-3 top-[76px] h-9 rounded-xl bg-white ring-1 ring-indigo-300 shadow-sm" />
+              <div className="pointer-events-none absolute left-3 right-3 top-[76px] h-9 rounded-xl bg-indigo-500/15 ring-1 ring-indigo-400/50 shadow-sm" />
               <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
                 <TimeWheel
                   label="Giờ"
@@ -172,7 +228,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   );
 };

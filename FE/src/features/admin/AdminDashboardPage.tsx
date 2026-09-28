@@ -12,6 +12,7 @@ import {
   Headphones,
   History,
   Loader2,
+  RefreshCw,
   Megaphone,
   MessageSquare,
   Plus,
@@ -59,11 +60,11 @@ type AuditLog = { id: string; action: string; user: string; time: string };
 type CustomerNote = { id: string; userId: string; agent: string; note: string; date: string };
 
 const roleBadgeColors: Record<Role, string> = {
-  ADMIN: 'bg-indigo-50 text-indigo-700 border-indigo-200/80 shadow-sm',
-  CONTENT_MANAGER: 'bg-amber-50 text-amber-700 border-amber-200/80 shadow-sm',
-  CUSTOMER_SUPPORT: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 shadow-sm',
-  ENTERPRISE_LEAD: 'bg-purple-50 text-purple-700 border-purple-200/80 shadow-sm',
-  USER: 'bg-slate-100 text-slate-700 border-slate-200',
+  ADMIN: 'bg-indigo-50 text-indigo-700 border-indigo-200/80 shadow-sm dark:bg-indigo-500/15 dark:text-indigo-100 dark:border-indigo-400/30',
+  CONTENT_MANAGER: 'bg-amber-50 text-amber-700 border-amber-200/80 shadow-sm dark:bg-amber-500/15 dark:text-amber-100 dark:border-amber-400/30',
+  CUSTOMER_SUPPORT: 'bg-emerald-50 text-emerald-700 border-emerald-200/80 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-100 dark:border-emerald-400/30',
+  ENTERPRISE_LEAD: 'bg-purple-50 text-purple-700 border-purple-200/80 shadow-sm dark:bg-purple-500/15 dark:text-purple-100 dark:border-purple-400/30',
+  USER: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600',
 };
 
 const emptyUserForm = { name: '', email: '', password: '', role: 'USER' as Role, accountTier: 'FREE' as Tier, status: 'ACTIVE' as Status };
@@ -193,7 +194,23 @@ export const AdminDashboardPage: React.FC = () => {
     const knownConfigs: Record<string, { label: string; description: string }> = {
       'ai.schedule.maxSessions': {
         label: getMultiLangText(language, { vi: 'Số phiên gợi ý tối đa', en: 'Maximum suggested sessions', ja: '最大提案セッション数', ko: '최대 추천 세션 수', zh: '最大建议会话数', fr: 'Nombre maximal de sessions suggérées', de: 'Maximale vorgeschlagene Sitzungen', es: 'Sesiones sugeridas máximas' }),
-        description: getMultiLangText(language, { vi: 'Thông số thật dùng để điều chỉnh thuật toán gợi ý lịch.', en: 'Real configuration used to tune the smart scheduling algorithm.', ja: 'スマートスケジュール提案アルゴリズムを調整する実設定です。', ko: '스마트 일정 추천 알고리즘을 조정하는 실제 설정입니다.', zh: '用于调整智能日程推荐算法的真实配置。', fr: 'Paramètre réel utilisé pour ajuster l’algorithme de planification intelligente.', de: 'Echte Einstellung zur Feinabstimmung des intelligenten Planungsalgorithmus.', es: 'Configuración real usada para ajustar el algoritmo de planificación inteligente.' }),
+        description: getMultiLangText(language, { vi: 'Giới hạn số phiên học/làm việc AI tạo trong một lần gợi ý lịch.', en: 'Caps how many sessions AI can suggest in one scheduling run.', ja: 'AI が 1 回のスケジュール提案で作成できるセッション数を制限します。', ko: 'AI가 한 번의 일정 추천에서 만들 수 있는 세션 수를 제한합니다.', zh: '限制 AI 单次排程可建议的会话数量。', fr: 'Limite le nombre de sessions proposées par l’IA.', de: 'Begrenzt vorgeschlagene KI-Sitzungen pro Lauf.', es: 'Limita las sesiones sugeridas por IA por ejecución.' }),
+      },
+      'ai.schedule.enabled': {
+        label: getMultiLangText(language, { vi: 'Bật gợi ý lịch AI', en: 'Enable AI scheduling', ja: 'AI スケジューリング有効', ko: 'AI 일정 추천 활성화', zh: '启用 AI 排程', fr: 'Activer la planification IA', de: 'KI-Planung aktivieren', es: 'Activar planificación IA' }),
+        description: getMultiLangText(language, { vi: 'Cho phép hệ thống tạo gợi ý lịch thông minh cho người dùng.', en: 'Allows the system to generate smart schedule suggestions.', ja: 'スマート予定提案を有効にします。', ko: '스마트 일정 추천을 허용합니다.', zh: '允许系统生成智能日程建议。', fr: 'Autorise les suggestions intelligentes.', de: 'Erlaubt intelligente Zeitplanvorschläge.', es: 'Permite sugerencias inteligentes.' }),
+      },
+      'notifications.digest.enabled': {
+        label: getMultiLangText(language, { vi: 'Bật nhắc lịch tổng hợp', en: 'Enable digest reminders', ja: 'ダイジェスト通知有効', ko: '요약 알림 활성화', zh: '启用摘要提醒', fr: 'Activer les rappels synthèse', de: 'Digest-Erinnerungen aktivieren', es: 'Activar recordatorios resumen' }),
+        description: getMultiLangText(language, { vi: 'Điều khiển thông báo tổng hợp deadline, sự kiện và thói quen.', en: 'Controls digest notifications for deadlines, events, and habits.', ja: '締切・イベント・習慣の要約通知を制御します。', ko: '마감, 이벤트, 습관 요약 알림을 제어합니다.', zh: '控制截止日期、事件和习惯摘要通知。', fr: 'Contrôle les notifications de synthèse.', de: 'Steuert zusammengefasste Benachrichtigungen.', es: 'Controla notificaciones resumen.' }),
+      },
+      'templates.public.enabled': {
+        label: getMultiLangText(language, { vi: 'Bật mẫu lập kế hoạch công khai', en: 'Enable public templates', ja: '公開テンプレート有効', ko: '공개 템플릿 활성화', zh: '启用公开模板', fr: 'Activer les modèles publics', de: 'Öffentliche Vorlagen aktivieren', es: 'Activar plantillas públicas' }),
+        description: getMultiLangText(language, { vi: 'Cho phép module mẫu chuẩn hiển thị và được sử dụng trong hệ thống.', en: 'Allows standard planning templates to be visible and usable.', ja: '標準テンプレートの表示と利用を許可します。', ko: '표준 템플릿 표시 및 사용을 허용합니다.', zh: '允许标准计划模板显示和使用。', fr: 'Autorise les modèles standard.', de: 'Erlaubt Standardplanungsvorlagen.', es: 'Permite plantillas estándar.' }),
+      },
+      'support.autoAssign.enabled': {
+        label: getMultiLangText(language, { vi: 'Tự động phân luồng ticket CS', en: 'Auto-route support tickets', ja: 'サポートチケット自動振分', ko: '지원 티켓 자동 분류', zh: '自动分流支持工单', fr: 'Routage auto des tickets', de: 'Supporttickets automatisch routen', es: 'Enrutar tickets automáticamente' }),
+        description: getMultiLangText(language, { vi: 'Đánh dấu hệ thống CS dùng chế độ tự động ưu tiên và phân luồng.', en: 'Marks support as using automatic prioritization and routing.', ja: '自動優先付けと振分を利用します。', ko: '자동 우선순위 및 분류를 사용합니다.', zh: '使用自动优先级和分流。', fr: 'Utilise la priorisation automatique.', de: 'Nutzt automatische Priorisierung.', es: 'Usa priorización automática.' }),
       },
     };
     return knownConfigs[key] || {
@@ -325,6 +342,30 @@ export const AdminDashboardPage: React.FC = () => {
 
   const canCreateUser = Boolean(userForm.name.trim() && userForm.email.trim() && userForm.password.trim());
 
+  const configByKey = Object.fromEntries(data.configs.map((config) => [config.key, config])) as Record<string, Config | undefined>;
+  const featureEntries = Object.entries(data.analytics.featureUsage);
+  const totalFeatureUsage = featureEntries.reduce((sum, [, value]) => sum + value, 0);
+  const activeConfigCount = data.configs.filter((config) => config.value === 'true' || config.value === 'enabled' || Number(config.value) > 0).length;
+  const latestActivityAt = [...data.overview.recentUsers.map((user) => user.createdAt), ...data.overview.recentTickets.map((ticket) => ticket.createdAt)]
+    .filter(Boolean)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+  const automationModules = [
+    { key: 'ai.schedule.enabled', icon: Bot, accent: 'from-cyan-500 to-blue-500' },
+    { key: 'notifications.digest.enabled', icon: Megaphone, accent: 'from-violet-500 to-indigo-500' },
+    { key: 'templates.public.enabled', icon: Tags, accent: 'from-emerald-500 to-teal-500' },
+    { key: 'support.autoAssign.enabled', icon: Headphones, accent: 'from-amber-500 to-orange-500' },
+  ].map((module) => ({ ...module, text: getSystemConfigText(module.key), enabled: configByKey[module.key]?.value === 'true' }));
+  const configPresets = [
+    { key: 'ai.schedule.maxSessions', value: '5' },
+    { key: 'ai.schedule.maxSessions', value: '8' },
+    { key: 'ai.schedule.enabled', value: 'true' },
+    { key: 'notifications.digest.enabled', value: 'true' },
+  ].map((preset) => ({ ...preset, text: getSystemConfigText(preset.key) }));
+  const saveSystemConfig = (key: string, value: string, label?: string, description?: string) => {
+    const text = getSystemConfigText(key, label, description);
+    return runAction(() => apiClient.post('/admin/system/configs', { key, value, label: text.label, description: text.description }));
+  };
+
   return (
     <div className="admin-dashboard-scope mx-auto max-w-[1480px] space-y-6 px-3 pb-12 lg:px-6">
       {/* Dynamic Role Header Banner */}
@@ -435,7 +476,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <TextInput placeholder={getMultiLangText(language, { vi: 'Mật khẩu', en: 'Password', ja: 'パスワード', ko: '비밀번호', zh: '密码', fr: 'Mot de passe', de: 'Passwort', es: 'Contraseña' })} type="password" value={userForm.password} onChange={(v) => setUserForm({ ...userForm, password: v })} />
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">
                     {getMultiLangText(language, { vi: 'Chọn vai trò hệ thống:', en: 'Select system role:', ja: 'システム役割を選択:', ko: '시스템 역할 선택:', zh: '选择系统角色:', fr: 'Sélectionner le rôle système :', de: 'Systemrolle auswählen:', es: 'Seleccionar rol del sistema:' })}
                   </label>
                   <Select
@@ -692,11 +733,11 @@ export const AdminDashboardPage: React.FC = () => {
                 </div>
 
                 {selectedCsUser ? (
-                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 space-y-4">
-                    <div className="flex items-center justify-between border-b border-indigo-100 pb-3">
+                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 space-y-4 dark:border-slate-700/80 dark:bg-slate-950/45">
+                    <div className="flex items-center justify-between border-b border-indigo-100 pb-3 dark:border-slate-700/80">
                       <div>
-                        <h3 className="text-base font-bold text-slate-900">{selectedCsUser.name}</h3>
-                        <p className="text-xs text-slate-500">{selectedCsUser.email}</p>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-50">{selectedCsUser.name}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{selectedCsUser.email}</p>
                       </div>
                       <span className={clsx('rounded-full px-3 py-1 text-xs font-semibold border', roleBadgeColors[selectedCsUser.role])}>
                         {roleLabelsMap[selectedCsUser.role]}
@@ -704,27 +745,27 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-xs font-semibold">
-                      <div className="rounded-xl bg-white p-3 border border-indigo-100">
-                        <span className="text-slate-400">{getMultiLangText(language, { vi: 'Gói tài khoản:', en: 'Account tier:', ja: 'アカウントプラン:', ko: '계정 플랜:', zh: '账户套餐:', fr: 'Forfait :', de: 'Kontoplan:', es: 'Plan:' })}</span>
-                        <p className="text-indigo-600 font-bold mt-0.5">{tierLabelsMap[selectedCsUser.accountTier]}</p>
+                      <div className="rounded-xl bg-white p-3 border border-indigo-100 dark:border-slate-700/70 dark:bg-slate-900/80">
+                        <span className="text-slate-400 dark:text-slate-400">{getMultiLangText(language, { vi: 'Gói tài khoản:', en: 'Account tier:', ja: 'アカウントプラン:', ko: '계정 플랜:', zh: '账户套餐:', fr: 'Forfait :', de: 'Kontoplan:', es: 'Plan:' })}</span>
+                        <p className="text-indigo-600 font-bold mt-0.5 dark:text-indigo-200">{tierLabelsMap[selectedCsUser.accountTier]}</p>
                       </div>
-                      <div className="rounded-xl bg-white p-3 border border-indigo-100">
-                        <span className="text-slate-400">{getMultiLangText(language, { vi: 'Trạng thái:', en: 'Status:', ja: 'ステータス:', ko: '상태:', zh: '状态:', fr: 'Statut :', de: 'Status:', es: 'Estado:' })}</span>
-                        <p className="text-emerald-600 font-bold mt-0.5">{statusLabelsMap[selectedCsUser.status]}</p>
+                      <div className="rounded-xl bg-white p-3 border border-indigo-100 dark:border-slate-700/70 dark:bg-slate-900/80">
+                        <span className="text-slate-400 dark:text-slate-400">{getMultiLangText(language, { vi: 'Trạng thái:', en: 'Status:', ja: 'ステータス:', ko: '상태:', zh: '状态:', fr: 'Statut :', de: 'Status:', es: 'Estado:' })}</span>
+                        <p className="text-emerald-600 font-bold mt-0.5 dark:text-emerald-300">{statusLabelsMap[selectedCsUser.status]}</p>
                       </div>
-                      <div className="rounded-xl bg-white p-3 border border-indigo-100">
-                        <span className="text-slate-400">{getMultiLangText(language, { vi: 'Số Task đã tạo:', en: 'Created tasks count:', ja: '作成済みタスク数:', ko: '생성된 작업 수:', zh: '已创任务数:', fr: 'Tâches créées :', de: 'Erstellte Aufgaben:', es: 'Tareas creadas:' })}</span>
-                        <p className="text-slate-900 font-bold mt-0.5">{selectedCsUser._count.tasks} {getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: '件のタスク', ko: '개 작업', zh: '个任务', fr: 'tâches', de: 'Aufgaben', es: 'tareas' })}</p>
+                      <div className="rounded-xl bg-white p-3 border border-indigo-100 dark:border-slate-700/70 dark:bg-slate-900/80">
+                        <span className="text-slate-400 dark:text-slate-400">{getMultiLangText(language, { vi: 'Số Task đã tạo:', en: 'Created tasks count:', ja: '作成済みタスク数:', ko: '생성된 작업 수:', zh: '已创任务数:', fr: 'Tâches créées :', de: 'Erstellte Aufgaben:', es: 'Tareas creadas:' })}</span>
+                        <p className="text-slate-900 font-bold mt-0.5 dark:text-slate-100">{selectedCsUser._count.tasks} {getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: '件のタスク', ko: '개 작업', zh: '个任务', fr: 'tâches', de: 'Aufgaben', es: 'tareas' })}</p>
                       </div>
-                      <div className="rounded-xl bg-white p-3 border border-indigo-100">
-                        <span className="text-slate-400">{getMultiLangText(language, { vi: 'Sự kiện & Lịch:', en: 'Events & schedule:', ja: 'イベント & 予定:', ko: '이벤트 & 일정:', zh: '事件与日程:', fr: 'Événements & planning :', de: 'Termine & Zeitplan:', es: 'Eventos y horario:' })}</span>
-                        <p className="text-slate-900 font-bold mt-0.5">{selectedCsUser._count.events} {getMultiLangText(language, { vi: 'sự kiện', en: 'events', ja: '件のイベント', ko: '개 이벤트', zh: '个事件', fr: 'événements', de: 'Termine', es: 'eventos' })}</p>
+                      <div className="rounded-xl bg-white p-3 border border-indigo-100 dark:border-slate-700/70 dark:bg-slate-900/80">
+                        <span className="text-slate-400 dark:text-slate-400">{getMultiLangText(language, { vi: 'Sự kiện & Lịch:', en: 'Events & schedule:', ja: 'イベント & 予定:', ko: '이벤트 & 일정:', zh: '事件与日程:', fr: 'Événements & planning :', de: 'Termine & Zeitplan:', es: 'Eventos y horario:' })}</span>
+                        <p className="text-slate-900 font-bold mt-0.5 dark:text-slate-100">{selectedCsUser._count.events} {getMultiLangText(language, { vi: 'sự kiện', en: 'events', ja: '件のイベント', ko: '개 이벤트', zh: '个事件', fr: 'événements', de: 'Termine', es: 'eventos' })}</p>
                       </div>
                     </div>
 
-                    <div className="rounded-xl bg-white p-3 border border-indigo-100 text-xs">
-                      <span className="text-slate-400">{getMultiLangText(language, { vi: 'Đăng nhập gần nhất:', en: 'Last active:', ja: '最終ログイン:', ko: '최근 활동:', zh: '最近登录:', fr: 'Dernière activité :', de: 'Zuletzt aktiv:', es: 'Última actividad:' })}</span>
-                      <p className="font-bold text-slate-700 mt-0.5">
+                    <div className="rounded-xl bg-white p-3 border border-indigo-100 text-xs dark:border-slate-700/70 dark:bg-slate-900/80">
+                      <span className="text-slate-400 dark:text-slate-400">{getMultiLangText(language, { vi: 'Đăng nhập gần nhất:', en: 'Last active:', ja: '最終ログイン:', ko: '최근 활동:', zh: '最近登录:', fr: 'Dernière activité :', de: 'Zuletzt aktiv:', es: 'Última actividad:' })}</span>
+                      <p className="font-bold text-slate-700 mt-0.5 dark:text-slate-100">
                         {selectedCsUser.lastActiveAt ? new Date(selectedCsUser.lastActiveAt).toLocaleString(language === 'vi' ? 'vi-VN' : 'en-US') : getMultiLangText(language, { vi: 'Chưa có dữ liệu', en: 'No data yet', ja: 'データなし', ko: '데이터 없음', zh: '暂无数据', fr: 'Aucune donnée', de: 'Keine Daten', es: 'Sin datos' })}
                       </p>
                     </div>
@@ -768,37 +809,124 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* TAB SYSTEM CONFIGS */}
       {activeTab === 'system' && (
-        <div className="grid gap-6 xl:grid-cols-2">
-          <Panel
-            title={getMultiLangText(language, { vi: 'Cấu hình AI / Tự động hóa', en: 'AI & automation configuration', ja: 'AI & 自動化設定', ko: 'AI & 자동화 설정', zh: 'AI 与自动化配置', fr: 'Configuration IA & automatisation', de: 'KI & Automatisierungskonfiguration', es: 'Configuración de IA y automatización' })}
-            icon={Bot}
-            subtitle={getMultiLangText(language, { vi: 'Tinh chỉnh thông số gợi ý lịch trình thông minh.', en: 'Tweak smart schedule suggestion parameters.', ja: 'スマート スケジュール提案のパラメータを調整。', ko: '스마트 일정 추천 매개변수 조정.', zh: '微调智能日程推荐参数。', fr: 'Ajuster les paramètres de suggestion IA.', de: 'Intelligente Vorschlagsparameter anpassen.', es: 'Ajustar parámetros de sugerencias con IA.' })}
-          >
-            <div className="mb-5 grid gap-3 md:grid-cols-2">
-              <TextInput placeholder={getMultiLangText(language, { vi: 'Khóa cấu hình', en: 'Config key', ja: '設定キー', ko: '설정 키', zh: '配置键', fr: 'Clé de conf', de: 'Konfigurationsschlüssel', es: 'Clave de conf.' })} value={configForm.key} onChange={(v) => setConfigForm({ ...configForm, key: v })} />
-              <TextInput placeholder={getMultiLangText(language, { vi: 'Tên hiển thị', en: 'Display name', ja: '表示名', ko: '표시 이름', zh: '显示名称', fr: 'Nom d\'affichage', de: 'Anzeigename', es: 'Nombre para mostrar' })} value={configForm.label} onChange={(v) => setConfigForm({ ...configForm, label: v })} />
-              <TextInput placeholder={getMultiLangText(language, { vi: 'Giá trị', en: 'Value', ja: '値', ko: '값', zh: '值', fr: 'Valeur', de: 'Wert', es: 'Valor' })} value={configForm.value} onChange={(v) => setConfigForm({ ...configForm, value: v })} />
-              <TextInput placeholder={getMultiLangText(language, { vi: 'Mô tả', en: 'Description', ja: '説明', ko: '설명', zh: '描述', fr: 'Description', de: 'Beschreibung', es: 'Descripción' })} value={configForm.description} onChange={(v) => setConfigForm({ ...configForm, description: v })} />
-              <PrimaryButton disabled={isSaving} onClick={() => runAction(() => apiClient.post('/admin/system/configs', buildConfigPayload()), () => setConfigForm(emptyConfigForm))}>
-                {getMultiLangText(language, { vi: 'Lưu cấu hình', en: 'Save config', ja: '設定を保存', ko: '설정 저장', zh: '保存配置', fr: 'Enregistrer', de: 'Speichern', es: 'Guardar' })}
-              </PrimaryButton>
-            </div>
-            <List rows={data.configs.map((c) => {
-              const display = getSystemConfigText(c.key, c.label, c.description);
-              return { id: c.id, title: display.label, meta: `${c.key} = ${c.value}`, desc: display.description, onDelete: () => runAction(() => apiClient.delete(`/admin/system/configs/${c.id}`)) };
-            })} />
-          </Panel>
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <SystemMetricCard label="Module đang bật" value={`${automationModules.filter((item) => item.enabled).length}/${automationModules.length}`} helper="Điều khiển trực tiếp bằng cấu hình hệ thống" tone="cyan" />
+            <SystemMetricCard label="Tổng dữ liệu module" value={totalFeatureUsage.toLocaleString()} helper="Task, lịch, thói quen, thông báo..." tone="violet" />
+            <SystemMetricCard label="Config đã lưu" value={String(data.configs.length)} helper={`${activeConfigCount} giá trị đang hoạt động`} tone="emerald" />
+            <SystemMetricCard label="Hoạt động mới nhất" value={latestActivityAt ? new Date(latestActivityAt).toLocaleDateString(language === 'vi' ? 'vi-VN' : undefined) : '--'} helper={latestActivityAt ? new Date(latestActivityAt).toLocaleTimeString(language === 'vi' ? 'vi-VN' : undefined, { hour: '2-digit', minute: '2-digit' }) : 'Chưa có dữ liệu'} tone="amber" />
+          </div>
 
-          <Panel
-            title={getMultiLangText(language, { vi: 'Phân tích dùng tính năng', en: 'Feature usage analytics', ja: '機能利用状況分析', ko: '기능 사용 분석', zh: '功能使用分析', fr: 'Analyse d\'utilisation des fonctionnalités', de: 'Funktionsnutzungsanalyse', es: 'Análisis de uso de funciones' })}
-            icon={Settings2}
-            subtitle={getMultiLangText(language, { vi: 'Tổng hợp dữ liệu thật theo module.', en: 'Aggregated usage stats by module.', ja: 'モジュールごとの実際の利用データ集計。', ko: '모듈별 실제 사용 데이터 집계.', zh: '按模块汇总真实使用数据。', fr: 'Statistiques agrégées par module.', de: 'Aggregierte Nutzungsdaten nach Modul.', es: 'Estadísticas agregadas por módulo.' })}
-          >
-            <List rows={Object.entries(data.analytics.featureUsage).map(([key, value]) => ({ id: key, title: getFeatureUsageLabel(key), meta: `${value}`, desc: getMultiLangText(language, { vi: 'Lượt dữ liệu đã phát sinh', en: 'Total data entries generated', ja: '発生データ件数', ko: '생성된 데이터 건수', zh: '已产生数据记录', fr: 'Données générées', de: 'Generierte Datenzeilen', es: 'Registros de datos generados' }) }))} />
-          </Panel>
+          <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+            <Panel
+              title="Trung tâm điều khiển tự động hóa"
+              icon={Bot}
+              subtitle="Bật/tắt các module đang kết nối với hệ thống thật và lưu thành cấu hình vận hành."
+            >
+              <div className="grid gap-3 md:grid-cols-2">
+                {automationModules.map((module) => {
+                  const Icon = module.icon;
+                  return (
+                    <div key={module.key} className="rounded-3xl border border-slate-200 bg-slate-50/80 p-4 transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-lg hover:shadow-slate-200/60 dark:border-slate-700/80 dark:bg-slate-900/70 dark:hover:border-cyan-400/30 dark:hover:shadow-black/20">
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <div className={clsx('flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg', module.accent)}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <button
+                          type="button"
+                          disabled={isSaving}
+                          onClick={() => saveSystemConfig(module.key, module.enabled ? 'false' : 'true')}
+                          className={clsx('relative h-7 w-12 rounded-full border transition', module.enabled ? 'border-emerald-400/60 bg-emerald-500' : 'border-slate-300 bg-slate-200 dark:border-slate-600 dark:bg-slate-800')}
+                          aria-label={module.text.label}
+                        >
+                          <span className={clsx('absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition', module.enabled ? 'left-6' : 'left-0.5')} />
+                        </button>
+                      </div>
+                      <p className="text-sm font-bold text-slate-950 dark:text-slate-50">{module.text.label}</p>
+                      <p className="mt-1 min-h-[2.5rem] text-xs leading-5 text-slate-500 dark:text-slate-400">{module.text.description}</p>
+                      <div className="mt-3 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-semibold dark:border-slate-700 dark:bg-slate-950/50">
+                        <span className="text-slate-500 dark:text-slate-400">{module.key}</span>
+                        <span className={clsx(module.enabled ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400')}>{module.enabled ? 'Đang bật' : 'Đang tắt'}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 rounded-3xl border border-indigo-100 bg-indigo-50/70 p-4 dark:border-indigo-400/20 dark:bg-indigo-500/10">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold text-slate-950 dark:text-slate-50">Cấu hình nhanh</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Chọn preset để ghi ngay vào bảng cấu hình hệ thống.</p>
+                  </div>
+                  <button type="button" onClick={loadAdminData} className="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-white px-3 py-2 text-xs font-bold text-indigo-700 shadow-sm hover:bg-indigo-50 dark:border-slate-600 dark:bg-slate-900 dark:text-cyan-200 dark:hover:bg-slate-800">
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Làm mới
+                  </button>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {configPresets.map((preset) => (
+                    <button key={`${preset.key}-${preset.value}`} type="button" disabled={isSaving} onClick={() => saveSystemConfig(preset.key, preset.value)} className="rounded-2xl border border-white/70 bg-white px-3 py-3 text-left text-xs font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-200 dark:hover:border-cyan-400/40 dark:hover:text-cyan-200">
+                      <span className="block text-[11px] uppercase tracking-[0.12em] text-slate-400">{preset.key}</span>
+                      {preset.text.label}: <span className="text-indigo-600 dark:text-cyan-200">{preset.value}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Panel>
+
+            <Panel
+              title="Cấu hình thủ công & dữ liệu module"
+              icon={Settings2}
+              subtitle="Tạo key cấu hình tùy chỉnh, xóa cấu hình thừa và theo dõi module phát sinh dữ liệu."
+            >
+              <div className="mb-5 rounded-3xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700/80 dark:bg-slate-900/70">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <TextInput placeholder="Khóa cấu hình" value={configForm.key} onChange={(v) => setConfigForm({ ...configForm, key: v })} />
+                  <TextInput placeholder="Tên hiển thị" value={configForm.label} onChange={(v) => setConfigForm({ ...configForm, label: v })} />
+                  <TextInput placeholder="Giá trị" value={configForm.value} onChange={(v) => setConfigForm({ ...configForm, value: v })} />
+                  <TextInput placeholder="Mô tả" value={configForm.description} onChange={(v) => setConfigForm({ ...configForm, description: v })} />
+                  <div className="md:col-span-2">
+                    <PrimaryButton disabled={isSaving || !configForm.key.trim() || !configForm.value.trim()} onClick={() => runAction(() => apiClient.post('/admin/system/configs', buildConfigPayload()), () => setConfigForm(emptyConfigForm))}>
+                      Lưu cấu hình hệ thống
+                    </PrimaryButton>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 2xl:grid-cols-2">
+                <div>
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Config đang lưu</h3>
+                  <List rows={data.configs.map((config) => {
+                    const display = getSystemConfigText(config.key, config.label, config.description);
+                    return { id: config.id, title: display.label, meta: `${config.key} = ${config.value}`, desc: display.description, onDelete: () => runAction(() => apiClient.delete(`/admin/system/configs/${config.id}`)) };
+                  })} />
+                </div>
+                <div>
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Dữ liệu theo module</h3>
+                  <div className="space-y-3">
+                    {featureEntries.map(([key, value]) => {
+                      const percent = totalFeatureUsage > 0 ? Math.round((value / totalFeatureUsage) * 100) : 0;
+                      return (
+                        <div key={key} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700/80 dark:bg-slate-900/70">
+                          <div className="flex items-center justify-between gap-3 text-xs font-bold">
+                            <span className="text-slate-900 dark:text-slate-100">{getFeatureUsageLabel(key)}</span>
+                            <span className="text-cyan-600 dark:text-cyan-300">{value}</span>
+                          </div>
+                          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                            <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500" style={{ width: `${percent}%` }} />
+                          </div>
+                          <p className="mt-2 text-[11px] font-medium text-slate-400">{percent}% trong tổng dữ liệu</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </Panel>
+          </div>
         </div>
-      )}
-    </div>
+      )}    </div>
   );
 };
 
@@ -984,7 +1112,7 @@ const TicketCard = ({
   language: string;
   ticketLabelsMap: Record<TicketStatus, string>;
 }) => (
-  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700/80 dark:bg-slate-900/70">
     <div className="flex items-start justify-between gap-3">
       <div>
         <p className="font-bold text-slate-950 text-sm dark:text-slate-100">{ticket.subject}</p>
@@ -1020,8 +1148,24 @@ const TicketCard = ({
   </div>
 );
 
+const SystemMetricCard = ({ label, value, helper, tone }: { label: string; value: string; helper: string; tone: 'cyan' | 'violet' | 'emerald' | 'amber' }) => {
+  const tones = {
+    cyan: 'from-cyan-500/18 to-blue-500/10 text-cyan-700 dark:text-cyan-200',
+    violet: 'from-violet-500/18 to-indigo-500/10 text-violet-700 dark:text-violet-200',
+    emerald: 'from-emerald-500/18 to-teal-500/10 text-emerald-700 dark:text-emerald-200',
+    amber: 'from-amber-500/18 to-orange-500/10 text-amber-700 dark:text-amber-200',
+  };
+
+  return (
+    <div className={clsx('rounded-3xl border border-slate-200 bg-gradient-to-br p-4 shadow-sm dark:border-slate-700/80 dark:bg-slate-900/80', tones[tone])}>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-slate-50">{value}</p>
+      <p className="mt-1 text-xs font-semibold leading-5 opacity-90">{helper}</p>
+    </div>
+  );
+};
 const Badge = ({ children }: { children: React.ReactNode }) => (
-  <span className="rounded-full bg-slate-200/60 px-2.5 py-0.5 text-[10px] font-semibold text-slate-700">{children}</span>
+  <span className="rounded-full bg-slate-200/60 px-2.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-slate-700/70 dark:text-slate-200">{children}</span>
 );
 
 const ActionSelect = ({ value, options, labels = {}, onChange }: { value: string; options: string[]; labels?: Record<string, string>; onChange: (v: string) => void }) => (
@@ -1039,7 +1183,7 @@ const ActionSelect = ({ value, options, labels = {}, onChange }: { value: string
 );
 
 const EmptyState = ({ text }: { text: string }) => (
-  <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-medium text-slate-500">
+  <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-400">
     {text}
   </div>
 );
@@ -1050,7 +1194,7 @@ const List = ({ rows }: { rows: { id: string; title: string; meta: string; desc?
   return (
     <div className="space-y-3">
       {rows.length === 0 ? (
-        <p className="rounded-2xl bg-slate-50 p-5 text-xs font-medium text-slate-500">
+        <p className="rounded-2xl bg-slate-50 p-5 text-xs font-medium text-slate-500 dark:bg-slate-900/70 dark:text-slate-400">
           {getMultiLangText(language, {
             vi: 'Chưa có dữ liệu.',
             en: 'No data available.',
@@ -1064,19 +1208,19 @@ const List = ({ rows }: { rows: { id: string; title: string; meta: string; desc?
         </p>
       ) : (
         rows.map((row) => (
-          <div key={row.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+          <div key={row.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700/80 dark:bg-slate-900/70">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-bold text-slate-950 text-xs dark:text-slate-100">{row.title}</p>
-                <p className="text-[11px] font-medium text-slate-500">{row.meta}</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{row.meta}</p>
               </div>
               {row.onDelete && (
-                <button onClick={row.onDelete} className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                <button onClick={row.onDelete} className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800">
                   {row.actionLabel || <Trash2 className="h-3.5 w-3.5 text-rose-600" />}
                 </button>
               )}
             </div>
-            {row.desc && <p className="mt-2 line-clamp-3 text-xs text-slate-600">{row.desc}</p>}
+            {row.desc && <p className="mt-2 line-clamp-3 text-xs text-slate-600 dark:text-slate-400">{row.desc}</p>}
           </div>
         ))
       )}
@@ -1097,5 +1241,8 @@ void FilterPill;
 void UserRow;
 void TicketCard;
 void EmptyState;
+
+
+
 
 

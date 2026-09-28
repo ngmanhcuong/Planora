@@ -54,6 +54,7 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Dialog Container */}
       <div
+        data-modal-panel
         className={twMerge(
           'relative w-full bg-white rounded-2xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.04)] border border-[#E2E8F0] overflow-hidden z-10 animate-in zoom-in-95 duration-200',
           maxWidthClasses[maxWidth]

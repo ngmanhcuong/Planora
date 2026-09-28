@@ -36,7 +36,7 @@ export function TimeWheel({ label, options, value, onChange }: {
     className="h-[108px] snap-y snap-mandatory overflow-y-auto overscroll-contain touch-pan-y px-1 py-9 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
     {options.map((option, index) => <div key={option} id={`time-wheel-${label}-${option}`} role="option" aria-selected={option === value}
       onClick={() => choose(index)}
-      className={`flex h-9 w-full shrink-0 snap-center cursor-pointer items-center justify-center rounded-xl text-xl font-black leading-none transition-colors ${option === value ? 'text-[#4F46E5]' : 'text-[#94A3B8] hover:text-[#64748B]'}`}>
+      className={`flex h-9 w-full shrink-0 snap-center cursor-pointer items-center justify-center rounded-xl text-xl font-black leading-none transition-colors ${option === value ? 'text-[var(--color-text-main)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}>
       {option}
     </div>)}
   </div>;

@@ -9,9 +9,15 @@ import { Loader2 } from 'lucide-react';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate } from '@/lib/i18n';
 import { formatTimeRangeLabel, parseTimeToMinutes } from './utils/timetableTime';
+import { minutesToTimeString, TIMETABLE_GRID_END, rangesOverlap } from './utils/timetableTime';
+import { useUpdateTimetableItem } from './hooks/useTimetable';
 
 export const TimetablePage: React.FC = () => {
   const language = useCurrentLanguage();
+  const moveMutation = useUpdateTimetableItem();
+  const [moveError, setMoveError] = useState('');
+  const [editingClass, setEditingClass] = useState<TimetableClassItem | null>(null);
+  const editMutation = useUpdateTimetableItem();
   const [selectedClass, setSelectedClass] = useState<TimetableClassItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const [isAddOpen, setIsAddOpen] = useState<boolean>(false);
@@ -53,7 +59,8 @@ export const TimetablePage: React.FC = () => {
       endTime,
       timeRange: formatTimeRangeLabel(startTime, endTime),
       room: item.room || 'Chưa xếp phòng',
-      lecturer: item.lecturer || 'Giảng viên',
+      lecturer: item.lecturer || 'Chưa có thông tin',
+      notes: item.notes || undefined,
       color: colorScheme.color,
       bgColor: colorScheme.bgColor,
       textColor: colorScheme.textColor,
@@ -65,6 +72,25 @@ export const TimetablePage: React.FC = () => {
   const handleSelectClass = (cls: TimetableClassItem) => {
     setSelectedClass(cls);
     setIsDetailOpen(true);
+  };
+
+  const handleMoveClass = (cls: TimetableClassItem, dayIndex: number, startTime: string) => {
+    if (!timetable?.id || moveMutation.isPending) return;
+    setMoveError('');
+    if (cls.dayIndex === dayIndex && cls.startTime === startTime) return;
+    const start = parseTimeToMinutes(startTime);
+    const end = start + parseTimeToMinutes(cls.endTime) - parseTimeToMinutes(cls.startTime);
+    if (end > TIMETABLE_GRID_END) {
+      setMoveError('Khung giờ mới vượt quá 21:00. Vui lòng chọn ô sớm hơn.');
+      return;
+    }
+    if (convertedClasses.some(item => item.id !== cls.id && item.dayIndex === dayIndex && rangesOverlap(start, end, parseTimeToMinutes(item.startTime), parseTimeToMinutes(item.endTime)))) {
+      setMoveError('Khung giờ này trùng với lịch đã có. Vui lòng chọn ô khác.');
+      return;
+    }
+    moveMutation.mutate({ timetableId: timetable.id, itemId: cls.id, data: { dayOfWeek: dayIndex, startTime, endTime: minutesToTimeString(end) } }, {
+      onError: () => setMoveError('Không lưu được vị trí mới. Lịch vẫn ở vị trí cũ, vui lòng thử lại.'),
+    });
   };
 
   const handleDeleteClass = (id: string) => {
@@ -92,7 +118,7 @@ export const TimetablePage: React.FC = () => {
       });
     } else {
       createTimetableMutation.mutate(
-        { name: 'Học kỳ 1', termName: 'Học kỳ 1', academicYear: '2026-2027', isCurrent: true },
+        { name: 'Học kỳ 1', termName: 'Học kỳ 1', academicYear: '2026-2027', isCurrent: true, autoCreated: true },
         {
           onSuccess: (newTt) => {
             createItemMutation.mutate({ timetableId: newTt.id, data: payload }, {
@@ -129,7 +155,9 @@ export const TimetablePage: React.FC = () => {
         }}
       />
 
-      {isLoading ? (
+        {moveError && <p role="alert" className="text-sm text-rose-500">{moveError}</p>}
+        <span role="status" className="sr-only">{moveMutation.isPending ? 'Đang lưu vị trí lịch…' : ''}</span>
+        {isLoading ? (
         <div className="flex items-center justify-center p-12 bg-white rounded-xl border border-[#E2E8F0] shadow-xs">
           <Loader2 className="w-6 h-6 animate-spin text-[#4F46E5]" />
           <span className="ml-2 text-xs font-semibold text-[#64748B]">{translate(language, 'timetable.loading')}</span>
@@ -143,6 +171,8 @@ export const TimetablePage: React.FC = () => {
           <TimetableGrid
             classes={convertedClasses}
             onSelectClass={handleSelectClass}
+            onMoveClass={handleMoveClass}
+            isMoving={moveMutation.isPending}
             onQuickAdd={handleQuickAdd}
           />
         </div>
@@ -153,6 +183,27 @@ export const TimetablePage: React.FC = () => {
         onClose={() => setIsDetailOpen(false)}
         selectedClass={selectedClass}
         onDeleteClass={handleDeleteClass}
+        onEditClass={(cls) => { setIsDetailOpen(false); setEditingClass(cls); }}
+      />
+
+      <AddSubjectModal
+        isOpen={editingClass !== null}
+        editingClass={editingClass}
+        onClose={() => setEditingClass(null)}
+        onAddClass={async (updated) => {
+          if (!editingClass || !timetable?.id) throw new Error('Không tìm thấy lịch');
+          await editMutation.mutateAsync({
+            timetableId: timetable.id,
+            itemId: editingClass.id,
+            data: {
+              subjectName: updated.subjectName.trim(), courseCode: updated.courseCode,
+              dayOfWeek: updated.dayIndex, startTime: updated.startTime, endTime: updated.endTime,
+              room: updated.room, lecturer: updated.lecturer,
+              classType: updated.type.toUpperCase() as 'THEORY' | 'PRACTICE' | 'EXAM',
+            },
+          });
+          setSelectedClass({ ...editingClass, ...updated });
+        }}
       />
 
       <AddSubjectModal

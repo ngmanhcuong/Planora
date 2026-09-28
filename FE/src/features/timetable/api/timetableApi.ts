@@ -2,6 +2,7 @@ import { apiClient } from '@/lib/axios';
 import type { ApiTimetable, ApiTimetableItem, ApiResponse } from '@/types';
 
 export interface CreateTimetablePayload {
+  autoCreated?: boolean;
   name?: string;
   termName?: string;
   academicYear?: string;

@@ -51,6 +51,7 @@ import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, translateCategory, translateRelativeTime, getMultiLangText, getMultiLangArray } from '@/lib/i18n';
 import { clsx } from 'clsx';
 import { UserHeroBanner } from '@/components/ui/UserHeroBanner';
+import { notifyLocalActivity } from '@/lib/activityNotifications';
 
 const cardClass = 'rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-200';
 
@@ -496,6 +497,7 @@ export const GoalsPage: React.FC = () => {
       icon: Tag,
     };
     setCategories((prev) => [...prev, newCat]);
+    notifyLocalActivity('category', 'create');
     setNewCategory(newCatId);
     setCustomCategoryName('');
     setIsCreatingCategory(false);
@@ -525,6 +527,7 @@ export const GoalsPage: React.FC = () => {
       targetWorkload: 1,
     };
     setGoals((prev) => [createdGoal, ...prev]);
+    notifyLocalActivity('goal', 'create');
     setNewTitle('');
     setNewDescription('');
     setIsAddingGoal(false);
@@ -844,7 +847,10 @@ export const GoalsPage: React.FC = () => {
                   </span>
 
                   <button
-                    onClick={() => setGoals((prev) => prev.filter((item) => item.id !== goal.id))}
+                    onClick={() => {
+                      setGoals((prev) => prev.filter((item) => item.id !== goal.id));
+                      notifyLocalActivity('goal', 'delete');
+                    }}
                     className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                     title="Xóa mục tiêu"
                   >
@@ -1081,17 +1087,20 @@ export const NotesPage: React.FC = () => {
       createdAt: translateRelativeTime(language, 'Just now'),
     };
     setNotes((prev) => [newNote, ...prev]);
+    notifyLocalActivity('note', 'create');
     setText('');
     setIsPinnedInput(false);
   };
 
   const toggleDone = (id: number) => {
+    notifyLocalActivity('note', 'status');
     setNotes((prev) =>
       prev.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
     );
   };
 
   const togglePin = (id: number) => {
+    notifyLocalActivity('note', 'pin');
     setNotes((prev) =>
       prev.map((item) => (item.id === id ? { ...item, isPinned: !item.isPinned } : item))
     );
@@ -1099,6 +1108,7 @@ export const NotesPage: React.FC = () => {
 
   const deleteNote = (id: number) => {
     setNotes((prev) => prev.filter((item) => item.id !== id));
+    notifyLocalActivity('note', 'delete');
   };
 
   const copyNoteText = (id: number, content: string) => {
@@ -1118,6 +1128,9 @@ export const NotesPage: React.FC = () => {
 
   const saveEdit = (id: number) => {
     if (editingText.trim()) {
+      if (notes.find((item) => item.id === id)?.text !== editingText.trim()) {
+        notifyLocalActivity('note', 'update');
+      }
       setNotes((prev) =>
         prev.map((item) => (item.id === id ? { ...item, text: editingText.trim() } : item))
       );
