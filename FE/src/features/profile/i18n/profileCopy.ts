@@ -1,4 +1,4 @@
-import { normalizeLanguage, type AppLanguage } from '@/lib/i18n';
+import { normalizeLanguage, translateEnglishPhrase, type AppLanguage } from '@/lib/i18n';
 
 type LocaleMap = Record<AppLanguage, string>;
 
@@ -11,9 +11,13 @@ const L = (
   fr: string,
   de: string,
   es: string
-): LocaleMap => ({ vi, en, ja, ko, zh, fr, de, es });
+): LocaleMap => ({ vi, en, ja, ko, zh, fr, de, es, ru: en, th: en, it: en, hi: en });
 
-const pick = (map: LocaleMap, language: AppLanguage) => map[language];
+const pick = (map: LocaleMap, language: AppLanguage) => (
+  ['ru', 'th', 'it', 'hi'].includes(language)
+    ? translateEnglishPhrase(language, map.en)
+    : map[language]
+);
 
 export const getProfileCopy = (language: string | null | undefined) => {
   const lang = normalizeLanguage(language);

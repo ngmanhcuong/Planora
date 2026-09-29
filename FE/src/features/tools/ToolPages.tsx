@@ -51,14 +51,18 @@ import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, translateCategory, translateRelativeTime, getMultiLangText, getMultiLangArray } from '@/lib/i18n';
 import { clsx } from 'clsx';
 import { UserHeroBanner } from '@/components/ui/UserHeroBanner';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { Select } from '@/components/ui/Select';
 import { notifyLocalActivity } from '@/lib/activityNotifications';
+import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '@/features/goals/hooks/useGoals';
 
 const cardClass = 'rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-200';
 
 interface GoalItem {
-  id: number;
+  id: string;
   title: string;
   category: string;
+  categoryColor?: string;
   progress: number;
   targetDate: string;
   description?: string;
@@ -216,7 +220,7 @@ export const AssistantPage: React.FC = () => {
   };
   const { data: aiStatus, isLoading: isAiStatusLoading } = useAiStatus();
   const { data: dashboardData } = useDashboard();
-  const { data: tasksData } = useTasks();
+  const { data: tasksData } = useTasks({ limit: 100, sortBy: 'dueDate', sortOrder: 'asc' });
   const prioritizeMutation = usePrioritizeTasks();
 
   const allTasks = tasksData?.tasks || [];
@@ -442,7 +446,11 @@ export const AssistantPage: React.FC = () => {
 
 export const GoalsPage: React.FC = () => {
   const language = useCurrentLanguage();
-  const { data: tasksData } = useTasks();
+  const { data: tasksData } = useTasks({ limit: 100, sortBy: 'dueDate', sortOrder: 'asc' });
+  const { data: goalsData = [], isLoading: isLoadingGoals, isError: isGoalsError } = useGoals();
+  const createGoalMutation = useCreateGoal();
+  const updateGoalMutation = useUpdateGoal();
+  const deleteGoalMutation = useDeleteGoal();
   const systemTasks = useMemo(() => tasksData?.tasks || [], [tasksData]);
   const goalsCopy = {
     all: getMultiLangText(language, { vi: 'Tất cả', en: 'All', ja: 'すべて', ko: '전체', zh: '全部', fr: 'Tous', de: 'Alle', es: 'Todos' }),
@@ -484,6 +492,14 @@ export const GoalsPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isAddingGoal, setIsAddingGoal] = useState<boolean>(false);
+  const [editingGoal, setEditingGoal] = useState<GoalItem | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState('study');
+  const [editCustomCategoryName, setEditCustomCategoryName] = useState('');
+  const [editCategoryColor, setEditCategoryColor] = useState('indigo');
+  const [editTargetDate, setEditTargetDate] = useState('');
+  const [editTargetWorkload, setEditTargetWorkload] = useState(1);
 
   const [categories, setCategories] = useState<CategoryOption[]>([
     { id: 'study', label: goalsCopy.study, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-100', icon: BookOpen },
@@ -506,6 +522,29 @@ export const GoalsPage: React.FC = () => {
     )));
   }, [goalsCopy.study, goalsCopy.work, goalsCopy.personal, goalsCopy.health]);
 
+  useEffect(() => {
+    const savedCustomCategories = goalsData
+      .filter((goal) => goal.category.startsWith('custom:'))
+      .map((goal) => ({
+        id: goal.category,
+        label: goal.category.slice('custom:'.length).trim(),
+        themeId: goal.categoryColor || 'indigo',
+      }))
+      .filter((category) => category.label);
+
+    if (savedCustomCategories.length === 0) return;
+    setCategories((current) => {
+      const existingIds = new Set(current.map((category) => category.id));
+      const missing = savedCustomCategories
+        .filter((category) => !existingIds.has(category.id))
+        .map((category) => {
+          const theme = COLOR_THEMES.find((item) => item.id === category.themeId) || COLOR_THEMES[0];
+          return { ...category, color: theme.color, bg: theme.bg, icon: Tag };
+        });
+      return missing.length > 0 ? [...current, ...missing] : current;
+    });
+  }, [goalsData]);
+
   const [isCreatingCategory, setIsCreatingCategory] = useState<boolean>(false);
   const [customCategoryName, setCustomCategoryName] = useState<string>('');
   const [customCategoryColorTheme, setCustomCategoryColorTheme] = useState<string>('indigo');
@@ -513,9 +552,22 @@ export const GoalsPage: React.FC = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newCategory, setNewCategory] = useState<string>('study');
-  const [newTargetDate, setNewTargetDate] = useState('2026-10-15');
+  const [newTargetDate, setNewTargetDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return date.toISOString().slice(0, 10);
+  });
 
-  const [goals, setGoals] = useState<GoalItem[]>([]);
+  const goals: GoalItem[] = useMemo(() => goalsData.map((goal) => ({
+    id: goal.id,
+    title: goal.title,
+    description: goal.description || undefined,
+    category: goal.category,
+    categoryColor: goal.categoryColor,
+    targetDate: goal.targetDate.slice(0, 10),
+    targetWorkload: goal.targetWorkload,
+    progress: 0,
+  })), [goalsData]);
   const evaluatedGoals = useMemo(
     () => goals.map((goal) => calculateGoalEvaluation(goal, systemTasks)),
     [goals, systemTasks]
@@ -525,15 +577,20 @@ export const GoalsPage: React.FC = () => {
     if (e) e.preventDefault();
     if (!customCategoryName.trim()) return;
     const theme = COLOR_THEMES.find((t) => t.id === customCategoryColorTheme) || COLOR_THEMES[0];
-    const newCatId = `custom_${Date.now()}`;
+    const categoryLabel = customCategoryName.trim();
+    const newCatId = `custom:${categoryLabel}`;
     const newCat: CategoryOption = {
       id: newCatId,
-      label: customCategoryName.trim(),
+      label: categoryLabel,
       color: theme.color,
       bg: theme.bg,
       icon: Tag,
     };
-    setCategories((prev) => [...prev, newCat]);
+    setCategories((prev) => (
+      prev.some((category) => category.id === newCatId)
+        ? prev.map((category) => category.id === newCatId ? newCat : category)
+        : [...prev, newCat]
+    ));
     notifyLocalActivity('category', 'create');
     setNewCategory(newCatId);
     setCustomCategoryName('');
@@ -554,20 +611,54 @@ export const GoalsPage: React.FC = () => {
   const handleAddGoal = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    const createdGoal: GoalItem = {
-      id: Date.now(),
+    const selectedCategoryConfig = categories.find((category) => category.id === newCategory);
+    const selectedTheme = COLOR_THEMES.find((theme) => theme.color === selectedCategoryConfig?.color);
+    createGoalMutation.mutate({
       title: newTitle.trim(),
       category: newCategory,
-      progress: 0,
-      targetDate: newTargetDate,
+      categoryColor: selectedTheme?.id || 'indigo',
       description: newDescription.trim() || undefined,
+      targetDate: new Date(`${newTargetDate}T23:59:59`).toISOString(),
       targetWorkload: 1,
-    };
-    setGoals((prev) => [createdGoal, ...prev]);
-    notifyLocalActivity('goal', 'create');
-    setNewTitle('');
-    setNewDescription('');
-    setIsAddingGoal(false);
+    }, {
+      onSuccess: () => {
+        setNewTitle('');
+        setNewDescription('');
+        setIsAddingGoal(false);
+      },
+    });
+  };
+
+  const openGoalEditor = (goal: GoalItem) => {
+    setEditingGoal(goal);
+    setEditTitle(goal.title);
+    setEditDescription(goal.description || '');
+    setEditCategory(goal.category);
+    setEditCategoryColor(goal.categoryColor || 'indigo');
+    setEditCustomCategoryName(
+      goal.category.startsWith('custom:') ? goal.category.slice('custom:'.length) : ''
+    );
+    setEditTargetDate(goal.targetDate);
+    setEditTargetWorkload(goal.targetWorkload || 1);
+    updateGoalMutation.reset();
+  };
+
+  const handleUpdateGoal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGoal || !editTitle.trim() || !editTargetDate) return;
+    const isCustomCategory = editCategory.startsWith('custom:') || editCategory.startsWith('custom_');
+    if (isCustomCategory && !editCustomCategoryName.trim()) return;
+    updateGoalMutation.mutate({
+      id: editingGoal.id,
+      payload: {
+        title: editTitle.trim(),
+        description: editDescription.trim() || undefined,
+        category: isCustomCategory ? `custom:${editCustomCategoryName.trim()}` : editCategory,
+        categoryColor: isCustomCategory ? editCategoryColor : 'indigo',
+        targetDate: new Date(`${editTargetDate}T23:59:59`).toISOString(),
+        targetWorkload: editTargetWorkload,
+      },
+    }, { onSuccess: () => setEditingGoal(null) });
   };
 
   return (
@@ -651,11 +742,11 @@ export const GoalsPage: React.FC = () => {
       {isAddingGoal &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setIsAddingGoal(false)}
           >
             <div
-              className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 relative space-y-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
+              className="relative my-auto w-full max-w-lg overflow-visible rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl sm:p-7 space-y-5 animate-in zoom-in-95 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
@@ -684,15 +775,20 @@ export const GoalsPage: React.FC = () => {
 
               {/* Form */}
               <form onSubmit={handleAddGoal} className="space-y-4">
+                {createGoalMutation.isError && (
+                  <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+                    Không thể lưu mục tiêu. Vui lòng kiểm tra dữ liệu và thử lại.
+                  </p>
+                )}
                 <div className="space-y-1.5">
                   <label className="text-xs font-extrabold text-slate-700">{goalsCopy.goalName}</label>
                   <input
                     type="text"
                     required
                     value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
+                    onChange={(e) => setNewTitle(e.target.value.toLocaleUpperCase('vi-VN'))}
                     placeholder={goalsCopy.goalNamePlaceholder}
-                    className="w-full h-11 px-4 rounded-2xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50"
+                    className="w-full h-11 px-4 rounded-2xl border border-slate-200 text-xs font-medium uppercase focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50"
                   />
                 </div>
 
@@ -722,24 +818,31 @@ export const GoalsPage: React.FC = () => {
                     </div>
 
                     {!isCreatingCategory ? (
-                      <select
+                      <Select
                         value={newCategory}
-                        onChange={(e) => {
-                          if (e.target.value === '__add_new__') {
+                        onChange={(value) => {
+                          if (value === '__add_new__') {
                             setIsCreatingCategory(true);
                           } else {
-                            setNewCategory(e.target.value);
+                            setNewCategory(value);
                           }
                         }}
-                        className="w-full h-11 px-3.5 rounded-2xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-600 bg-slate-50/50 cursor-pointer"
-                      >
-                        {categories.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.label}
-                          </option>
-                        ))}
-                        <option value="__add_new__">{goalsCopy.addCategoryOption}</option>
-                      </select>
+                        options={[
+                          ...(!categories.some((category) => category.id === newCategory) && newCategory.startsWith('custom:')
+                            ? [{
+                              value: newCategory,
+                              label: newCategory.slice('custom:'.length),
+                              icon: <Tag className="h-4 w-4" />,
+                            }]
+                            : []),
+                          ...categories.map((category) => ({
+                            value: category.id,
+                            label: category.label,
+                            icon: category.icon ? React.createElement(category.icon, { className: 'h-4 w-4' }) : undefined,
+                          })),
+                          { value: '__add_new__', label: goalsCopy.addCategoryOption, icon: <Plus className="h-4 w-4" /> },
+                        ]}
+                      />
                     ) : (
                       <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-2xl space-y-2.5 animate-in fade-in duration-200">
                         <div className="flex items-center justify-between text-xs font-extrabold text-indigo-950">
@@ -760,6 +863,13 @@ export const GoalsPage: React.FC = () => {
                           type="text"
                           value={customCategoryName}
                           onChange={(e) => setCustomCategoryName(e.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              handleCreateCategory();
+                            }
+                          }}
                           placeholder={goalsCopy.categoryNamePlaceholder}
                           className="w-full h-9 px-3 rounded-xl border border-indigo-200 text-xs bg-white focus:outline-none focus:border-indigo-600 font-medium"
                         />
@@ -796,11 +906,11 @@ export const GoalsPage: React.FC = () => {
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-extrabold text-slate-700">{goalsCopy.targetDate}</label>
-                    <input
-                      type="date"
+                    <DatePicker
                       value={newTargetDate}
-                      onChange={(e) => setNewTargetDate(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-2xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-600 bg-slate-50/50"
+                      onChange={setNewTargetDate}
+                      required
+                      align="right"
                     />
                   </div>
                 </div>
@@ -816,10 +926,180 @@ export const GoalsPage: React.FC = () => {
                   </button>
                   <button
                     type="submit"
+                    disabled={createGoalMutation.isPending}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-extrabold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer active:scale-95"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>{goalsCopy.createGoal}</span>
+                    <span>{createGoalMutation.isPending ? 'Đang lưu...' : goalsCopy.createGoal}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Edit Goal Popup Modal */}
+      {editingGoal &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => !updateGoalMutation.isPending && setEditingGoal(null)}
+          >
+            <div
+              className="relative my-auto w-full max-w-lg space-y-5 overflow-visible rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200 sm:p-7"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600">
+                    <Edit2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-base font-extrabold text-slate-900">Chỉnh sửa mục tiêu</h3>
+                    <p className="mt-0.5 text-xs font-medium text-slate-500">Cập nhật thông tin và chỉ tiêu của mục tiêu</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingGoal(null)}
+                  disabled={updateGoalMutation.isPending}
+                  className="cursor-pointer rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+                  aria-label="Đóng"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdateGoal} className="space-y-4">
+                {updateGoalMutation.isError && (
+                  <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+                    Không thể cập nhật mục tiêu. Vui lòng thử lại.
+                  </p>
+                )}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700">Tên mục tiêu *</label>
+                  <input
+                    type="text"
+                    required
+                    minLength={2}
+                    maxLength={160}
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value.toLocaleUpperCase('vi-VN'))}
+                    className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-medium uppercase focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700">Mô tả / Ghi chú</label>
+                  <textarea
+                    rows={3}
+                    maxLength={2000}
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder={goalsCopy.descriptionPlaceholder}
+                    className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/50 p-3 text-xs font-medium focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700">Danh mục</label>
+                    <Select
+                      value={editCategory}
+                      onChange={(value) => {
+                        if (value === '__custom__') {
+                          setEditCategory('custom:');
+                          setEditCustomCategoryName('');
+                          return;
+                        }
+                        setEditCategory(value);
+                        setEditCustomCategoryName(
+                          value.startsWith('custom:') ? value.slice('custom:'.length) : ''
+                        );
+                        const selectedCategory = categories.find((category) => category.id === value);
+                        const selectedTheme = COLOR_THEMES.find((theme) => theme.color === selectedCategory?.color);
+                        setEditCategoryColor(selectedTheme?.id || 'indigo');
+                      }}
+                      options={[
+                        ...(!categories.some((category) => category.id === editCategory)
+                          ? [{
+                            value: editCategory,
+                            label: editCategory.startsWith('custom:')
+                              ? editCategory.slice('custom:'.length)
+                              : 'Danh mục tùy chỉnh',
+                            icon: <Tag className="h-4 w-4" />,
+                          }]
+                          : []),
+                        ...categories.map((category) => ({
+                          value: category.id,
+                          label: category.label,
+                          icon: category.icon ? React.createElement(category.icon, { className: 'h-4 w-4' }) : undefined,
+                        })),
+                        { value: '__custom__', label: 'Tạo danh mục tùy chỉnh...', icon: <Plus className="h-4 w-4" /> },
+                      ]}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700">Hạn chót *</label>
+                    <DatePicker
+                      value={editTargetDate}
+                      onChange={setEditTargetDate}
+                      required
+                      align="right"
+                    />
+                  </div>
+                </div>
+                {(editCategory.startsWith('custom:') || editCategory.startsWith('custom_')) && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-slate-700">Tên danh mục tùy chỉnh *</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={100}
+                      value={editCustomCategoryName}
+                      onChange={(event) => setEditCustomCategoryName(event.target.value)}
+                      placeholder="Nhập tên danh mục..."
+                      autoFocus={editCategory === 'custom:'}
+                      className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-medium focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                    />
+                    <div className="flex items-center gap-2 pt-1" aria-label="Màu danh mục">
+                      {COLOR_THEMES.map((theme) => (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          onClick={() => setEditCategoryColor(theme.id)}
+                          className={clsx(
+                            'h-6 w-6 cursor-pointer rounded-full border border-transparent transition-all',
+                            theme.dot,
+                            editCategoryColor === theme.id && 'scale-110 ring-2 ring-indigo-500 ring-offset-2'
+                          )}
+                          title={theme.label}
+                          aria-label={`Chọn màu ${theme.label}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setEditingGoal(null)}
+                    disabled={updateGoalMutation.isPending}
+                    className="cursor-pointer rounded-2xl px-4 py-2.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-50"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      updateGoalMutation.isPending
+                      || !editTitle.trim()
+                      || !editTargetDate
+                      || ((editCategory.startsWith('custom:') || editCategory.startsWith('custom_')) && !editCustomCategoryName.trim())
+                    }
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-extrabold text-white shadow-md shadow-indigo-600/20 transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {updateGoalMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Edit2 className="h-4 w-4" />}
+                    <span>{updateGoalMutation.isPending ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
                   </button>
                 </div>
               </form>
@@ -829,7 +1109,12 @@ export const GoalsPage: React.FC = () => {
         )}
 
       {/* Goals Grid */}
-      {filteredGoals.length === 0 && (
+      {isGoalsError && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
+          Không thể tải mục tiêu. Vui lòng thử lại.
+        </div>
+      )}
+      {!isLoadingGoals && !isGoalsError && filteredGoals.length === 0 && (
         <div className="rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center shadow-sm">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
             <Target className="h-7 w-7" />
@@ -852,20 +1137,37 @@ export const GoalsPage: React.FC = () => {
       )}
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {filteredGoals.map((goal) => {
-          const catConfig = categories.find((c) => c.id === goal.category) || {
-            label: goal.category,
+          const baseCatConfig = categories.find((c) => c.id === goal.category) || {
+            label: goal.category.startsWith('custom:')
+              ? goal.category.slice('custom:'.length)
+              : 'Danh mục tùy chỉnh',
             icon: Tag,
             color: 'text-indigo-600',
             bg: 'bg-indigo-50 border-indigo-100',
           };
+          const savedCustomTheme = goal.category.startsWith('custom:')
+            ? COLOR_THEMES.find((theme) => theme.id === goal.categoryColor)
+            : undefined;
+          const catConfig = savedCustomTheme
+            ? { ...baseCatConfig, color: savedCustomTheme.color, bg: savedCustomTheme.bg }
+            : baseCatConfig;
           const CatIcon = catConfig.icon || Tag;
           const isDone = goal.progress >= 100 || goal.isCompleted;
 
           return (
             <article
               key={goal.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => openGoalEditor(goal)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openGoalEditor(goal);
+                }
+              }}
               className={clsx(
-                'group relative rounded-3xl border bg-white p-6 shadow-sm transition-all duration-300 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1',
+                'group relative cursor-pointer rounded-3xl border bg-white p-6 shadow-sm transition-all duration-300 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
                 isDone ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200/80'
               )}
             >
@@ -884,9 +1186,9 @@ export const GoalsPage: React.FC = () => {
                   </span>
 
                   <button
-                    onClick={() => {
-                      setGoals((prev) => prev.filter((item) => item.id !== goal.id));
-                      notifyLocalActivity('goal', 'delete');
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      deleteGoalMutation.mutate(goal.id);
                     }}
                     className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                     title={goalsCopy.deleteGoal}

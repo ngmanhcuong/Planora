@@ -11,7 +11,7 @@ const L = (
   fr: string,
   de: string,
   es: string
-): LocaleMap => ({ vi, en, ja, ko, zh, fr, de, es });
+): LocaleMap => ({ vi, en, ja, ko, zh, fr, de, es, ru: en, th: en, it: en, hi: en });
 
 const knownValues: Record<string, LocaleMap> = {
   'chưa cập nhật': L(

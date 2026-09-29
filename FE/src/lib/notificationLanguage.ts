@@ -1,5 +1,5 @@
 import type { ApiNotification } from '@/types';
-import { normalizeLanguage } from './i18n';
+import { normalizeLanguage, translateEnglishPhrase } from './i18n';
 
 const languages = ['en', 'fr', 'de', 'es', 'ja', 'ko', 'zh'];
 const words: Record<string, string[]> = {
@@ -46,20 +46,26 @@ const ui: Record<string, string[]> = {
   'Không cập nhật được trạng thái. Vui lòng thử lại.': ['Could not update status. Please retry.', 'Mise à jour impossible. Réessayez.', 'Status konnte nicht aktualisiert werden.', 'No se pudo actualizar el estado.', '状態を更新できません。再試行してください。', '상태 업데이트 실패. 다시 시도하세요.', '状态更新失败，请重试。'],
 };
 export function notificationText(language: string, text: string): string {
-  const index = languages.indexOf(normalizeLanguage(language));
-  return index < 0 ? text : ui[text]?.[index] || text;
+  const normalized = normalizeLanguage(language);
+  const index = languages.indexOf(normalized);
+  const values = ui[text];
+  if (!values) return text;
+  return index < 0 ? translateEnglishPhrase(normalized, values[0]) : values[index] || text;
 }
 
 // Translate only recognized system templates, never user-entered names or text.
 export function localizeNotification(item: ApiNotification, language: string): ApiNotification {
-  const index = languages.indexOf(normalizeLanguage(language));
-  if (index < 0) return item;
-  let title = fixed[item.title]?.[index];
+  const normalized = normalizeLanguage(language);
+  const index = languages.indexOf(normalized);
+  const pick = (values?: string[]) => values
+    ? (index < 0 ? translateEnglishPhrase(normalized, values[0]) : values[index])
+    : undefined;
+  let title = pick(fixed[item.title]);
   const match = item.title.match(/^(Tạo|Cập nhật|Xóa|Đổi|Thay đổi) (.+) thành công$/)
     || item.title.match(/^(Đã thêm|Đã cập nhật|Đã xóa|Đã đổi trạng thái|Đã đổi ghim) (.+)$/);
   if (match && words[match[2]]) {
     const action = /Tạo|Đã thêm/.test(match[1]) ? 'create' : /Xóa|Đã xóa/.test(match[1]) ? 'delete' : match[1] === 'Đã đổi trạng thái' ? 'status' : match[1] === 'Đã đổi ghim' ? 'pin' : 'update';
-    title = `${words[match[2]][index]} — ${actions[action][index]}`;
+    title = `${pick(words[match[2]])} — ${pick(actions[action])}`;
   }
   if (!title) return item;
   let message = item.message;
