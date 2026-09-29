@@ -11,21 +11,50 @@ const getMailerConfig = () => {
   return { host, port, user, pass, from };
 };
 
-export const sendPasswordResetOtpEmail = async (to: string, otp: string): Promise<void> => {
+const createTransporter = () => {
   const mailConfig = getMailerConfig();
+  return {
+    mailConfig,
+    transporter: nodemailer.createTransport({
+      host: mailConfig.host,
+      port: mailConfig.port,
+      secure: config.smtp.secure,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 12000,
+      auth: { user: mailConfig.user, pass: mailConfig.pass },
+    }),
+  };
+};
 
-  const transporter = nodemailer.createTransport({
-    host: mailConfig.host,
-    port: mailConfig.port,
-    secure: config.smtp.secure,
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
-    socketTimeout: 12000,
-    auth: {
-      user: mailConfig.user,
-      pass: mailConfig.pass,
-    },
+const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#039;',
+}[character] || character));
+
+export const sendScheduleReminderEmail = async (
+  to: string,
+  item: { title: string; kind: 'Công việc' | 'Lịch trình'; scheduledAt: Date; isOverdue?: boolean }
+): Promise<void> => {
+  const { mailConfig, transporter } = createTransporter();
+  const time = item.scheduledAt.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+  const headline = item.isOverdue ? `${item.kind} đã quá hạn` : `${item.kind} sắp tới`;
+  const safeTitle = escapeHtml(item.title);
+
+  await transporter.sendMail({
+    from: mailConfig.from,
+    to,
+    subject: `${headline}: ${item.title}`,
+    text: `${headline} “${item.title}” vào ${time}. Mở Planora để xem chi tiết.`,
+    html: `<div style="font-family:Arial,sans-serif;background:#f4f6fb;padding:28px;color:#0f172a"><div style="max-width:560px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px"><div style="font-size:20px;font-weight:800;color:#4f46e5;margin-bottom:18px">Planora</div><h1 style="font-size:22px;margin:0 0 10px">${headline}</h1><p style="font-size:16px;line-height:1.6;margin:0 0 12px"><strong>${safeTitle}</strong></p><p style="color:#475569;margin:0">Thời gian: ${time}</p><p style="color:#64748b;font-size:13px;margin:22px 0 0">Email được gửi theo cài đặt nhắc lịch của bạn trên Planora.</p></div></div>`,
   });
+};
+
+export const sendPasswordResetOtpEmail = async (to: string, otp: string): Promise<void> => {
+  const { mailConfig, transporter } = createTransporter();
 
   await transporter.sendMail({
     from: mailConfig.from,

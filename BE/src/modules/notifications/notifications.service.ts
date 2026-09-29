@@ -6,6 +6,7 @@ import {
   PaginatedNotificationsResponse,
   CreateNotificationInput,
 } from './notifications.types';
+import { sendScheduleReminderEmail } from '../../utils/mailer';
 
 function formatNotification(n: any): NotificationResponse {
   return {
@@ -281,11 +282,20 @@ export class NotificationsService {
     const now = new Date();
 
     // 1. Fetch user settings for deadlineReminderHours
-    const setting = await prisma.userSetting.findUnique({
-      where: { userId },
-    });
-    const reminderHours = setting?.deadlineReminderHours || 24;
-    const reminderThreshold = new Date(now.getTime() + Math.max(reminderHours, 7 * 24) * 3600 * 1000);
+    const [setting, user] = await Promise.all([
+      prisma.userSetting.findUnique({ where: { userId } }),
+      prisma.user.findUnique({ where: { id: userId }, select: { email: true } }),
+    ]);
+    const reminderHours = setting?.deadlineReminderHours ?? 24;
+    const reminderThreshold = new Date(now.getTime() + reminderHours * 3600 * 1000);
+    const sendEmail = async (item: { title: string; kind: 'Công việc' | 'Lịch trình'; scheduledAt: Date; isOverdue?: boolean }) => {
+      if (!setting?.emailNotifications || !user?.email) return;
+      try {
+        await sendScheduleReminderEmail(user.email, item);
+      } catch (error) {
+        console.error('[Schedule reminder email] Failed:', error instanceof Error ? error.message : error);
+      }
+    };
 
     let createdCount = 0;
 
@@ -311,7 +321,10 @@ export class NotificationsService {
           relatedEntityId: task.id,
           link: '/tasks',
         });
-        if (result.isNew) createdCount++;
+        if (result.isNew) {
+          createdCount++;
+          await sendEmail({ title: task.title, kind: 'Công việc', scheduledAt: dueAt, isOverdue: true });
+        }
       } else if (dueAt <= reminderThreshold) {
         // Task Reminder
         const result = await NotificationsService.createNotification({
@@ -323,7 +336,10 @@ export class NotificationsService {
           relatedEntityId: task.id,
           link: '/tasks',
         });
-        if (result.isNew) createdCount++;
+        if (result.isNew) {
+          createdCount++;
+          await sendEmail({ title: task.title, kind: 'Công việc', scheduledAt: dueAt });
+        }
       }
     }
 
@@ -333,7 +349,7 @@ export class NotificationsService {
         userId,
         startTime: {
           gte: now,
-          lte: new Date(now.getTime() + 7 * 24 * 3600 * 1000),
+          lte: reminderThreshold,
         },
       },
     });
@@ -348,7 +364,10 @@ export class NotificationsService {
         relatedEntityId: evt.id,
         link: '/calendar',
       });
-      if (result.isNew) createdCount++;
+      if (result.isNew) {
+        createdCount++;
+        await sendEmail({ title: evt.title, kind: 'Lịch trình', scheduledAt: evt.startTime });
+      }
 
       if (evt.hasConflict) {
         const conflictRes = await NotificationsService.createNotification({

@@ -506,6 +506,7 @@ export class EventsService {
       end: evt.endAt,
       allDay: evt.allDay,
       location: evt.location,
+      description: evt.description,
       category: evt.category,
       recurrenceType: evt.recurrenceType,
     }));
@@ -522,6 +523,7 @@ export class EventsService {
         start: task.dueDate,
         end: null,
         allDay: !task.dueTime,
+        description: task.description,
         status: task.status,
         priority: task.priority,
         isOverdue,

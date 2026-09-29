@@ -10,19 +10,67 @@ import {
   BookOpen
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
-import type { ApiTimetableItem, ApiEvent } from '@/types';
+import type { ApiTimetableItem, ApiEvent, ApiCalendarItem } from '@/types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, getMultiLangText } from '@/lib/i18n';
 
 export interface TodayTimelineProps {
   timetableToday?: ApiTimetableItem[];
   eventsToday?: ApiEvent[];
+  calendarTodayItems?: ApiCalendarItem[];
 }
 
-export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [], eventsToday = [] }) => {
+const getEventStart = (event: ApiEvent) => (event as any).startAt || (event as any).startTime || (event as any).start;
+const getEventEnd = (event: ApiEvent) => (event as any).endAt || (event as any).endTime || (event as any).end;
+const getCalendarItemStart = (item: ApiCalendarItem) => item.start;
+const getCalendarItemEnd = (item: ApiCalendarItem) => item.end;
+
+const isSameLocalDay = (value: string | Date | undefined | null, target: Date) => {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth() && date.getDate() === target.getDate();
+};
+
+const formatTimeRange = (start: string | Date | undefined | null, end: string | Date | undefined | null, allDay: boolean | undefined, language: string) => {
+  if (allDay) return translate(language, 'dashboard.allDay');
+  const startDate = start ? new Date(start) : null;
+  const endDate = end ? new Date(end) : null;
+  const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+
+  if (startDate && !Number.isNaN(startDate.getTime()) && endDate && !Number.isNaN(endDate.getTime())) {
+    return startDate.toLocaleTimeString([], timeOptions) + ' - ' + endDate.toLocaleTimeString([], timeOptions);
+  }
+  if (startDate && !Number.isNaN(startDate.getTime())) {
+    return startDate.toLocaleTimeString([], timeOptions);
+  }
+  return getMultiLangText(language, { vi: 'Chưa đặt giờ', en: 'No time set', ja: '時刻未設定', ko: '시간 미설정', zh: '未设置时间', fr: 'Heure non définie', de: 'Keine Uhrzeit', es: 'Sin hora' });
+};
+
+const formatEventTimeRange = (event: ApiEvent, language: string) => formatTimeRange(getEventStart(event), getEventEnd(event), event.allDay, language);
+const formatCalendarItemTimeRange = (item: ApiCalendarItem, language: string) => formatTimeRange(getCalendarItemStart(item), getCalendarItemEnd(item), item.allDay, language);
+
+const getCalendarItemTypeLabel = (item: ApiCalendarItem, language: string) => {
+  if (item.sourceType === 'TIMETABLE') return translate(language, 'dashboard.classPeriod');
+  if (item.sourceType === 'TASK') return getMultiLangText(language, { vi: 'Công việc', en: 'Task', ja: 'タスク', ko: '작업', zh: '任务', fr: 'Tâche', de: 'Aufgabe', es: 'Tarea' });
+  return translate(language, 'dashboard.event');
+};
+
+export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [], eventsToday = [], calendarTodayItems = [] }) => {
   const language = useCurrentLanguage();
-  const hasItems = timetableToday.length > 0 || eventsToday.length > 0;
-  const totalCount = timetableToday.length + eventsToday.length;
+  const today = new Date();
+  const normalizedCalendarItems = calendarTodayItems
+    .filter((item) => isSameLocalDay(getCalendarItemStart(item), today))
+    .sort((a, b) => new Date(getCalendarItemStart(a) || 0).getTime() - new Date(getCalendarItemStart(b) || 0).getTime());
+  const todayEvents = eventsToday.filter((event) => event.allDay || isSameLocalDay(getEventStart(event), today));
+  const sortedTodayEvents = [...todayEvents].sort((a, b) => {
+    const aStart = getEventStart(a);
+    const bStart = getEventStart(b);
+    return new Date(aStart || 0).getTime() - new Date(bStart || 0).getTime();
+  });
+  const useCalendarItems = normalizedCalendarItems.length > 0;
+  const hasItems = useCalendarItems || timetableToday.length > 0 || sortedTodayEvents.length > 0;
+  const totalCount = useCalendarItems ? normalizedCalendarItems.length : timetableToday.length + sortedTodayEvents.length;
 
   return (
     <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-sm flex flex-col gap-6">
@@ -113,8 +161,60 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
           {/* Continuous Vertical Line */}
           <div className="absolute left-[19px] top-3 bottom-6 w-0.5 bg-slate-200 pointer-events-none" />
 
+          {/* Calendar Items from the same source as Lịch Riêng */}
+          {useCalendarItems && normalizedCalendarItems.map((item) => {
+            const color = item.category?.color || (item.sourceType === 'TASK' ? '#7C3AED' : item.sourceType === 'TIMETABLE' ? '#10B981' : '#3525CD');
+            const badgeBg = item.category?.bgColor || (item.sourceType === 'TASK' ? '#EDE9FE' : item.sourceType === 'TIMETABLE' ? '#D1FAE5' : '#E2DFFF');
+            const badgeText = item.category?.textColor || (item.sourceType === 'TASK' ? '#5B21B6' : item.sourceType === 'TIMETABLE' ? '#065F46' : '#3525CD');
+            const location = item.location || item.room;
+            return (
+              <div key={`cal_${item.sourceType}_${item.id}`} className="relative flex items-start gap-4 group z-10">
+                <div
+                  className="w-4 h-4 rounded-full shrink-0 mt-2.5 ring-4 ring-white shadow-xs"
+                  style={{ backgroundColor: color }}
+                />
+
+                <div
+                  className="flex-1 bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col gap-2.5"
+                  style={{ borderLeftWidth: '4px', borderLeftColor: color }}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black tracking-wide" style={{ color }}>
+                        {formatCalendarItemTimeRange(item, language)}
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-slate-300" />
+                      <Badge size="sm" customBg={badgeBg} customColor={badgeText}>
+                        {getCalendarItemTypeLabel(item, language)}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <h3 className="text-sm font-extrabold text-slate-900">{item.title}</h3>
+                  {item.courseCode && <p className="text-xs font-semibold text-slate-500">{item.courseCode}</p>}
+                  {(location || item.lecturer) && (
+                    <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 text-xs text-slate-600 font-medium">
+                      {location && (
+                        <span className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                          <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+                          {location}
+                        </span>
+                      )}
+                      {item.lecturer && (
+                        <span className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                          <UserIcon className="w-3.5 h-3.5 text-indigo-500" />
+                          {translate(language, 'dashboard.lecturer')}: {item.lecturer}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
           {/* Timetable Items */}
-          {timetableToday.map((item) => (
+          {!useCalendarItems && timetableToday.map((item) => (
             <div key={`tt_${item.id}`} className="relative flex items-start gap-4 group z-10">
               <div
                 className="w-4 h-4 rounded-full shrink-0 mt-2.5 ring-4 ring-white shadow-xs"
@@ -163,7 +263,7 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
           ))}
 
           {/* Events Today */}
-          {eventsToday.map((event) => (
+          {!useCalendarItems && sortedTodayEvents.map((event) => (
             <div key={`evt_${event.id}`} className="relative flex items-start gap-4 group z-10">
               <div
                 className="w-4 h-4 rounded-full shrink-0 mt-2.5 ring-4 ring-white shadow-xs"
@@ -177,7 +277,7 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black tracking-wide" style={{ color: event.color || '#3525CD' }}>
-                      {event.allDay ? translate(language, 'dashboard.allDay') : `${new Date(event.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(event.endAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                      {formatEventTimeRange(event, language)}
                     </span>
                     <span className="w-1 h-1 rounded-full bg-slate-300" />
                     <Badge size="sm" customBg="#E2DFFF" customColor="#3525CD">

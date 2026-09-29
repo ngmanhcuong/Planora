@@ -6,6 +6,7 @@ import { PriorityTasksWidget } from './components/PriorityTasksWidget';
 import { HabitTrackerWidget } from './components/HabitTrackerWidget';
 import { TomorrowPreviewWidget } from './components/TomorrowPreviewWidget';
 import { useDashboard } from './hooks/useDashboard';
+import { useCalendarRange } from '@/features/calendar/hooks/useCalendar';
 import { SmartScheduleModal, AiAssistantPanel } from '@/features/ai';
 import { Loader2 } from 'lucide-react';
 
@@ -13,6 +14,14 @@ export const DashboardPage: React.FC = () => {
   const { data: dashboardData, isLoading, isError } = useDashboard();
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(todayStart);
+  todayEnd.setHours(23, 59, 59, 999);
+  const { data: todayCalendarItems = [] } = useCalendarRange({
+    start: todayStart.toISOString(),
+    end: todayEnd.toISOString(),
+  });
 
   if (isLoading) {
     return (
@@ -51,7 +60,8 @@ export const DashboardPage: React.FC = () => {
         <div className="lg:col-span-7 flex flex-col gap-6">
           <TodayTimeline
             timetableToday={dashboardData.timetable?.today}
-            eventsToday={dashboardData.events?.upcoming}
+            eventsToday={dashboardData.events?.today ?? dashboardData.events?.upcoming}
+            calendarTodayItems={todayCalendarItems}
           />
         </div>
 

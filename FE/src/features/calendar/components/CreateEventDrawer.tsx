@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { AlertTriangle, MapPin, BookmarkPlus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AlertTriangle, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -19,22 +19,50 @@ export interface CreateEventDrawerProps {
   isPending?: boolean;
 }
 
+const formatDateInput = (value: Date) =>
+  `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+
+const formatTimeInput = (value: Date) =>
+  `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
+
+const getDefaultTimes = () => {
+  const start = new Date();
+  start.setMinutes(0, 0, 0);
+  start.setHours(Math.min(22, start.getHours() + 1));
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  return { start: formatTimeInput(start), end: formatTimeInput(end) };
+};
+
 export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
   isOpen,
   onClose,
   onSave,
   isPending, initialDate,
 }) => {
+  const defaultTimes = getDefaultTimes();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [location, setLocation] = useState('');
+  const [startTime, setStartTime] = useState(defaultTimes.start);
+  const [endTime, setEndTime] = useState(defaultTimes.end);
   const [notes, setNotes] = useState('');
-  const [date, setDate] = useState(`${initialDate.getFullYear()}-${String(initialDate.getMonth()+1).padStart(2,'0')}-${String(initialDate.getDate()).padStart(2,'0')}`);
+  const [date, setDate] = useState(formatDateInput(initialDate));
   const [error, setError] = useState('');
   const [allowConflict, setAllowConflict] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const times = getDefaultTimes();
+    setTitle('');
+    setCategory('');
+    setStartTime(times.start);
+    setEndTime(times.end);
+    setNotes('');
+    setDate(formatDateInput(initialDate));
+    setError('');
+    setAllowConflict(false);
+  }, [isOpen, initialDate]);
+
   const start = new Date(`${date}T${startTime}`);
   const end = new Date(`${date}T${endTime}`);
   const valid = Number.isFinite(start.getTime()) && Number.isFinite(end.getTime()) && end > start;
@@ -53,14 +81,24 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
     if (!valid || title.trim().length < 2) { setError('Nhập tên từ 2 ký tự và giờ kết thúc sau giờ bắt đầu.'); return; }
     setSaving(true);
     try {
-      const result = await check.refetch();
-      if (result.error || !result.data) throw new Error('Không kiểm tra được lịch. Vui lòng thử lại.');
-      if (result.data.some(item => item.sourceType === 'EVENT' && item.end && new Date(item.start) < end && new Date(item.end) > start) && !allowConflict) {
-        setError('Lịch bị trùng. Hãy đổi giờ hoặc xác nhận vẫn lưu.'); return;
+      let conflictItems = check.data || [];
+      try {
+        const result = await check.refetch();
+        if (result.data) conflictItems = result.data;
+      } catch {
+        conflictItems = check.data || [];
       }
-      await onSave({title: title.trim(), startAt, endAt, categoryId: category || null, location: location.trim() || undefined, description: notes.trim() || undefined});
+
+      if (conflictItems.some(item => item.sourceType === 'EVENT' && item.end && new Date(item.start) < end && new Date(item.end) > start) && !allowConflict) {
+        setError('Lịch bị trùng. Hãy đổi giờ hoặc tích “Vẫn lưu trong khung giờ này”.');
+        return;
+      }
+
+      await onSave({ title: title.trim(), startAt, endAt, categoryId: category || null, description: notes.trim() || undefined });
       onClose();
-    } catch { setError('Không thể lưu hoặc kiểm tra lịch. Vui lòng thử lại.'); }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || 'Không thể lưu lịch. Vui lòng thử lại.');
+    }
     finally { setSaving(false); }
   };
   const categoryOptions = [
@@ -128,15 +166,6 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
           </div>
         </div>
 
-        {/* Location */}
-        <Input
-          label="Địa điểm / Nền tảng"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          leftIcon={<MapPin className="w-4 h-4" />}
-          placeholder="Phòng học / Link Google Meet..."
-        />
-
         {/* Notes */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold text-[#131B2E]">Ghi chú chi tiết</label>
@@ -158,10 +187,10 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
         </div>}
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
-          <Button type="button" variant="secondary" onClick={close} disabled={isPending}>
+          <Button type="button" variant="secondary" onClick={close} disabled={saving || isPending}>
             Hủy bỏ
           </Button>
-          <Button type="submit" variant="primary" disabled={isPending}>
+          <Button type="submit" variant="primary" disabled={saving || isPending}>
             <BookmarkPlus className="w-4 h-4" />
             <span>{saving || isPending ? 'Đang lưu...' : 'Lưu lịch trình'}</span>
           </Button>

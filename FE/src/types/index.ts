@@ -123,6 +123,7 @@ export interface ApiCalendarItem {
   end?: string | null;
   allDay: boolean;
   location?: string | null;
+  description?: string | null;
   status?: string;
   priority?: string;
   isOverdue?: boolean;
@@ -214,6 +215,7 @@ export interface ApiDashboardData {
     overdue: ApiTask[];
   };
   events: {
+    today?: ApiEvent[];
     upcoming: ApiEvent[];
   };
   timetable: {

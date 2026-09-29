@@ -14,8 +14,13 @@ export interface CalendarEventItem {
   startAt: string;
   endAt?: string | null;
   category: CategoryType;
+  categoryId?: string | null;
   categoryLabel: string;
   location?: string;
+  description?: string | null;
+  priority?: string | null;
+  status?: string | null;
+  courseCode?: string | null;
   timetableId?: string | null;
   timetableItemId?: string | null;
   speaker?: string;

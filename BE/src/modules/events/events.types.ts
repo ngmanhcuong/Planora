@@ -77,6 +77,7 @@ export interface CalendarItemResponse {
   end: Date | null;
   allDay: boolean;
   location?: string | null;
+  description?: string | null;
   status?: string;
   priority?: string;
   isOverdue?: boolean;

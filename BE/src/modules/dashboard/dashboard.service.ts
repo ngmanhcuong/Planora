@@ -97,6 +97,7 @@ export class DashboardService {
     const [
       tasksTodayRaw,
       tasksOverdueRaw,
+      eventsTodayRaw,
       eventsUpcomingRaw,
       activeTimetable,
       habitsRaw,
@@ -128,7 +129,25 @@ export class DashboardService {
         orderBy: { dueDate: 'asc' },
       }),
 
-      // Upcoming events next 7 days (limit 5)
+      // Events that overlap today, including items that already passed earlier today
+      prisma.event.findMany({
+        where: {
+          userId,
+          OR: [
+            {
+              startTime: { lt: endOfToday },
+              endTime: { gt: startOfToday },
+            },
+            {
+              recurrenceType: { not: 'NONE' },
+            },
+          ],
+        },
+        include: { category: true },
+        orderBy: { startTime: 'asc' },
+      }),
+
+      // Upcoming events next 7 days
       prisma.event.findMany({
         where: {
           userId,
@@ -205,8 +224,7 @@ export class DashboardService {
     const overdueTasksCount = overdueTasks.length;
 
     // 2. Process Events
-    const expandedEvents = expandRecurringEvents(eventsUpcomingRaw, now, next7DaysEnd, 500);
-    const upcomingEvents: DashboardEventItem[] = expandedEvents.slice(0, 5).map((e: any) => ({
+    const toDashboardEvent = (e: any): DashboardEventItem => ({
       id: e.id,
       title: e.title,
       start: e.startAt || e.startTime,
@@ -214,7 +232,24 @@ export class DashboardService {
       allDay: e.allDay ?? e.isAllDay ?? false,
       location: e.location,
       category: e.category,
-    }));
+    });
+
+    const expandedTodayEvents = expandRecurringEvents(eventsTodayRaw, startOfToday, endOfToday, 500)
+      .filter((e: any) => {
+        const start = new Date(e.startAt || e.startTime);
+        const end = new Date(e.endAt || e.endTime);
+        return start < endOfToday && end > startOfToday;
+      })
+      .sort((a: any, b: any) => new Date(a.startAt || a.startTime).getTime() - new Date(b.startAt || b.startTime).getTime());
+    const todayEvents: DashboardEventItem[] = expandedTodayEvents.map(toDashboardEvent);
+
+    const expandedEvents = expandRecurringEvents(eventsUpcomingRaw, now, next7DaysEnd, 500)
+      .filter((e: any) => {
+        const start = new Date(e.startAt || e.startTime);
+        return start >= now && start <= next7DaysEnd;
+      })
+      .sort((a: any, b: any) => new Date(a.startAt || a.startTime).getTime() - new Date(b.startAt || b.startTime).getTime());
+    const upcomingEvents: DashboardEventItem[] = expandedEvents.slice(0, 5).map(toDashboardEvent);
 
     // 3. Process Timetable
     const activeTimetableItems = activeTimetable?.items || [];
@@ -277,6 +312,7 @@ export class DashboardService {
         overdue: overdueTasks,
       },
       events: {
+        today: todayEvents,
         upcoming: upcomingEvents,
       },
       timetable: {

@@ -341,6 +341,15 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
               {dayEvents.map((evt) => (
                 (() => {
                   const isDraggable = canDragEvent(evt);
+                  const snappedSlotTop = Math.max(
+                    0,
+                    Math.min(
+                      GRID_HEIGHT_PX - SLOT_HEIGHT_PX,
+                      Math.floor(evt.startTopPx / SLOT_HEIGHT_PX) * SLOT_HEIGHT_PX
+                    )
+                  );
+                  const cardTop = snappedSlotTop + 8;
+                  const cardHeight = SLOT_HEIGHT_PX - 16;
                   return (
                     <div
                       key={evt.id}
@@ -360,32 +369,32 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                       }}
                       onClick={() => onSelectEvent?.(evt)}
                       title={isDraggable ? 'Kéo sang ô ngày/giờ khác' : undefined}
-                      className={`group absolute left-2.5 right-2.5 z-10 flex ${isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} flex-col justify-between overflow-hidden rounded-lg border-l-[4px] p-3 shadow-md shadow-slate-950/10 ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${draggedEventId === evt.id ? 'opacity-60 ring-2 ring-cyan-300' : ''}`}
+                      className={`group absolute left-2.5 right-2.5 z-10 flex ${isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} flex-col justify-center overflow-hidden rounded-lg border-l-[4px] px-3 py-1.5 shadow-md shadow-slate-950/10 ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${draggedEventId === evt.id ? 'opacity-60 ring-2 ring-cyan-300' : ''}`}
                       style={{
-                        top: `${evt.startTopPx + 8}px`,
-                        height: '72px',
+                        top: `${cardTop}px`,
+                        height: `${cardHeight}px`,
                         backgroundColor: evt.bgColor,
                         color: evt.textColor,
                         borderColor: evt.color,
                       }}
                     >
-                      <div className="flex min-w-0 flex-col">
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="line-clamp-2 text-xs leading-snug sm:text-sm font-extrabold">{evt.title}</span>
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-[12px] leading-4 font-extrabold sm:text-[13px]">{evt.title}</span>
                           {evt.hasConflict && (
-                            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                           )}
                         </div>
-                          <span className="text-xs font-medium opacity-90 truncate flex items-center gap-1.5 mt-1">
+                          <span className="text-[11px] leading-4 font-medium opacity-90 truncate flex items-center gap-1">
                             {evt.location?.includes('Meet') || evt.location?.includes('Online') ? (
-                              <Video className="w-3.5 h-3.5 shrink-0" />
+                              <Video className="w-3 h-3 shrink-0" />
                             ) : (
-                              <MapPin className="w-3.5 h-3.5 shrink-0" />
+                              <MapPin className="w-3 h-3 shrink-0" />
                             )}
                             {evt.location || 'Chưa xếp địa điểm'}
                           </span>
                       </div>
-                      <span className="text-[11px] mt-1 font-black opacity-85">{evt.timeRange}</span>
+                      <span className="truncate text-[11px] leading-4 font-black opacity-85">{evt.timeRange}</span>
                     </div>
                   );
                 })()

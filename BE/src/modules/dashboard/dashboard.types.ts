@@ -70,6 +70,7 @@ export interface DashboardResponse {
     overdue: DashboardTaskItem[];
   };
   events: {
+    today: DashboardEventItem[];
     upcoming: DashboardEventItem[];
   };
   timetable: {
