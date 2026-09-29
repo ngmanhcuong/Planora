@@ -711,7 +711,7 @@ export const GoalsPage: React.FC = () => {
                   : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900'
               )}
             >
-              {cat.label}
+              {translateCategory(language, cat.label)}
             </button>
           ))}
         </div>
@@ -831,13 +831,13 @@ export const GoalsPage: React.FC = () => {
                           ...(!categories.some((category) => category.id === newCategory) && newCategory.startsWith('custom:')
                             ? [{
                               value: newCategory,
-                              label: newCategory.slice('custom:'.length),
+                              label: translateCategory(language, newCategory.slice('custom:'.length)),
                               icon: <Tag className="h-4 w-4" />,
                             }]
                             : []),
                           ...categories.map((category) => ({
                             value: category.id,
-                            label: category.label,
+                            label: translateCategory(language, category.label),
                             icon: category.icon ? React.createElement(category.icon, { className: 'h-4 w-4' }) : undefined,
                           })),
                           { value: '__add_new__', label: goalsCopy.addCategoryOption, icon: <Plus className="h-4 w-4" /> },
@@ -1024,14 +1024,14 @@ export const GoalsPage: React.FC = () => {
                           ? [{
                             value: editCategory,
                             label: editCategory.startsWith('custom:')
-                              ? editCategory.slice('custom:'.length)
+                              ? translateCategory(language, editCategory.slice('custom:'.length))
                               : 'Danh mục tùy chỉnh',
                             icon: <Tag className="h-4 w-4" />,
                           }]
                           : []),
                         ...categories.map((category) => ({
                           value: category.id,
-                          label: category.label,
+                          label: translateCategory(language, category.label),
                           icon: category.icon ? React.createElement(category.icon, { className: 'h-4 w-4' }) : undefined,
                         })),
                         { value: '__custom__', label: 'Tạo danh mục tùy chỉnh...', icon: <Plus className="h-4 w-4" /> },
@@ -1182,7 +1182,7 @@ export const GoalsPage: React.FC = () => {
                     )}
                   >
                     <CatIcon className="w-3.5 h-3.5" />
-                    {catConfig.label}
+                    {translateCategory(language, catConfig.label)}
                   </span>
 
                   <button

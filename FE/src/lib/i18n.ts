@@ -2537,7 +2537,202 @@ export const translateEnglishPhrase = (
 
 export const translateCategory = (language: string | null | undefined, name?: string): string => {
   if (!name) return translate(language, 'category.study');
-  const lower = name.toLowerCase().trim();
+  const cleanName = name.replace(/^custom[:_]/i, '').trim();
+  if (!cleanName) return translate(language, 'category.study');
+
+  const lang = normalizeLanguage(language);
+  const phraseMatch = ADDITIONAL_PHRASE_TRANSLATIONS[lang]?.[cleanName];
+  if (phraseMatch) return phraseMatch;
+
+  const lower = cleanName.toLowerCase();
+
+  if (lower.includes('vui chơi') || lower.includes('chơi game') || lower.includes('giải trí') || lower.includes('entertainment') || lower.includes('gaming') || lower.includes('play')) {
+    return getMultiLangText(language, {
+      vi: 'Vui Chơi',
+      en: 'Entertainment',
+      ru: 'Развлечения',
+      ja: '娯楽',
+      ko: '오락',
+      zh: '娱乐',
+      fr: 'Divertissement',
+      de: 'Unterhaltung',
+      es: 'Entretenimiento',
+      th: 'ความบันเทิง',
+      it: 'Intrattenimento',
+      hi: 'मनोरंजन',
+    });
+  }
+
+  if (lower.includes('tài chính') || lower.includes('finance') || lower.includes('tiền bạc') || lower.includes('money')) {
+    return getMultiLangText(language, {
+      vi: 'Tài chính',
+      en: 'Finance',
+      ru: 'Финансы',
+      ja: '財務',
+      ko: '재무',
+      zh: '财务',
+      fr: 'Finance',
+      de: 'Finanzen',
+      es: 'Finanzas',
+      th: 'การเงิน',
+      it: 'Finanza',
+      hi: 'वित्त',
+    });
+  }
+
+  if (lower.includes('du lịch') || lower.includes('travel') || lower.includes('trips')) {
+    return getMultiLangText(language, {
+      vi: 'Du lịch',
+      en: 'Travel',
+      ru: 'Путешествия',
+      ja: '旅行',
+      ko: '여행',
+      zh: '旅游',
+      fr: 'Voyage',
+      de: 'Reisen',
+      es: 'Viajes',
+      th: 'ท่องเที่ยว',
+      it: 'Viaggi',
+      hi: 'यात्रा',
+    });
+  }
+
+  if (lower.includes('gia đình') || lower.includes('family')) {
+    return getMultiLangText(language, {
+      vi: 'Gia đình',
+      en: 'Family',
+      ru: 'Семья',
+      ja: '家族',
+      ko: '가족',
+      zh: '家庭',
+      fr: 'Famille',
+      de: 'Familie',
+      es: 'Familia',
+      th: 'ครอบครัว',
+      it: 'Famiglia',
+      hi: 'परिवार',
+    });
+  }
+
+  if (lower.includes('thể thao') || lower.includes('sport') || lower.includes('gym') || lower.includes('fitness')) {
+    return getMultiLangText(language, {
+      vi: 'Thể thao',
+      en: 'Sports',
+      ru: 'Спорт',
+      ja: 'スポーツ',
+      ko: '스포츠',
+      zh: '体育',
+      fr: 'Sports',
+      de: 'Sport',
+      es: 'Deportes',
+      th: 'กีฬา',
+      it: 'Sport',
+      hi: 'खेल',
+    });
+  }
+
+  if (lower.includes('nghỉ ngơi') || lower.includes('rest') || lower.includes('relax')) {
+    return getMultiLangText(language, {
+      vi: 'Nghỉ ngơi',
+      en: 'Rest',
+      ru: 'Отдых',
+      ja: '休憩',
+      ko: '휴식',
+      zh: '休息',
+      fr: 'Repos',
+      de: 'Ruhe',
+      es: 'Descanso',
+      th: 'พักผ่อน',
+      it: 'Riposo',
+      hi: 'आराम',
+    });
+  }
+
+  if (lower.includes('mua sắm') || lower.includes('shopping')) {
+    return getMultiLangText(language, {
+      vi: 'Mua sắm',
+      en: 'Shopping',
+      ru: 'Покупки',
+      ja: 'ショッピング',
+      ko: '쇼핑',
+      zh: '购物',
+      fr: 'Achats',
+      de: 'Einkaufen',
+      es: 'Compras',
+      th: 'ช้อปปิ้ง',
+      it: 'Shopping',
+      hi: 'खरीदारी',
+    });
+  }
+
+  if (lower.includes('dự án') || lower.includes('project')) {
+    return getMultiLangText(language, {
+      vi: 'Dự án',
+      en: 'Project',
+      ru: 'Проект',
+      ja: 'プロジェクト',
+      ko: '프로젝트',
+      zh: '项目',
+      fr: 'Projet',
+      de: 'Projekt',
+      es: 'Proyecto',
+      th: 'โครงการ',
+      it: 'Progetto',
+      hi: 'परियोजना',
+    });
+  }
+
+  if (lower.includes('bài tập') || lower.includes('homework') || lower.includes('assignment')) {
+    return getMultiLangText(language, {
+      vi: 'Bài tập',
+      en: 'Assignment',
+      ru: 'Задание',
+      ja: '課題',
+      ko: '과제',
+      zh: '作业',
+      fr: 'Devoirs',
+      de: 'Hausaufgabe',
+      es: 'Tarea',
+      th: 'การบ้าน',
+      it: 'Compiti',
+      hi: 'गृहकार्य',
+    });
+  }
+
+  if (lower.includes('âm nhạc') || lower.includes('music')) {
+    return getMultiLangText(language, {
+      vi: 'Âm nhạc',
+      en: 'Music',
+      ru: 'Музыка',
+      ja: '音楽',
+      ko: '음악',
+      zh: '音乐',
+      fr: 'Musique',
+      de: 'Musik',
+      es: 'Música',
+      th: 'ดนตรี',
+      it: 'Musica',
+      hi: 'संगीत',
+    });
+  }
+
+  if (lower.includes('kỹ năng') || lower.includes('skills') || lower.includes('skill')) {
+    return getMultiLangText(language, {
+      vi: 'Kỹ năng',
+      en: 'Skills',
+      ru: 'Навыки',
+      ja: 'スキル',
+      ko: '기술',
+      zh: '技能',
+      fr: 'Compétences',
+      de: 'Fähigkeiten',
+      es: 'Habilidades',
+      th: 'ทักษะ',
+      it: 'Abilità',
+      hi: 'कौशल',
+    });
+  }
+
   if (lower.includes('họp') || lower.includes('meet')) return translate(language, 'category.meeting');
   if (lower.includes('học') || lower.includes('stud')) return translate(language, 'category.study');
   if (lower.includes('công việc') || lower.includes('work')) return translate(language, 'category.work');
@@ -2550,7 +2745,7 @@ export const translateCategory = (language: string | null | undefined, name?: st
   if (lower.includes('ghi chú') || lower.includes('note')) return getMultiLangText(language, { vi: 'Ghi chú', en: 'Note', ja: 'メモ', ko: '노트', zh: '笔记', fr: 'Note', de: 'Notiz', es: 'Nota' });
   if (lower.includes('sức khỏe') || lower.includes('health')) return getMultiLangText(language, { vi: 'Sức khỏe', en: 'Health', ja: '健康', ko: '건강', zh: '健康', fr: 'Santé', de: 'Gesundheit', es: 'Salud' });
   if (lower.includes('khác') || lower.includes('other')) return getMultiLangText(language, { vi: 'Khác', en: 'Other', ja: 'その他', ko: '기타', zh: '其他', fr: 'Autre', de: 'Andere', es: 'Otro' });
-  return name;
+  return cleanName;
 };
 
 export const translateRelativeTime = (language: string | null | undefined, timeStr?: string): string => {
