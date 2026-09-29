@@ -97,6 +97,10 @@ enum Language {
   FR
   DE
   ES
+  RU
+  TH
+  IT
+  HI
 }
 
 enum NotificationType {
@@ -127,6 +131,7 @@ model User {
   events        Event[]
   timetables    Timetable[]
   habits        Habit[]
+  goals         Goal[]
   notifications Notification[]
   supportTickets SupportTicket[]
 
@@ -225,6 +230,25 @@ model Task {
   @@index([userId, status])
   @@index([userId, dueDate])
   @@map("tasks")
+}
+
+model Goal {
+  id             String   @id @default(cuid())
+  userId         String
+  title          String
+  description    String?  @db.Text
+  category       String
+  categoryColor  String   @default("indigo")
+  targetDate     DateTime
+  targetWorkload Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, targetDate])
+  @@map("goals")
 }
 
 model Event {

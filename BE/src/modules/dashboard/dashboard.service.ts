@@ -302,7 +302,7 @@ export class DashboardService {
         tasksToday: tasksTodayCount,
         tasksCompletedToday: tasksCompletedTodayCount,
         overdueTasks: overdueTasksCount,
-        upcomingEvents: upcomingEvents.length + upcomingTimetableCount,
+        upcomingEvents: expandedEvents.length + upcomingTimetableCount,
         habitsCompletedToday: habitsCompletedTodayCount,
         totalHabits,
         unreadNotifications: unreadNotificationsCount,

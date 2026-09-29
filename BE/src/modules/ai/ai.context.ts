@@ -99,6 +99,27 @@ export async function buildUserAiContext(userId: string): Promise<UserAiContext>
     currentStreak: h.currentStreak,
   }));
 
+  // Productivity score calculated from today's persisted tasks and habits.
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  const endOfToday = new Date(now);
+  endOfToday.setHours(23, 59, 59, 999);
+  const todayTasks = await prisma.task.findMany({
+    where: { userId, dueDate: { gte: startOfToday, lte: endOfToday } },
+    select: { status: true },
+  });
+  const completedTasks = todayTasks.filter((task) => task.status === 'COMPLETED').length;
+  const completedHabits = formattedHabits.filter((habit) => habit.completedToday).length;
+  const taskRate = todayTasks.length > 0 ? completedTasks / todayTasks.length : null;
+  const habitRate = formattedHabits.length > 0 ? completedHabits / formattedHabits.length : null;
+  const todayScore = taskRate !== null && habitRate !== null
+    ? Math.round((taskRate * 0.6 + habitRate * 0.4) * 100)
+    : taskRate !== null
+      ? Math.round(taskRate * 100)
+      : habitRate !== null
+        ? Math.round(habitRate * 100)
+        : 0;
+
   return {
     currentTimeIso: now.toISOString(),
     userName: user?.name || 'Người dùng',
@@ -106,6 +127,6 @@ export async function buildUserAiContext(userId: string): Promise<UserAiContext>
     upcomingEvents: formattedEvents,
     timetableItems: formattedTimetable,
     habitSummaries: formattedHabits,
-    todayScore: 75,
+    todayScore,
   };
 }

@@ -1,0 +1,2 @@
+ALTER TABLE `goals`
+ADD COLUMN `categoryColor` VARCHAR(191) NOT NULL DEFAULT 'indigo';
