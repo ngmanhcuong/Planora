@@ -2291,7 +2291,7 @@ export const ReportsPage: React.FC = () => {
         {[
           {
             label: translate(language, 'reports.completedTasks'),
-            value: `${completedTasksCount}/${totalTasksCount} task`,
+            value: `${completedTasksCount}/${totalTasksCount} ${getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: 'タスク', ko: '작업', zh: '任务', fr: 'tâches', de: 'Aufgaben', es: 'tareas', ru: 'задачи', th: 'งาน', it: 'attività', hi: 'कार्य' })}`,
             trend: `${getMultiLangText(language, { vi: 'Tỷ lệ', en: 'Rate', ja: '達成率', ko: '달성률', zh: '完成率', fr: 'Taux', de: 'Rate', es: 'Tasa' })} ${completedTasksCount > 0 ? Math.round((completedTasksCount / (totalTasksCount || 1)) * 100) : 0}%`,
             icon: CheckCircle2,
             color: 'text-emerald-600',
@@ -2299,7 +2299,7 @@ export const ReportsPage: React.FC = () => {
           },
           {
             label: translate(language, 'reports.todayTasksCount'),
-            value: `${dashboardData?.summary.tasksCompletedToday || 0}/${dashboardData?.summary.tasksToday || 0} task`,
+            value: `${dashboardData?.summary.tasksCompletedToday || 0}/${dashboardData?.summary.tasksToday || 0} ${getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: 'タスク', ko: '작업', zh: '任务', fr: 'tâches', de: 'Aufgaben', es: 'tareas', ru: 'задачи', th: 'งาน', it: 'attività', hi: 'कार्य' })}`,
             trend: translate(language, 'reports.todayData'),
             icon: Clock,
             color: 'text-indigo-600',
@@ -2307,7 +2307,7 @@ export const ReportsPage: React.FC = () => {
           },
           {
             label: translate(language, 'reports.habitsCompletedCount'),
-            value: `${dashboardData?.summary.habitsCompletedToday || 0}/${dashboardData?.summary.totalHabits || 0} ${getMultiLangText(language, { vi: 'thói quen', en: 'habits', ja: '習慣', ko: '습관', zh: '习惯', fr: 'habitudes', de: 'Gewohnheiten', es: 'hábitos' })}`,
+            value: `${dashboardData?.summary.habitsCompletedToday || 0}/${dashboardData?.summary.totalHabits || 0} ${getMultiLangText(language, { vi: 'thói quen', en: 'habits', ja: '習慣', ko: '습관', zh: '习惯', fr: 'habitudes', de: 'Gewohnheiten', es: 'hábitos', ru: 'привычки', th: 'นิสัย', it: 'abitudini', hi: 'आदतें' })}`,
             trend: translate(language, 'reports.streak'),
             icon: Flag,
             color: 'text-amber-600',
@@ -2543,7 +2543,7 @@ export const ReportsPage: React.FC = () => {
                 <div className="flex items-center justify-between text-xs font-bold">
                   <span className="text-slate-700 flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                    {cat.label} ({cat.count} task)
+                    {cat.label} ({cat.count} {getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: 'タスク', ko: '작업', zh: '任务', fr: 'tâches', de: 'Aufgaben', es: 'tareas', ru: 'задачи', th: 'งาน', it: 'attività', hi: 'कार्य' })})
                   </span>
                   <div className="flex items-center gap-2">
                     <span className={`font-black ${cat.text}`}>{cat.percent}%</span>

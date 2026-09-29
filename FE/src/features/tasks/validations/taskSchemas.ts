@@ -10,7 +10,6 @@ export const createTaskSchema = z.object({
   dueDate: z.string().min(1, { message: 'Vui lòng chọn ngày hết hạn' }),
   dueTime: z.string().optional(),
   description: z.string().optional(),
-  courseCode: z.string().optional(),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;

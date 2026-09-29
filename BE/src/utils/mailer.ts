@@ -1,6 +1,9 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config';
 
+const EMAIL_LOGO_URL = process.env.EMAIL_LOGO_URL
+  || 'https://raw.githubusercontent.com/ngmanhcuong/Planora/427c4f78703f9a858e9eaef2cce7675cf6f08492/FE/public/planora-logo-professional.png';
+
 const getMailerConfig = () => {
   const { host, port, user, pass, from } = config.smtp;
 
@@ -35,21 +38,104 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => (
   "'": '&#039;',
 }[character] || character));
 
+const NON_DELIVERABLE_EMAIL_DOMAINS = new Set([
+  'example.com',
+  'example.net',
+  'example.org',
+  'localhost',
+  'test',
+  'invalid',
+]);
+
+export const isDeliverableEmailAddress = (email: string): boolean => {
+  const normalizedEmail = email.trim().toLowerCase();
+  const separatorIndex = normalizedEmail.lastIndexOf('@');
+  if (separatorIndex <= 0 || separatorIndex === normalizedEmail.length - 1) return false;
+
+  const domain = normalizedEmail.slice(separatorIndex + 1);
+  return !NON_DELIVERABLE_EMAIL_DOMAINS.has(domain) && !domain.endsWith('.invalid');
+};
+
 export const sendScheduleReminderEmail = async (
   to: string,
   item: { title: string; kind: 'Công việc' | 'Lịch trình'; scheduledAt: Date; isOverdue?: boolean }
 ): Promise<void> => {
   const { mailConfig, transporter } = createTransporter();
-  const time = item.scheduledAt.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+  const date = item.scheduledAt.toLocaleDateString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+  const time = item.scheduledAt.toLocaleTimeString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const fullTime = `${time}, ${date}`;
   const headline = item.isOverdue ? `${item.kind} đã quá hạn` : `${item.kind} sắp tới`;
   const safeTitle = escapeHtml(item.title);
+  const safeHeadline = escapeHtml(headline);
+  const detailUrl = escapeHtml(`${config.clientUrl.replace(/\/$/, '')}${item.kind === 'Công việc' ? '/tasks' : '/calendar'}`);
+  const accent = item.isOverdue ? '#e11d48' : '#4f46e5';
 
   await transporter.sendMail({
     from: mailConfig.from,
     to,
     subject: `${headline}: ${item.title}`,
-    text: `${headline} “${item.title}” vào ${time}. Mở Planora để xem chi tiết.`,
-    html: `<div style="font-family:Arial,sans-serif;background:#f4f6fb;padding:28px;color:#0f172a"><div style="max-width:560px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px"><div style="font-size:20px;font-weight:800;color:#4f46e5;margin-bottom:18px">Planora</div><h1 style="font-size:22px;margin:0 0 10px">${headline}</h1><p style="font-size:16px;line-height:1.6;margin:0 0 12px"><strong>${safeTitle}</strong></p><p style="color:#475569;margin:0">Thời gian: ${time}</p><p style="color:#64748b;font-size:13px;margin:22px 0 0">Email được gửi theo cài đặt nhắc lịch của bạn trên Planora.</p></div></div>`,
+    text: `${headline}: “${item.title}” vào ${fullTime}. Mở Planora: ${detailUrl}`,
+    html: `
+      <div style="margin:0;padding:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#172033;-webkit-font-smoothing:antialiased;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f5f6f8;">
+          <tr>
+            <td align="center" style="padding:32px 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;border-collapse:separate;background:#ffffff;border:1px solid #dde2ea;border-top:4px solid ${accent};border-radius:10px;overflow:hidden;">
+                <tr>
+                  <td style="padding:21px 28px;border-bottom:1px solid #e8ebf0;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td style="vertical-align:middle;"><img src="${EMAIL_LOGO_URL}" width="132" alt="Planora" style="display:block;width:132px;max-width:132px;height:auto;border:0;" /></td>
+                        <td align="right" style="font-size:12px;line-height:1.4;font-weight:500;color:#7b8496;">Thông báo lịch trình</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:30px 28px 28px;">
+                    <p style="margin:0 0 8px;color:${accent};font-size:13px;line-height:1.5;font-weight:600;letter-spacing:.1px;">${safeHeadline}</p>
+                    <h1 style="margin:0 0 12px;font-size:25px;line-height:1.3;font-weight:750;letter-spacing:-.45px;color:#172033;">${safeTitle}</h1>
+                    <p style="margin:0 0 25px;color:#5d687b;font-size:15px;line-height:1.65;font-weight:400;">${item.isOverdue ? 'Thời hạn của công việc này đã qua. Bạn có thể mở Planora để cập nhật lại tiến độ.' : 'Công việc này sắp đến hạn. Bạn nên kiểm tra lại kế hoạch để hoàn thành đúng thời gian.'}</p>
+
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:26px;background:#f8f9fb;border:1px solid #e3e7ed;border-radius:8px;">
+                      <tr>
+                        <td style="padding:15px 18px;color:#697386;font-size:13px;line-height:1.5;font-weight:500;border-bottom:1px solid #e3e7ed;">Ngày</td>
+                        <td align="right" style="padding:15px 18px;color:#20293a;font-size:14px;line-height:1.5;font-weight:650;border-bottom:1px solid #e3e7ed;text-transform:capitalize;">${date}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:15px 18px;color:#697386;font-size:13px;line-height:1.5;font-weight:500;">Thời gian</td>
+                        <td align="right" style="padding:15px 18px;color:#20293a;font-size:14px;line-height:1.5;font-weight:650;font-variant-numeric:tabular-nums;">${time}</td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td align="center" style="border-radius:7px;background:#4f46e5;">
+                          <a href="${detailUrl}" target="_blank" style="display:inline-block;padding:11px 18px;color:#ffffff;text-decoration:none;font-size:14px;line-height:1.4;font-weight:650;letter-spacing:-.05px;">Xem trong Planora</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:17px 28px;background:#fafbfc;border-top:1px solid #e8ebf0;color:#7c8698;font-size:12px;line-height:1.6;font-weight:400;">Email được gửi theo thiết lập thông báo của bạn trên Planora. Đây là thư tự động, vui lòng không trả lời.</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `,
   });
 };
 
@@ -71,18 +157,7 @@ export const sendPasswordResetOtpEmail = async (to: string, otp: string): Promis
                   <td style="padding:28px 32px 22px;border-bottom:1px solid #eef2f7;">
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                       <tr>
-                        <td style="vertical-align:middle;">
-                          <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
-                            <tr>
-                              <td style="width:36px;height:36px;border-radius:10px;background:#4f46e5;color:#ffffff;font-size:18px;font-weight:800;text-align:center;vertical-align:middle;">
-                                P
-                              </td>
-                              <td style="padding-left:10px;font-size:20px;font-weight:800;letter-spacing:-.3px;color:#111827;vertical-align:middle;">
-                                Planora
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
+                        <td style="vertical-align:middle;"><img src="${EMAIL_LOGO_URL}" width="132" alt="Planora" style="display:block;width:132px;max-width:132px;height:auto;border:0;" /></td>
                         <td align="right" style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;vertical-align:middle;">
                           Bảo mật tài khoản
                         </td>

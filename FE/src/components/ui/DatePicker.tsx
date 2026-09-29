@@ -29,16 +29,19 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const language = useCurrentLanguage();
   const locale = ({ vi: 'vi-VN', en: 'en-US', ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', ru: 'ru-RU', th: 'th-TH', it: 'it-IT', hi: 'hi-IN' } as const)[language];
   const [isOpen, setIsOpen] = useState(false);
+  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const initialDate = value ? new Date(value) : new Date();
   const validInitial = !isNaN(initialDate.getTime()) ? initialDate : new Date();
   const [viewMonth, setViewMonth] = useState<Date>(new Date(validInitial.getFullYear(), validInitial.getMonth(), 1));
+  const [yearPageStart, setYearPageStart] = useState(Math.floor(validInitial.getFullYear() / 12) * 12);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setIsYearPickerOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -96,6 +99,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   const todayStr = formatDateStr(new Date());
+  const yearOptions = Array.from({ length: 12 }, (_, index) => yearPageStart + index);
   const weekdayLabels = Array.from({ length: 7 }, (_, index) => (
     new Date(2026, 0, 4 + index).toLocaleDateString(locale, { weekday: 'short' })
   ));
@@ -104,6 +108,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     const dateStr = formatDateStr(d);
     onChange(dateStr);
     setIsOpen(false);
+    setIsYearPickerOpen(false);
   };
 
   return (
@@ -116,7 +121,21 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          setIsOpen((prev) => {
+            const next = !prev;
+            if (next) {
+              const current = value ? new Date(`${value}T00:00:00`) : new Date();
+              if (!Number.isNaN(current.getTime())) {
+                setViewMonth(new Date(current.getFullYear(), current.getMonth(), 1));
+                setYearPageStart(Math.floor(current.getFullYear() / 12) * 12);
+              }
+            } else {
+              setIsYearPickerOpen(false);
+            }
+            return next;
+          });
+        }}
         className={clsx(
           'flex h-11 w-full items-center justify-between rounded-xl border bg-white px-3.5 text-left text-sm font-semibold transition-all shadow-sm cursor-pointer',
           disabled && 'cursor-not-allowed opacity-60 bg-slate-50',
@@ -140,53 +159,90 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           <div className="mb-2 flex items-center justify-between">
             <button
               type="button"
-              onClick={() => changeMonth(-1)}
+              onClick={() => isYearPickerOpen ? setYearPageStart((start) => start - 12) : changeMonth(-1)}
               className="rounded-lg p-1.5 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#131B2E] cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <div className="text-xs font-bold text-[#131B2E]">
-              {viewMonth.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
-            </div>
             <button
               type="button"
-              onClick={() => changeMonth(1)}
+              onClick={() => {
+                setYearPageStart(Math.floor(year / 12) * 12);
+                setIsYearPickerOpen((current) => !current);
+              }}
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-[#131B2E] transition-colors hover:bg-[#F1F5F9] cursor-pointer"
+              aria-label="Chọn năm"
+              aria-expanded={isYearPickerOpen}
+            >
+              {isYearPickerOpen
+                ? `${yearPageStart} – ${yearPageStart + 11}`
+                : viewMonth.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
+              <ChevronDown className={clsx('h-3.5 w-3.5 transition-transform', isYearPickerOpen && 'rotate-180')} />
+            </button>
+            <button
+              type="button"
+              onClick={() => isYearPickerOpen ? setYearPageStart((start) => start + 12) : changeMonth(1)}
               className="rounded-lg p-1.5 text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#131B2E] cursor-pointer"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-bold text-[#94A3B8]">
-            {weekdayLabels.map((day) => (
-              <span key={day} className="py-0.5">{day}</span>
-            ))}
-          </div>
-
-          <div className="mt-1 grid grid-cols-7 gap-0.5">
-            {days.map(({ date: itemDate, isCurrentMonth }) => {
-              const valStr = formatDateStr(itemDate);
-              const isSelected = valStr === value;
-              const isToday = valStr === todayStr;
-
-              return (
+          {isYearPickerOpen ? (
+            <div className="grid grid-cols-3 gap-1.5 py-1">
+              {yearOptions.map((yearOption) => (
                 <button
                   type="button"
-                  key={valStr}
-                  onClick={() => handleSelect(itemDate)}
+                  key={yearOption}
+                  onClick={() => {
+                    setViewMonth(new Date(yearOption, month, 1));
+                    setIsYearPickerOpen(false);
+                  }}
                   className={clsx(
-                    'h-7.5 w-full rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center',
-                    isSelected && 'bg-[#4F46E5] text-white shadow-xs',
-                    !isSelected && isToday && 'bg-[#EEF2FF] text-[#4F46E5]',
-                    !isSelected && !isToday && isCurrentMonth && 'text-[#131B2E] hover:bg-[#F1F5F9]',
-                    !isSelected && !isCurrentMonth && 'text-[#CBD5E1] hover:bg-[#F8FAFC]'
+                    'flex h-9 items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer',
+                    yearOption === year
+                      ? 'bg-[#4F46E5] text-white shadow-xs'
+                      : 'text-[#334155] hover:bg-[#EEF2FF] hover:text-[#4F46E5]'
                   )}
                 >
-                  {itemDate.getDate()}
+                  {yearOption}
                 </button>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-bold text-[#94A3B8]">
+                {weekdayLabels.map((day) => (
+                  <span key={day} className="py-0.5">{day}</span>
+                ))}
+              </div>
+
+              <div className="mt-1 grid grid-cols-7 gap-0.5">
+                {days.map(({ date: itemDate, isCurrentMonth }) => {
+                  const valStr = formatDateStr(itemDate);
+                  const isSelected = valStr === value;
+                  const isToday = valStr === todayStr;
+
+                  return (
+                    <button
+                      type="button"
+                      key={valStr}
+                      onClick={() => handleSelect(itemDate)}
+                      className={clsx(
+                        'h-7.5 w-full rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center',
+                        isSelected && 'bg-[#4F46E5] text-white shadow-xs',
+                        !isSelected && isToday && 'bg-[#EEF2FF] text-[#4F46E5]',
+                        !isSelected && !isToday && isCurrentMonth && 'text-[#131B2E] hover:bg-[#F1F5F9]',
+                        !isSelected && !isCurrentMonth && 'text-[#CBD5E1] hover:bg-[#F8FAFC]'
+                      )}
+                    >
+                      {itemDate.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

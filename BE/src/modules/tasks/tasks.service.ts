@@ -3,6 +3,13 @@ import { prisma } from '../../config/prisma';
 import type { CreateTaskInput, UpdateTaskInput } from './tasks.schemas';
 import type { TaskResponse, TaskListQuery, PaginatedTasksResponse } from './tasks.types';
 
+const getVietnamDateKey = (date: Date) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Ho_Chi_Minh',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(date);
+
 export class TasksService {
   private formatTaskResponse(task: any): TaskResponse {
     const now = new Date();
@@ -197,13 +204,28 @@ export class TasksService {
     if (input.dueTime !== undefined) updateData.dueTime = input.dueTime || null;
     if (input.courseCode !== undefined) updateData.courseCode = input.courseCode || null;
 
-    const updatedTask = await prisma.task.update({
-      where: { id: taskId },
-      data: updateData,
-      include: {
-        category: true,
-      },
-    });
+    const nextDueDate = input.dueDate !== undefined ? new Date(input.dueDate) : existingTask.dueDate;
+    const nextDueTime = input.dueTime !== undefined ? input.dueTime || null : existingTask.dueTime;
+    const timelineChanged =
+      getVietnamDateKey(nextDueDate) !== getVietnamDateKey(existingTask.dueDate) ||
+      nextDueTime !== existingTask.dueTime;
+
+    const [updatedTask] = await prisma.$transaction([
+      prisma.task.update({
+        where: { id: taskId },
+        data: updateData,
+        include: { category: true },
+      }),
+      ...(timelineChanged ? [prisma.notification.deleteMany({
+        where: {
+          userId,
+          relatedEntityType: 'TASK',
+          relatedEntityId: taskId,
+          type: 'DEADLINE',
+          title: { in: ['Công việc quá hạn', 'Nhắc nhở công việc sắp tới hạn'] },
+        },
+      })] : []),
+    ]);
 
     return this.formatTaskResponse(updatedTask);
   }
@@ -248,9 +270,10 @@ export class TasksService {
       throw new Error('Không tìm thấy công việc');
     }
 
-    await prisma.task.delete({
-      where: { id: taskId },
-    });
+    await prisma.$transaction([
+      prisma.notification.deleteMany({ where: { userId, relatedEntityType: 'TASK', relatedEntityId: taskId } }),
+      prisma.task.delete({ where: { id: taskId } }),
+    ]);
   }
 }
 

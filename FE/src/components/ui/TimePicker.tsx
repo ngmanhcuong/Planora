@@ -209,21 +209,23 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                 <div className="w-3" />
                 <div>Phút</div>
               </div>
-              <div className="pointer-events-none absolute left-3 right-3 top-[76px] h-9 rounded-xl bg-indigo-500/15 ring-1 ring-indigo-400/50 shadow-sm" />
-              <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
-                <TimeWheel
-                  label="Giờ"
-                  options={hourOptions}
-                  value={hour12}
-                  onChange={(h) => updateTime(h, minute, meridiem)}
-                />
-                <div className="flex h-[108px] w-3 items-center justify-center text-lg font-black text-slate-300">:</div>
-                <TimeWheel
-                  label="Phút"
-                  options={minuteOptions}
-                  value={minute}
-                  onChange={(m) => updateTime(hour12, m, meridiem)}
-                />
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 h-9 -translate-y-1/2 rounded-xl bg-indigo-500/15 ring-1 ring-indigo-400/50 shadow-sm" />
+                <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-1">
+                  <TimeWheel
+                    label="Giờ"
+                    options={hourOptions}
+                    value={hour12}
+                    onChange={(h) => updateTime(h, minute, meridiem)}
+                  />
+                  <div className="flex h-[108px] w-3 items-center justify-center text-lg font-black text-slate-300">:</div>
+                  <TimeWheel
+                    label="Phút"
+                    options={minuteOptions}
+                    value={minute}
+                    onChange={(m) => updateTime(hour12, m, meridiem)}
+                  />
+                </div>
               </div>
             </div>
           </div>

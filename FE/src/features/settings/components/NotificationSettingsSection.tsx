@@ -1,20 +1,44 @@
 import React from 'react';
-import { Bell, Mail, Smartphone, Clock, Calendar, Volume2 } from 'lucide-react';
-import { normalizeLanguage, translate } from '@/lib/i18n';
+import { Bell, Mail, Smartphone, Clock, Calendar, Volume2, Save, CheckCircle2, Loader2 } from 'lucide-react';
+import { getMultiLangText, normalizeLanguage, translate } from '@/lib/i18n';
 import type { UserSettingsState } from '../types';
+import { Select } from '@/components/ui/Select';
 
 export interface NotificationSettingsProps {
   settings: UserSettingsState;
   onUpdate: (updated: Partial<UserSettingsState>) => void;
+  onSave: () => void;
+  hasChanges: boolean;
+  isSaving: boolean;
+  isSaved: boolean;
 }
 
 export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = ({
   settings,
   onUpdate,
+  onSave,
+  hasChanges,
+  isSaving,
+  isSaved,
 }) => {
   const language = normalizeLanguage(settings.language);
-  const beforeHours = (hours: number) =>
-    translate(language, 'settings.notifications.deadline.beforeHours').replace('{hours}', String(hours));
+  const reminderOptions = [
+    {
+      value: '24',
+      label: getMultiLangText(language, { vi: 'Trước 1 ngày', en: '1 day before', ja: '1日前', ko: '1일 전', zh: '提前1天', fr: '1 jour avant', de: '1 Tag vorher', es: '1 día antes', ru: 'За 1 день', th: 'ล่วงหน้า 1 วัน', it: '1 giorno prima', hi: '1 दिन पहले' }),
+      icon: <Clock className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />,
+    },
+    {
+      value: '168',
+      label: getMultiLangText(language, { vi: 'Trước 1 tuần', en: '1 week before', ja: '1週間前', ko: '1주 전', zh: '提前1周', fr: '1 semaine avant', de: '1 Woche vorher', es: '1 semana antes', ru: 'За 1 неделю', th: 'ล่วงหน้า 1 สัปดาห์', it: '1 settimana prima', hi: '1 सप्ताह पहले' }),
+      icon: <Clock className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />,
+    },
+    {
+      value: '720',
+      label: getMultiLangText(language, { vi: 'Trước 1 tháng', en: '1 month before', ja: '1か月前', ko: '1개월 전', zh: '提前1个月', fr: '1 mois avant', de: '1 Monat vorher', es: '1 mes antes', ru: 'За 1 месяц', th: 'ล่วงหน้า 1 เดือน', it: '1 mese prima', hi: '1 महीने पहले' }),
+      icon: <Clock className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />,
+    },
+  ];
 
   return (
     <section className="flex flex-col gap-6 p-6 border-b border-[#E2E8F0]">
@@ -83,17 +107,13 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
             <span className="text-xs text-[#64748B]">{translate(language, 'settings.notifications.deadline.subtitle')}</span>
           </div>
         </div>
-        <select
-          value={settings.deadlineReminderHours}
-          onChange={(e) => onUpdate({ deadlineReminderHours: Number(e.target.value) })}
-          className="px-3 py-1.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-semibold text-[#131B2E] focus:outline-none focus:border-[#4F46E5]"
-        >
-          <option value={1}>{translate(language, 'settings.notifications.deadline.beforeHour')}</option>
-          <option value={3}>{beforeHours(3)}</option>
-          <option value={12}>{beforeHours(12)}</option>
-          <option value={24}>{translate(language, 'settings.notifications.deadline.beforeDay')}</option>
-          <option value={48}>{translate(language, 'settings.notifications.deadline.beforeDays')}</option>
-        </select>
+        <Select
+          value={String(settings.deadlineReminderHours)}
+          onChange={(value) => onUpdate({ deadlineReminderHours: Number(value) })}
+          options={reminderOptions}
+          className="w-[190px] shrink-0"
+          placeholder={reminderOptions[0].label}
+        />
       </div>
 
       {/* Timetable Alerts */}
@@ -139,6 +159,26 @@ export const NotificationSettingsSection: React.FC<NotificationSettingsProps> = 
               settings.soundEffects ? 'translate-x-5' : 'translate-x-0'
             }`}
           />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#F1F5F9] pt-5">
+        {isSaved && !hasChanges && (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+            <CheckCircle2 className="h-4 w-4" />
+            {getMultiLangText(language, { vi: 'Đã lưu cài đặt', en: 'Settings saved', ja: '設定を保存しました', ko: '설정이 저장되었습니다', zh: '设置已保存', fr: 'Paramètres enregistrés', de: 'Einstellungen gespeichert', es: 'Configuración guardada', ru: 'Настройки сохранены', th: 'บันทึกการตั้งค่าแล้ว', it: 'Impostazioni salvate', hi: 'सेटिंग सहेजी गई' })}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={!hasChanges || isSaving}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#4F46E5] px-5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#4338CA] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {isSaving
+            ? getMultiLangText(language, { vi: 'Đang lưu...', en: 'Saving...', ja: '保存中...', ko: '저장 중...', zh: '正在保存...', fr: 'Enregistrement...', de: 'Wird gespeichert...', es: 'Guardando...', ru: 'Сохранение...', th: 'กำลังบันทึก...', it: 'Salvataggio...', hi: 'सहेजा जा रहा है...' })
+            : getMultiLangText(language, { vi: 'Lưu cài đặt', en: 'Save settings', ja: '設定を保存', ko: '설정 저장', zh: '保存设置', fr: 'Enregistrer', de: 'Speichern', es: 'Guardar ajustes', ru: 'Сохранить', th: 'บันทึกการตั้งค่า', it: 'Salva impostazioni', hi: 'सेटिंग सहेजें' })}
         </button>
       </div>
     </section>

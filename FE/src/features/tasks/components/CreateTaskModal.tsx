@@ -10,7 +10,6 @@ import { TimePicker } from '@/components/ui/TimePicker';
 import { apiClient } from '@/lib/axios';
 import {
   BookmarkPlus,
-  BookOpen,
   Loader2,
   ChevronDown,
 } from 'lucide-react';
@@ -20,6 +19,7 @@ import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, getMultiLangText } from '@/lib/i18n';
 import { clsx } from 'clsx';
 import type { ApiCategory, ApiTask } from '@/types';
+import { TASK_PRIORITY_PALETTE } from '../taskPriorityPalette';
 
 type TaskCategoryOption = {
   id?: string;
@@ -87,7 +87,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     priority: getTaskPriorityValue(editingTask?.priority),
     dueDate: getTaskDateValue(editingTask?.dueDate),
     dueTime: editingTask?.dueTime ?? '23:59',
-    courseCode: editingTask?.courseCode ?? '',
     description: editingTask?.description ?? '',
   });
 
@@ -141,7 +140,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       priority: priorityMap[data.priority] || 'MEDIUM',
       dueDate: data.dueDate,
       dueTime: data.dueTime || undefined,
-      courseCode: data.courseCode || undefined,
       description: data.description || undefined,
       categoryId: selectedCategoryId ?? null,
     };
@@ -199,9 +197,9 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     : fallbackCategoryOptions;
 
   const priorityOptions = [
-    { value: 'high', label: translate(language, 'tasks.priority.high'), color: '#F43F5E' },
-    { value: 'medium', label: translate(language, 'tasks.priority.medium'), color: '#F59E0B' },
-    { value: 'low', label: translate(language, 'tasks.priority.low'), color: '#22C55E' },
+    { value: 'high', label: translate(language, 'tasks.priority.high'), color: TASK_PRIORITY_PALETTE.HIGH.dot },
+    { value: 'medium', label: translate(language, 'tasks.priority.medium'), color: TASK_PRIORITY_PALETTE.MEDIUM.dot },
+    { value: 'low', label: translate(language, 'tasks.priority.low'), color: TASK_PRIORITY_PALETTE.LOW.dot },
   ] as const;
 
   const currentCategory =
@@ -361,15 +359,6 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             onChange={(val) => setValue('dueTime', val, { shouldDirty: true, shouldValidate: true })}
           />
         </div>
-
-        {/* Course Code */}
-        <Input
-          label={translate(language, 'tasks.modal.courseCode')}
-          placeholder={translate(language, 'tasks.modal.courseCodePlaceholder')}
-          leftIcon={<BookOpen className="w-4 h-4" />}
-          className="h-12 rounded-xl"
-          {...register('courseCode')}
-        />
 
         {/* Description */}
         <div className="flex flex-col gap-1.5">

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Check, Calendar, CheckSquare, Trash2, BookOpen, Pencil, Clock3 } from 'lucide-react';
+import { Check, Calendar, CheckSquare, Trash2, Pencil, Clock3 } from 'lucide-react';
 import type { ApiTask } from '@/types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate, translateCategory, getMultiLangText } from '@/lib/i18n';
+import { TASK_PRIORITY_PALETTE } from '../taskPriorityPalette';
 
 const LOCALE_MAP: Record<string, string> = {
   vi: 'vi-VN',
@@ -33,10 +34,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const isOverdue = task.isOverdue || task.displayStatus === 'OVERDUE';
 
   const priorityStyles: Record<string, { bg: string; text: string; label: string }> = {
-    URGENT: { bg: '#FFE4E6', text: '#991B1B', label: translate(language, 'tasks.card.urgent') },
-    HIGH: { bg: '#FEF3C7', text: '#92400E', label: translate(language, 'tasks.card.high') },
-    MEDIUM: { bg: '#E0E7FF', text: '#3730A3', label: translate(language, 'tasks.card.medium') },
-    LOW: { bg: '#D1FAE5', text: '#065F46', label: translate(language, 'tasks.card.low') },
+    URGENT: { bg: TASK_PRIORITY_PALETTE.URGENT.background, text: TASK_PRIORITY_PALETTE.URGENT.text, label: translate(language, 'tasks.card.urgent') },
+    HIGH: { bg: TASK_PRIORITY_PALETTE.HIGH.background, text: TASK_PRIORITY_PALETTE.HIGH.text, label: translate(language, 'tasks.card.high') },
+    MEDIUM: { bg: TASK_PRIORITY_PALETTE.MEDIUM.background, text: TASK_PRIORITY_PALETTE.MEDIUM.text, label: translate(language, 'tasks.card.medium') },
+    LOW: { bg: TASK_PRIORITY_PALETTE.LOW.background, text: TASK_PRIORITY_PALETTE.LOW.text, label: translate(language, 'tasks.card.low') },
   };
 
   const prio = priorityStyles[task.priority] || priorityStyles.MEDIUM;
@@ -99,13 +100,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               {prio.label}
             </span>
 
-            {/* Course Code if present */}
-            {task.courseCode && (
-              <span className="text-[10px] font-mono font-bold text-slate-500 flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded-md">
-                <BookOpen className="w-3 h-3 text-indigo-600" />
-                {task.courseCode}
-              </span>
-            )}
           </div>
 
           <h3 className="text-sm font-extrabold leading-snug text-slate-900">

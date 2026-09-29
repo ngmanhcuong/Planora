@@ -14,13 +14,16 @@ export const SettingsPage: React.FC = () => {
   const { data: backendSettings, isLoading, isError } = useSettings();
   const updateSettingsMutation = useUpdateSettings();
   const [localSettings, setLocalSettings] = useState<UserSettingsState | null>(null);
+  const [notificationDirty, setNotificationDirty] = useState(false);
+  const [notificationSaved, setNotificationSaved] = useState(false);
 
+  const reminderHours = backendSettings?.deadlineReminderHours ?? 24;
   const syncedSettings: UserSettingsState = {
     theme: ((backendSettings?.theme || 'light').toLowerCase() as UserSettingsState['theme']),
     language: normalizeLanguage(backendSettings?.language),
     emailNotifications: backendSettings?.emailNotifications ?? true,
     pushNotifications: backendSettings?.pushNotifications ?? true,
-    deadlineReminderHours: backendSettings?.deadlineReminderHours ?? 24,
+    deadlineReminderHours: [24, 168, 720].includes(reminderHours) ? reminderHours : 24,
     timetableAlerts: backendSettings?.timetableAlerts ?? true,
     soundEffects: backendSettings?.soundEffects ?? false,
     twoFactorAuth: backendSettings?.twoFactorAuth ?? false,
@@ -30,9 +33,16 @@ export const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     if (backendSettings) {
-      setLocalSettings(syncedSettings);
+      setLocalSettings((current) => notificationDirty && current ? {
+        ...syncedSettings,
+        emailNotifications: current.emailNotifications,
+        pushNotifications: current.pushNotifications,
+        deadlineReminderHours: current.deadlineReminderHours,
+        timetableAlerts: current.timetableAlerts,
+        soundEffects: current.soundEffects,
+      } : syncedSettings);
     }
-  }, [backendSettings]);
+  }, [backendSettings, notificationDirty]);
 
   const settings = localSettings ?? syncedSettings;
 
@@ -42,6 +52,30 @@ export const SettingsPage: React.FC = () => {
       ...updated,
     }));
     updateSettingsMutation.mutate(updated);
+  };
+
+  const handleUpdateNotificationSettings = (updated: Partial<UserSettingsState>) => {
+    setLocalSettings((current) => ({
+      ...(current ?? settings),
+      ...updated,
+    }));
+    setNotificationDirty(true);
+    setNotificationSaved(false);
+  };
+
+  const handleSaveNotificationSettings = () => {
+    updateSettingsMutation.mutate({
+      emailNotifications: settings.emailNotifications,
+      pushNotifications: settings.pushNotifications,
+      deadlineReminderHours: settings.deadlineReminderHours,
+      timetableAlerts: settings.timetableAlerts,
+      soundEffects: settings.soundEffects,
+    }, {
+      onSuccess: () => {
+        setNotificationDirty(false);
+        setNotificationSaved(true);
+      },
+    });
   };
 
   if (isLoading) {
@@ -76,7 +110,14 @@ export const SettingsPage: React.FC = () => {
 
       <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
         <GeneralSettingsSection settings={settings} onUpdate={handleUpdateSettings} />
-        <NotificationSettingsSection settings={settings} onUpdate={handleUpdateSettings} />
+        <NotificationSettingsSection
+          settings={settings}
+          onUpdate={handleUpdateNotificationSettings}
+          onSave={handleSaveNotificationSettings}
+          hasChanges={notificationDirty}
+          isSaving={updateSettingsMutation.isPending}
+          isSaved={notificationSaved}
+        />
         <SecuritySettingsSection settings={settings} onUpdate={handleUpdateSettings} />
         <AppearanceSettingsSection settings={settings} onUpdate={handleUpdateSettings} />
       </div>

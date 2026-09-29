@@ -372,6 +372,7 @@ model Notification {
   relatedEntityId   String?
   isRead            Boolean          @default(false)
   readAt            DateTime?
+  emailSentAt       DateTime?
   link              String?
   createdAt         DateTime         @default(now())
 

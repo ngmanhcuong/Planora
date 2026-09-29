@@ -64,8 +64,7 @@ export const TasksPage: React.FC = () => {
       const q = searchQuery.toLowerCase();
       const titleMatch = task.title.toLowerCase().includes(q);
       const descMatch = task.description?.toLowerCase().includes(q);
-      const codeMatch = task.courseCode?.toLowerCase().includes(q);
-      if (!titleMatch && !descMatch && !codeMatch) return false;
+      if (!titleMatch && !descMatch) return false;
     }
 
     return true;

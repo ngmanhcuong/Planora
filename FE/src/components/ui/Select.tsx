@@ -35,7 +35,8 @@ export const Select: React.FC<SelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find((opt) => opt.value === value) || (value === '' ? options[0] : undefined);
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
+  const effectiveValue = selectedOption?.value;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -90,7 +91,7 @@ export const Select: React.FC<SelectProps> = ({
       {isOpen && (
         <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-60 overflow-y-auto rounded-2xl border border-[#E2E8F0] bg-white p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.16)] animate-in fade-in zoom-in-95 duration-150">
           {options.map((option) => {
-            const isSelected = option.value === value;
+            const isSelected = option.value === effectiveValue;
 
             return (
               <button
@@ -101,7 +102,7 @@ export const Select: React.FC<SelectProps> = ({
                   'flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-left text-sm font-semibold transition-colors cursor-pointer',
                   isSelected
                     ? 'bg-[#EEF2FF] text-[#4F46E5]'
-                    : 'text-[#334155] hover:bg-[#F8FAFC] hover:text-[#131B2E]'
+                    : 'text-[var(--color-text-main)] hover:bg-[#F8FAFC] hover:text-[#131B2E]'
                 )}
               >
                 {option.color ? (

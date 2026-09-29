@@ -379,13 +379,23 @@ export class EventsService {
     });
     updateData.hasConflict = conflictCount > 0;
 
-    const updated = await prisma.event.update({
-      where: { id: eventId },
-      data: updateData,
-      include: {
-        category: true,
-      },
-    });
+    const timelineChanged = newStart.getTime() !== existing.startTime.getTime();
+    const [updated] = await prisma.$transaction([
+      prisma.event.update({
+        where: { id: eventId },
+        data: updateData,
+        include: { category: true },
+      }),
+      ...(timelineChanged ? [prisma.notification.deleteMany({
+        where: {
+          userId,
+          relatedEntityType: 'EVENT',
+          relatedEntityId: eventId,
+          type: 'EVENT',
+          title: 'Nhắc nhở sự kiện sắp diễn ra',
+        },
+      })] : []),
+    ]);
 
     return formatEvent(updated);
   }
@@ -405,9 +415,10 @@ export class EventsService {
       throw new Error('Không tìm thấy sự kiện');
     }
 
-    await prisma.event.delete({
-      where: { id: eventId },
-    });
+    await prisma.$transaction([
+      prisma.notification.deleteMany({ where: { userId, relatedEntityType: 'EVENT', relatedEntityId: eventId } }),
+      prisma.event.delete({ where: { id: eventId } }),
+    ]);
   }
 
   /**
@@ -512,7 +523,19 @@ export class EventsService {
     }));
 
     const taskItems: CalendarItemResponse[] = tasks.map((task: any) => {
-      const isOverdue = task.status !== TaskStatus.COMPLETED && task.dueDate < now;
+      // A task stores its date and time separately. Calendar items need one real
+      // timestamp, otherwise every task is rendered at the database date's
+      // midnight (and shifts again when the browser applies its timezone).
+      const dateParts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).formatToParts(task.dueDate);
+      const datePart = Object.fromEntries(dateParts.map((part) => [part.type, part.value]));
+      const dueTime = /^\d{2}:\d{2}$/.test(task.dueTime || '') ? task.dueTime : '00:00';
+      const calendarStart = new Date(`${datePart.year}-${datePart.month}-${datePart.day}T${dueTime}:00+07:00`);
+      const isOverdue = task.status !== TaskStatus.COMPLETED && calendarStart < now;
       let displayStatus = task.status;
       if (isOverdue) displayStatus = 'OVERDUE';
 
@@ -520,7 +543,7 @@ export class EventsService {
         id: task.id,
         sourceType: 'TASK' as const,
         title: task.title,
-        start: task.dueDate,
+        start: calendarStart,
         end: null,
         allDay: !task.dueTime,
         description: task.description,

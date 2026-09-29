@@ -47,7 +47,7 @@ export const Logo: React.FC<LogoProps> = ({
         }`}
       >
         <img
-          src="/planora-logo-icon.png"
+          src="/planora-logo-mark.png"
           alt="Planora"
           className="w-full h-full object-contain drop-shadow-sm"
           draggable={false}

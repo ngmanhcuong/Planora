@@ -6,7 +6,7 @@ import {
   PaginatedNotificationsResponse,
   CreateNotificationInput,
 } from './notifications.types';
-import { sendScheduleReminderEmail } from '../../utils/mailer';
+import { isDeliverableEmailAddress, sendScheduleReminderEmail } from '../../utils/mailer';
 
 function formatNotification(n: any): NotificationResponse {
   return {
@@ -19,6 +19,7 @@ function formatNotification(n: any): NotificationResponse {
     relatedEntityId: n.relatedEntityId,
     isRead: n.isRead,
     readAt: n.readAt,
+    emailSentAt: n.emailSentAt,
     link: n.link,
     createdAt: n.createdAt,
   };
@@ -36,22 +37,20 @@ function mapTypeString(typeStr?: string): NotificationType | undefined {
 }
 
 function getTaskDueAt(task: { dueDate: Date; dueTime?: string | null }): Date {
-  const dueAt = new Date(task.dueDate);
-  if (!task.dueTime) return dueAt;
-
-  const match = task.dueTime.match(/^(\d{1,2}):(\d{2})/);
-  if (!match) return dueAt;
-
-  const hours = Number(match[1]);
-  const minutes = Number(match[2]);
-  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return dueAt;
-
-  dueAt.setHours(hours, minutes, 0, 0);
-  return dueAt;
+  const dateParts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(task.dueDate);
+  const datePart = Object.fromEntries(dateParts.map((part) => [part.type, part.value]));
+  const dueTime = /^(\d{1,2}):(\d{2})$/.test(task.dueTime || '') ? task.dueTime : '23:59';
+  return new Date(`${datePart.year}-${datePart.month}-${datePart.day}T${dueTime}:00+07:00`);
 }
 
 export class NotificationsService {
   private static pendingGeneration = new Map<string, Promise<{ createdCount: number }>>();
+  private static allUsersGeneration: Promise<void> | null = null;
   /**
    * Internal method to create a notification with duplicate prevention
    */
@@ -278,6 +277,25 @@ export class NotificationsService {
     return work;
   }
 
+  static async generateDueNotificationsForAllUsers(): Promise<void> {
+    if (this.allUsersGeneration) return this.allUsersGeneration;
+
+    this.allUsersGeneration = (async () => {
+      const users = await prisma.user.findMany({ select: { id: true } });
+      for (const user of users) {
+        try {
+          await this.generateDueNotifications(user.id);
+        } catch (error) {
+          console.error('[Reminder scheduler] User generation failed:', user.id, error instanceof Error ? error.message : error);
+        }
+      }
+    })().finally(() => {
+      this.allUsersGeneration = null;
+    });
+
+    return this.allUsersGeneration;
+  }
+
   private static async generateReminders(userId: string): Promise<{ createdCount: number }> {
     const now = new Date();
 
@@ -288,10 +306,19 @@ export class NotificationsService {
     ]);
     const reminderHours = setting?.deadlineReminderHours ?? 24;
     const reminderThreshold = new Date(now.getTime() + reminderHours * 3600 * 1000);
-    const sendEmail = async (item: { title: string; kind: 'Công việc' | 'Lịch trình'; scheduledAt: Date; isOverdue?: boolean }) => {
-      if (!setting?.emailNotifications || !user?.email) return;
+    const sendEmail = async (notificationId: string, emailSentAt: Date | null, item: { title: string; kind: 'Công việc' | 'Lịch trình'; scheduledAt: Date; isOverdue?: boolean }) => {
+      if (
+        emailSentAt
+        || !setting?.emailNotifications
+        || !user?.email
+        || !isDeliverableEmailAddress(user.email)
+      ) return;
       try {
         await sendScheduleReminderEmail(user.email, item);
+        await prisma.notification.update({
+          where: { id: notificationId },
+          data: { emailSentAt: new Date() },
+        });
       } catch (error) {
         console.error('[Schedule reminder email] Failed:', error instanceof Error ? error.message : error);
       }
@@ -321,10 +348,8 @@ export class NotificationsService {
           relatedEntityId: task.id,
           link: '/tasks',
         });
-        if (result.isNew) {
-          createdCount++;
-          await sendEmail({ title: task.title, kind: 'Công việc', scheduledAt: dueAt, isOverdue: true });
-        }
+        if (result.isNew) createdCount++;
+        await sendEmail(result.notification.id, result.notification.emailSentAt, { title: task.title, kind: 'Công việc', scheduledAt: dueAt, isOverdue: true });
       } else if (dueAt <= reminderThreshold) {
         // Task Reminder
         const result = await NotificationsService.createNotification({
@@ -336,10 +361,8 @@ export class NotificationsService {
           relatedEntityId: task.id,
           link: '/tasks',
         });
-        if (result.isNew) {
-          createdCount++;
-          await sendEmail({ title: task.title, kind: 'Công việc', scheduledAt: dueAt });
-        }
+        if (result.isNew) createdCount++;
+        await sendEmail(result.notification.id, result.notification.emailSentAt, { title: task.title, kind: 'Công việc', scheduledAt: dueAt });
       }
     }
 
@@ -364,10 +387,8 @@ export class NotificationsService {
         relatedEntityId: evt.id,
         link: '/calendar',
       });
-      if (result.isNew) {
-        createdCount++;
-        await sendEmail({ title: evt.title, kind: 'Lịch trình', scheduledAt: evt.startTime });
-      }
+      if (result.isNew) createdCount++;
+      await sendEmail(result.notification.id, result.notification.emailSentAt, { title: evt.title, kind: 'Lịch trình', scheduledAt: evt.startTime });
 
       if (evt.hasConflict) {
         const conflictRes = await NotificationsService.createNotification({

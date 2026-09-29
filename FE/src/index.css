@@ -87,6 +87,28 @@
   background: #485773;
 }
 
+.time-wheel-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(99 102 241 / 0.72) transparent;
+}
+
+.time-wheel-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.time-wheel-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.time-wheel-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(99 102 241 / 0.72);
+}
+
+.time-wheel-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(79 70 229 / 0.95);
+}
+
 /* Global app dark theme bridge for existing Tailwind utility colors */
 :root[data-theme='dark'] .bg-white,
 :root[data-theme='dark'] .bg-\[\#FFFFFF\] {
@@ -761,6 +783,10 @@
 
 :root[data-theme='dark'] .report-live-note p {
   color: #BAC6D8 !important;
+}
+
+:root[data-theme='dark'] .report-live-note > div {
+  color: #E0E7FF !important;
 }
 
 .calendar-week-shell {

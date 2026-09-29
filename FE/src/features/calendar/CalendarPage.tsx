@@ -195,6 +195,7 @@ export const CalendarPage: React.FC = () => {
         id: eventItem.id,
         data: {
           dueDate: nextStart.toISOString(),
+          dueTime: `${String(nextStart.getHours()).padStart(2, '0')}:${String(nextStart.getMinutes()).padStart(2, '0')}`,
         },
       });
     }

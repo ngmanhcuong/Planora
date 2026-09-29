@@ -10,6 +10,7 @@ export interface NotificationResponse {
   relatedEntityId: string | null;
   isRead: boolean;
   readAt: Date | null;
+  emailSentAt: Date | null;
   link: string | null;
   createdAt: Date;
 }

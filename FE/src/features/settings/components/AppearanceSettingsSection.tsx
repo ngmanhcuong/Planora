@@ -43,7 +43,10 @@ export const AppearanceSettingsSection: React.FC<AppearanceSettingsProps> = ({
                 key={t.id}
                 type="button"
                 aria-pressed={isSelected}
-                onClick={() => onUpdate({ theme: t.id })}
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('planora-theme-change', { detail: t.id }));
+                  onUpdate({ theme: t.id });
+                }}
                 className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border text-xs font-bold transition-all ${
                   isSelected
                     ? 'theme-option-selected bg-[#EEF2FF] border-[#4F46E5] text-[#4F46E5] shadow-xs ring-2 ring-[#4F46E5]/20'

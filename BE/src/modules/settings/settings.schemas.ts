@@ -8,7 +8,7 @@ export const updateSettingsSchema = z.object({
     .number({ message: 'Thời gian nhắc nhở deadline phải là số nguyên' })
     .int({ message: 'Thời gian nhắc nhở deadline phải là số nguyên' })
     .min(0, { message: 'Thời gian nhắc nhở tối thiểu 0 giờ' })
-    .max(168, { message: 'Thời gian nhắc nhở tối đa 168 giờ (7 ngày)' })
+    .max(720, { message: 'Thời gian nhắc nhở tối đa 720 giờ (30 ngày)' })
     .optional(),
   emailNotifications: z.boolean({ message: 'Thông báo email phải là kiểu boolean' }).optional(),
   pushNotifications: z.boolean({ message: 'Thông báo push phải là kiểu boolean' }).optional(),
