@@ -10,6 +10,7 @@ import { habitRoutes } from '../modules/habits';
 import { notificationRoutes } from '../modules/notifications';
 import { dashboardRoutes } from '../modules/dashboard';
 import { aiRoutes } from '../modules/ai';
+import { goalRoutes } from '../modules/goals';
 import { adminRoutes } from '../modules/admin';
 
 const router = Router();
@@ -26,6 +27,7 @@ router.use('/habits', habitRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/ai', aiRoutes);
+router.use('/goals', goalRoutes);
 router.use('/admin', adminRoutes);
 
 export default router;

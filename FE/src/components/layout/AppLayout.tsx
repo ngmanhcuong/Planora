@@ -1,5 +1,5 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { LogoutModal } from './LogoutModal';
@@ -8,6 +8,11 @@ import { clsx } from 'clsx';
 
 export const AppLayout: React.FC = () => {
   const { isSidebarCollapsed } = useUIStore();
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-main)] transition-colors duration-200">
