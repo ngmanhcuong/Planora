@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 
 export interface DatePickerProps {
   value: string; // YYYY-MM-DD
@@ -25,6 +26,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   error,
   align = 'left',
 }) => {
+  const language = useCurrentLanguage();
+  const locale = ({ vi: 'vi-VN', en: 'en-US', ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', ru: 'ru-RU', th: 'th-TH', it: 'it-IT', hi: 'hi-IN' } as const)[language];
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -87,12 +90,15 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     if (!val) return '';
     const parts = val.split('-');
     if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return new Date(`${val}T00:00:00`).toLocaleDateString(locale);
     }
     return val;
   };
 
   const todayStr = formatDateStr(new Date());
+  const weekdayLabels = Array.from({ length: 7 }, (_, index) => (
+    new Date(2026, 0, 4 + index).toLocaleDateString(locale, { weekday: 'short' })
+  ));
 
   const handleSelect = (d: Date) => {
     const dateStr = formatDateStr(d);
@@ -140,7 +146,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               <ChevronLeft className="h-4 w-4" />
             </button>
             <div className="text-xs font-bold text-[#131B2E]">
-              {viewMonth.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
+              {viewMonth.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
             </div>
             <button
               type="button"
@@ -152,7 +158,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           </div>
 
           <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-bold text-[#94A3B8]">
-            {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day) => (
+            {weekdayLabels.map((day) => (
               <span key={day} className="py-0.5">{day}</span>
             ))}
           </div>

@@ -1,3 +1,6 @@
+import { ADDITIONAL_TRANSLATIONS } from './i18n.additional';
+import { ADDITIONAL_PHRASE_TRANSLATIONS } from './i18n.phrases';
+
 export const LANGUAGE_OPTIONS = [
   { id: 'vi', flag: '🇻🇳', nativeName: 'Tiếng Việt', displayName: 'Vietnamese', backendValue: 'VI' },
   { id: 'en', flag: '🇺🇸', nativeName: 'English', displayName: 'English', backendValue: 'EN' },
@@ -7,6 +10,10 @@ export const LANGUAGE_OPTIONS = [
   { id: 'fr', flag: '🇫🇷', nativeName: 'Français', displayName: 'French', backendValue: 'FR' },
   { id: 'de', flag: '🇩🇪', nativeName: 'Deutsch', displayName: 'German', backendValue: 'DE' },
   { id: 'es', flag: '🇪🇸', nativeName: 'Español', displayName: 'Spanish', backendValue: 'ES' },
+  { id: 'ru', flag: '🇷🇺', nativeName: 'Русский', displayName: 'Russian', backendValue: 'RU' },
+  { id: 'th', flag: '🇹🇭', nativeName: 'ไทย', displayName: 'Thai', backendValue: 'TH' },
+  { id: 'it', flag: '🇮🇹', nativeName: 'Italiano', displayName: 'Italian', backendValue: 'IT' },
+  { id: 'hi', flag: '🇮🇳', nativeName: 'हिन्दी', displayName: 'Hindi', backendValue: 'HI' },
 ] as const;
 
 export type AppLanguage = (typeof LANGUAGE_OPTIONS)[number]['id'];
@@ -2490,6 +2497,10 @@ const translations: Record<AppLanguage, Partial<Record<TranslationKey, string>>>
     'reports.aiAdviceSubtitle': 'Basado en datos reales del sistema',
     'reports.aiScheduleBtn': 'Abrir optimizador de horario IA',
   },
+  ru: ADDITIONAL_TRANSLATIONS.ru,
+  th: ADDITIONAL_TRANSLATIONS.th,
+  it: ADDITIONAL_TRANSLATIONS.it,
+  hi: ADDITIONAL_TRANSLATIONS.hi,
 };
 
 export const translate = (language: string | null | undefined, key: TranslationKey): string => {
@@ -2499,18 +2510,29 @@ export const translate = (language: string | null | undefined, key: TranslationK
 
 export const getMultiLangText = (
   language: string | null | undefined,
-  texts: { vi: string; en: string; ja?: string; ko?: string; zh?: string; fr?: string; de?: string; es?: string }
+  texts: { vi: string; en: string; ja?: string; ko?: string; zh?: string; fr?: string; de?: string; es?: string; ru?: string; th?: string; it?: string; hi?: string }
 ): string => {
   const lang = normalizeLanguage(language);
-  return texts[lang] || texts.en || texts.vi;
+  return texts[lang]
+    || ADDITIONAL_PHRASE_TRANSLATIONS[lang]?.[texts.en]
+    || texts.en
+    || texts.vi;
 };
 
 export const getMultiLangArray = <T>(
   language: string | null | undefined,
-  arrays: { vi: T[]; en: T[]; ja?: T[]; ko?: T[]; zh?: T[]; fr?: T[]; de?: T[]; es?: T[] }
+  arrays: { vi: T[]; en: T[]; ja?: T[]; ko?: T[]; zh?: T[]; fr?: T[]; de?: T[]; es?: T[]; ru?: T[]; th?: T[]; it?: T[]; hi?: T[] }
 ): T[] => {
   const lang = normalizeLanguage(language);
   return arrays[lang] || arrays.en || arrays.vi;
+};
+
+export const translateEnglishPhrase = (
+  language: string | null | undefined,
+  englishText: string
+): string => {
+  const lang = normalizeLanguage(language);
+  return ADDITIONAL_PHRASE_TRANSLATIONS[lang]?.[englishText] || englishText;
 };
 
 export const translateCategory = (language: string | null | undefined, name?: string): string => {
@@ -2586,6 +2608,10 @@ export const translateRelativeTime = (language: string | null | undefined, timeS
       fr: `il y a ${num} jours`,
       de: `vor ${num} Tagen`,
       es: `hace ${num} días`,
+      ru: `${num} дней назад`,
+      th: `${num} วันที่แล้ว`,
+      it: `${num} giorni fa`,
+      hi: `${num} दिन पहले`,
     });
   }
 
@@ -2600,6 +2626,10 @@ export const translateRelativeTime = (language: string | null | undefined, timeS
       fr: `il y a ${num}h`,
       de: `vor ${num} Std.`,
       es: `hace ${num} h`,
+      ru: `${num} ч. назад`,
+      th: `${num} ชั่วโมงที่แล้ว`,
+      it: `${num} ore fa`,
+      hi: `${num} घंटे पहले`,
     });
   }
 
@@ -2614,6 +2644,10 @@ export const translateRelativeTime = (language: string | null | undefined, timeS
       fr: `il y a ${num} min`,
       de: `vor ${num} Min.`,
       es: `hace ${num} min`,
+      ru: `${num} мин. назад`,
+      th: `${num} นาทีที่แล้ว`,
+      it: `${num} min fa`,
+      hi: `${num} मिनट पहले`,
     });
   }
 

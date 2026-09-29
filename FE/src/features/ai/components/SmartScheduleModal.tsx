@@ -24,7 +24,7 @@ export const SmartScheduleModal: React.FC<SmartScheduleModalProps> = ({
   const [endDate, setEndDate] = useState(nextWeekStr);
   const [sessionMinutes, setSessionMinutes] = useState(60);
 
-  const { data: tasksData } = useTasks();
+  const { data: tasksData } = useTasks({ limit: 100, sortBy: 'dueDate', sortOrder: 'asc' });
   const incompleteTasks = (tasksData?.tasks || []).filter((t) => t.status !== 'COMPLETED');
 
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
