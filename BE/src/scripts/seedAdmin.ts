@@ -2,18 +2,21 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../config/prisma';
 
 const adminEmail = (process.env.ADMIN_EMAIL || 'adminplanora@gmail.com').trim().toLowerCase();
-const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123456';
+const configuredAdminPassword = process.env.ADMIN_PASSWORD?.trim();
+const initialAdminPassword = configuredAdminPassword || 'Admin@123456';
 
 async function main() {
-  const passwordHash = await bcrypt.hash(adminPassword, 10);
+  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+  const passwordHash = await bcrypt.hash(initialAdminPassword, 10);
 
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
     update: {
       name: 'Planora Admin',
       role: 'ADMIN',
+      status: 'ACTIVE',
       isVerified: true,
-      passwordHash,
+      ...(configuredAdminPassword ? { passwordHash } : {}),
     },
     create: {
       name: 'Planora Admin',
@@ -36,7 +39,7 @@ async function main() {
     create: { userId: admin.id },
   });
 
-  console.log(`Admin account ready: ${admin.email}`);
+  console.log(`Admin account ${existingAdmin ? 'verified' : 'created'}: ${admin.email}`);
 }
 
 main()
