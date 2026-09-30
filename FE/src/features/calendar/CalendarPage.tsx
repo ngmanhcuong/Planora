@@ -151,7 +151,8 @@ export const CalendarPage: React.FC = () => {
     const event = await createEventMutation.mutateAsync(data);
     pendingFocusEventIdRef.current = event.id;
     setCurrentDate(new Date(event.startAt));
-    if (viewMode === 'month') setViewMode('day');
+    setActiveCategory('all');
+    setViewMode('day');
     return event;
   };
 
