@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { MapPin, Video, AlertTriangle, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import type { CalendarEventItem } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
@@ -44,27 +44,20 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
   const [draggedEvent, setDraggedEvent] = useState<CalendarEventItem | null>(null);
   const [dragOverDayKey, setDragOverDayKey] = useState<string | null>(null);
-  const shellRef = useRef<HTMLDivElement | null>(null);
-  const lastWeekSwitchAtRef = useRef(0);
-  const preserveDragAfterWeekSwitchRef = useRef(false);
-  const clearPreservedDragTimerRef = useRef<number | null>(null);
   const language = useCurrentLanguage();
   const isDayView = weekDays.length === 1;
   const activeDay = weekDays[0];
 
-  const navigateWhileDragging = (direction: 'prev' | 'next') => {
-    const now = Date.now();
-    if (now - lastWeekSwitchAtRef.current < 700) return;
-
-    lastWeekSwitchAtRef.current = now;
-    preserveDragAfterWeekSwitchRef.current = true;
-    if (clearPreservedDragTimerRef.current) window.clearTimeout(clearPreservedDragTimerRef.current);
-    clearPreservedDragTimerRef.current = window.setTimeout(() => {
-      preserveDragAfterWeekSwitchRef.current = false;
-    }, 2000);
+  const moveToAdjacentWeek = (direction: 'prev' | 'next') => {
+    const eventToMove = draggedEvent ?? events.find((event) => event.id === draggedEventId);
+    if (!eventToMove) return;
+    const target = new Date(eventToMove.startAt);
+    target.setDate(target.getDate() + (direction === 'prev' ? -7 : 7));
+    setDraggedEventId(null);
+    setDraggedEvent(null);
     setDragOverDayKey(null);
-    if (direction === 'prev') onPrevRange?.();
-    else onNextRange?.();
+    onMoveEvent?.(eventToMove, target);
+    if (direction === 'prev') onPrevRange?.(); else onNextRange?.();
   };
 
   const handlePrevDay = () => {
@@ -83,38 +76,6 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   // Calendar cards can all be moved by dragging, including timetable-backed cards.
   const canDragEvent = (_event: CalendarEventItem) => true;
 
-  useEffect(() => {
-    if (!draggedEvent) return;
-
-    const handleWindowDragOver = (event: DragEvent) => {
-      const shell = shellRef.current;
-      if (!shell) return;
-      event.preventDefault();
-
-      const rect = shell.getBoundingClientRect();
-      const edgeThreshold = 56;
-      const isPastRightEdge = event.clientX >= rect.right - edgeThreshold || event.clientX > rect.right;
-      const isPastLeftEdge = event.clientX <= rect.left + edgeThreshold || event.clientX < rect.left;
-
-      if (isPastRightEdge) {
-        navigateWhileDragging('next');
-      } else if (isPastLeftEdge) {
-        navigateWhileDragging('prev');
-      }
-    };
-
-    document.addEventListener('dragover', handleWindowDragOver, true);
-    return () => document.removeEventListener('dragover', handleWindowDragOver, true);
-  }, [draggedEvent, onNextRange, onPrevRange]);
-
-  useEffect(() => {
-    return () => {
-      if (clearPreservedDragTimerRef.current) {
-        window.clearTimeout(clearPreservedDragTimerRef.current);
-      }
-    };
-  }, []);
-
   const getDropDateTime = (targetDate: Date, clientY: number, columnElement: HTMLDivElement) => {
     const rect = columnElement.getBoundingClientRect();
     const offsetY = Math.max(0, Math.min(GRID_HEIGHT_PX - 1, clientY - rect.top));
@@ -128,8 +89,6 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
     if (!draggedEventId && !draggedEvent) return;
     const eventToMove = draggedEvent ?? events.find((event) => event.id === draggedEventId);
     const targetDateTime = getDropDateTime(targetDate, clientY, columnElement);
-    preserveDragAfterWeekSwitchRef.current = false;
-    if (clearPreservedDragTimerRef.current) window.clearTimeout(clearPreservedDragTimerRef.current);
     setDraggedEventId(null);
     setDraggedEvent(null);
     setDragOverDayKey(null);
@@ -138,35 +97,35 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   };
 
   return (
-    <div ref={shellRef} className="calendar-week-shell calendar-soft-scrollbar relative flex-1 w-full overflow-hidden rounded-[1.35rem] border shadow-sm">
+    <div className="calendar-week-shell calendar-soft-scrollbar relative flex-1 w-full overflow-hidden rounded-[1.35rem] border shadow-sm">
       {draggedEvent && (
         <>
           <div
-            onDragEnter={(event) => {
-              event.preventDefault();
-              navigateWhileDragging('prev');
-            }}
             onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              moveToAdjacentWeek('prev');
+            }}
             className="absolute inset-y-0 left-0 z-40 flex w-20 items-center justify-center bg-gradient-to-r from-indigo-600/35 to-transparent text-white backdrop-blur-[1px]"
             aria-label="Chuyển về tuần trước"
           >
             <div className="flex flex-col items-center gap-1 rounded-2xl bg-slate-950/75 px-3 py-2 text-[10px] font-bold shadow-xl">
               <ChevronLeft className="h-5 w-5" />
-              <span>Tuần trước</span>
+              <span>Thả về tuần trước</span>
             </div>
           </div>
           <div
-            onDragEnter={(event) => {
-              event.preventDefault();
-              navigateWhileDragging('next');
-            }}
             onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              moveToAdjacentWeek('next');
+            }}
             className="absolute inset-y-0 right-0 z-40 flex w-20 items-center justify-center bg-gradient-to-l from-indigo-600/35 to-transparent text-white backdrop-blur-[1px]"
             aria-label="Chuyển sang tuần sau"
           >
             <div className="flex flex-col items-center gap-1 rounded-2xl bg-slate-950/75 px-3 py-2 text-[10px] font-bold shadow-xl">
               <ChevronRight className="h-5 w-5" />
-              <span>Tuần sau</span>
+              <span>Thả sang tuần sau</span>
             </div>
           </div>
         </>
@@ -394,7 +353,6 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                         setDraggedEvent(evt);
                       }}
                       onDragEnd={() => {
-                        if (preserveDragAfterWeekSwitchRef.current) return;
                         setDraggedEventId(null);
                         setDraggedEvent(null);
                         setDragOverDayKey(null);
