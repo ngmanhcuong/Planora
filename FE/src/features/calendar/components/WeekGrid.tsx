@@ -52,6 +52,21 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   const isDayView = weekDays.length === 1;
   const activeDay = weekDays[0];
 
+  const navigateWhileDragging = (direction: 'prev' | 'next') => {
+    const now = Date.now();
+    if (now - lastWeekSwitchAtRef.current < 700) return;
+
+    lastWeekSwitchAtRef.current = now;
+    preserveDragAfterWeekSwitchRef.current = true;
+    if (clearPreservedDragTimerRef.current) window.clearTimeout(clearPreservedDragTimerRef.current);
+    clearPreservedDragTimerRef.current = window.setTimeout(() => {
+      preserveDragAfterWeekSwitchRef.current = false;
+    }, 2000);
+    setDragOverDayKey(null);
+    if (direction === 'prev') onPrevRange?.();
+    else onNextRange?.();
+  };
+
   const handlePrevDay = () => {
     if (!selectedDate || !onSelectDate) return;
     const prev = new Date(selectedDate);
@@ -77,31 +92,14 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
       event.preventDefault();
 
       const rect = shell.getBoundingClientRect();
-      const now = Date.now();
-      if (now - lastWeekSwitchAtRef.current < 750) return;
-
       const edgeThreshold = 56;
       const isPastRightEdge = event.clientX >= rect.right - edgeThreshold || event.clientX > rect.right;
       const isPastLeftEdge = event.clientX <= rect.left + edgeThreshold || event.clientX < rect.left;
 
       if (isPastRightEdge) {
-        lastWeekSwitchAtRef.current = now;
-        preserveDragAfterWeekSwitchRef.current = true;
-        if (clearPreservedDragTimerRef.current) window.clearTimeout(clearPreservedDragTimerRef.current);
-        clearPreservedDragTimerRef.current = window.setTimeout(() => {
-          preserveDragAfterWeekSwitchRef.current = false;
-        }, 1600);
-        setDragOverDayKey(null);
-        onNextRange?.();
+        navigateWhileDragging('next');
       } else if (isPastLeftEdge) {
-        lastWeekSwitchAtRef.current = now;
-        preserveDragAfterWeekSwitchRef.current = true;
-        if (clearPreservedDragTimerRef.current) window.clearTimeout(clearPreservedDragTimerRef.current);
-        clearPreservedDragTimerRef.current = window.setTimeout(() => {
-          preserveDragAfterWeekSwitchRef.current = false;
-        }, 1600);
-        setDragOverDayKey(null);
-        onPrevRange?.();
+        navigateWhileDragging('prev');
       }
     };
 
@@ -140,7 +138,39 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   };
 
   return (
-    <div ref={shellRef} className="calendar-week-shell calendar-soft-scrollbar flex-1 w-full overflow-hidden rounded-[1.35rem] border shadow-sm">
+    <div ref={shellRef} className="calendar-week-shell calendar-soft-scrollbar relative flex-1 w-full overflow-hidden rounded-[1.35rem] border shadow-sm">
+      {draggedEvent && (
+        <>
+          <div
+            onDragEnter={(event) => {
+              event.preventDefault();
+              navigateWhileDragging('prev');
+            }}
+            onDragOver={(event) => event.preventDefault()}
+            className="absolute inset-y-0 left-0 z-40 flex w-20 items-center justify-center bg-gradient-to-r from-indigo-600/35 to-transparent text-white backdrop-blur-[1px]"
+            aria-label="Chuyển về tuần trước"
+          >
+            <div className="flex flex-col items-center gap-1 rounded-2xl bg-slate-950/75 px-3 py-2 text-[10px] font-bold shadow-xl">
+              <ChevronLeft className="h-5 w-5" />
+              <span>Tuần trước</span>
+            </div>
+          </div>
+          <div
+            onDragEnter={(event) => {
+              event.preventDefault();
+              navigateWhileDragging('next');
+            }}
+            onDragOver={(event) => event.preventDefault()}
+            className="absolute inset-y-0 right-0 z-40 flex w-20 items-center justify-center bg-gradient-to-l from-indigo-600/35 to-transparent text-white backdrop-blur-[1px]"
+            aria-label="Chuyển sang tuần sau"
+          >
+            <div className="flex flex-col items-center gap-1 rounded-2xl bg-slate-950/75 px-3 py-2 text-[10px] font-bold shadow-xl">
+              <ChevronRight className="h-5 w-5" />
+              <span>Tuần sau</span>
+            </div>
+          </div>
+        </>
+      )}
       {/* 7-Day Quick Selector Strip (Visible in Day View) */}
       {isDayView && fullWeekDays && fullWeekDays.length > 0 && (
         <div className="calendar-day-strip border-b px-4 py-3 flex items-center gap-3 overflow-x-auto">
