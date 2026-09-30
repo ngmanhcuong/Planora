@@ -322,10 +322,11 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
               onDragOver={(event) => {
                 if (!draggedEventId && !draggedEvent) return;
                 event.preventDefault();
-                setDragOverDayKey(dayKey);
               }}
-              onDragLeave={() => {
-                if (dragOverDayKey === dayKey) setDragOverDayKey(null);
+              onDragEnter={(event) => {
+                if (!draggedEventId && !draggedEvent) return;
+                event.preventDefault();
+                setDragOverDayKey((current) => current === dayKey ? current : dayKey);
               }}
               onDrop={(event) => {
                 event.preventDefault();
