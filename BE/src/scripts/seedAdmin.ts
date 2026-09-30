@@ -16,7 +16,7 @@ async function main() {
       role: 'ADMIN',
       status: 'ACTIVE',
       isVerified: true,
-      ...(configuredAdminPassword ? { passwordHash } : {}),
+      passwordHash,
     },
     create: {
       name: 'Planora Admin',
