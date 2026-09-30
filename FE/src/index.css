@@ -1064,82 +1064,6 @@
   background-color: rgb(51 65 85 / 0.86) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  .admin-dashboard-scope {
-    color: #e2e8f0;
-  }
-
-  .admin-dashboard-scope :is(.bg-white, .bg-white\/90, .bg-white\/95) {
-    background-color: rgb(17 24 39 / 0.96) !important;
-  }
-
-  .admin-dashboard-scope :is(.bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80, .bg-slate-50\/90, .bg-slate-100) {
-    background-color: rgb(30 41 59 / 0.82) !important;
-  }
-
-  .admin-dashboard-scope :is(.border-slate-100, .border-slate-200, .border-slate-200\/80, .border-slate-300) {
-    border-color: rgb(71 85 105 / 0.76) !important;
-  }
-
-  .admin-dashboard-scope :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700) {
-    color: #f1f5f9 !important;
-  }
-
-  .admin-dashboard-scope :is(.text-slate-600, .text-slate-500, .text-slate-400) {
-    color: #aeb9ca !important;
-  }
-
-  .admin-dashboard-scope :is(input, textarea, select) {
-    background-color: rgb(15 23 42 / 0.92) !important;
-    border-color: rgb(71 85 105 / 0.78) !important;
-    color: #e2e8f0 !important;
-  }
-
-  .admin-dashboard-scope :is(input, textarea)::placeholder {
-    color: #94a3b8 !important;
-  }
-
-  .admin-dashboard-scope :is(button.bg-white, select.bg-white) {
-    background-color: rgb(15 23 42 / 0.92) !important;
-    border-color: rgb(71 85 105 / 0.78) !important;
-  }
-
-  .admin-dashboard-scope :is(.text-indigo-700, .text-purple-700) {
-    color: #c7d2fe !important;
-  }
-
-  .admin-dashboard-scope :is(.text-emerald-700, .text-emerald-900) {
-    color: #86efac !important;
-  }
-
-  .admin-dashboard-scope :is(.text-amber-700, .text-orange-700) {
-    color: #fcd34d !important;
-  }
-
-  .admin-dashboard-scope .bg-indigo-50 {
-    background-color: rgb(79 70 229 / 0.22) !important;
-  }
-
-  .admin-dashboard-scope .bg-emerald-50 {
-    background-color: rgb(16 185 129 / 0.18) !important;
-  }
-
-  .admin-dashboard-scope .bg-amber-50,
-  .admin-dashboard-scope .bg-orange-50 {
-    background-color: rgb(245 158 11 / 0.18) !important;
-  }
-
-  .admin-dashboard-scope button:disabled {
-    opacity: 1 !important;
-    color: rgb(255 255 255 / 0.82) !important;
-  }
-
-  .admin-dashboard-scope .hover\:bg-white:hover,
-  .admin-dashboard-scope .hover\:bg-slate-50:hover,
-  .admin-dashboard-scope .hover\:bg-slate-100:hover {
-    background-color: rgb(51 65 85 / 0.86) !important;
-  }
-}
 
 :root[data-theme='dark'] .ai-assistant-panel {
   background-color: #0F172A !important;
@@ -1310,66 +1234,7 @@
   filter: saturate(0.9);
 }
 
-@media (prefers-color-scheme: dark) {
-  .admin-dashboard-scope {
-    color: #e5edf8 !important;
-  }
 
-  .admin-dashboard-scope :is(.bg-white, .bg-white\/90, .bg-white\/95, .bg-slate-50, .bg-slate-50\/70, .bg-slate-50\/80, .bg-slate-50\/90, .bg-slate-100) {
-    background-color: #1b2433 !important;
-  }
-
-  .admin-dashboard-scope :is(section, article, .rounded-2xl, .rounded-3xl, .rounded-\[2rem\], .rounded-\[1\.75rem\]) {
-    border-color: rgb(71 85 105 / 0.82) !important;
-  }
-
-  .admin-dashboard-scope :is(.text-slate-950, .text-slate-900, .text-slate-800, .text-slate-700, .text-gray-900) {
-    color: #f8fafc !important;
-  }
-
-  .admin-dashboard-scope :is(.text-slate-600, .text-slate-500, .text-slate-400, .text-gray-600, .text-gray-500) {
-    color: #c9d4e5 !important;
-  }
-
-  .admin-dashboard-scope :is(.text-indigo-700, .text-indigo-600, .text-purple-700, .text-purple-600) {
-    color: #c7d2fe !important;
-  }
-
-  .admin-dashboard-scope :is(.text-emerald-900, .text-emerald-700, .text-emerald-600) {
-    color: #86efac !important;
-  }
-
-  .admin-dashboard-scope :is(.text-amber-700, .text-orange-700, .text-yellow-700) {
-    color: #fde68a !important;
-  }
-
-  .admin-dashboard-scope :is(.bg-indigo-50, .bg-violet-50, .bg-purple-50) {
-    background-color: rgb(79 70 229 / 0.24) !important;
-  }
-
-  .admin-dashboard-scope :is(.bg-emerald-50, .bg-teal-50) {
-    background-color: rgb(16 185 129 / 0.18) !important;
-  }
-
-  .admin-dashboard-scope :is(.bg-amber-50, .bg-orange-50, .bg-yellow-50) {
-    background-color: rgb(245 158 11 / 0.18) !important;
-  }
-
-  .admin-dashboard-scope :is(input, textarea, select, button.bg-white) {
-    background-color: #111827 !important;
-    border-color: rgb(71 85 105 / 0.86) !important;
-    color: #f1f5f9 !important;
-  }
-
-  .admin-dashboard-scope :is(input, textarea)::placeholder {
-    color: #b6c3d5 !important;
-  }
-
-  .admin-dashboard-scope button:disabled {
-    opacity: 1 !important;
-    filter: saturate(0.9);
-  }
-}
 
 
 
