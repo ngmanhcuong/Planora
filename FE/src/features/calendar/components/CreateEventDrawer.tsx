@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { calendarApi, type CreateEventPayload } from '../api/calendarApi';
 import { apiClient } from '@/lib/axios';
 import type { ApiCategory } from '@/types';
+import { getEndOfWeek, getStartOfWeek } from '@/utils/dateUtils';
 
 export interface CreateEventDrawerProps {
   isOpen: boolean;
@@ -75,6 +76,12 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
   const check = useQuery({ queryKey: ['calendar-conflicts', startAt, endAt], enabled: valid,
     queryFn: () => calendarApi.getCalendarRange({start: startAt, end: endAt}) });
   const conflicts = (check.data || []).filter(item => item.sourceType === 'EVENT' && item.end && new Date(item.start) < end && new Date(item.end) > start);
+  const selectedDay = date ? new Date(`${date}T00:00:00`) : null;
+  const initialWeekStart = getStartOfWeek(initialDate);
+  const initialWeekEnd = getEndOfWeek(initialDate);
+  const isOutsideVisibleWeek = Boolean(
+    selectedDay && (selectedDay < initialWeekStart || selectedDay > initialWeekEnd)
+  );
   const close = () => { if (!saving && !isPending) onClose(); };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError('');
@@ -180,19 +187,28 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
 
         {valid && check.isFetching && <p role="status">Đang kiểm tra lịch đã lưu...</p>}
         {check.isError && <p role="alert">Không tải được lịch để kiểm tra trùng giờ.</p>}
+        {isOutsideVisibleWeek && selectedDay && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
+            <p className="font-semibold">Ngày đã chọn nằm ngoài tuần đang xem.</p>
+            <p className="mt-1">Sau khi lưu, lịch sẽ tự chuyển đến ngày {selectedDay.toLocaleDateString('vi-VN')}.</p>
+          </div>
+        )}
         {conflicts.length > 0 && <div className="bg-[#FFF1F2] text-[#BA1A1A] rounded-lg p-3 text-xs">
-          <p className="font-semibold flex gap-2"><AlertTriangle size={16} />Trùng với lịch đã lưu:</p>
+          <p className="font-semibold flex gap-2"><AlertTriangle size={16} />Lịch chưa được lưu vì trùng với lịch đã có:</p>
           {conflicts.map((item, index) => <p key={`${item.id}-${index}`}>{item.title} · {new Date(item.start).toLocaleString('vi-VN')} – {new Date(item.end!).toLocaleString('vi-VN')}</p>)}
-          <label className="flex gap-2 mt-2"><input type="checkbox" checked={allowConflict} onChange={e => setAllowConflict(e.target.checked)} />Vẫn lưu trong khung giờ này</label>
+          <label className="mt-3 flex cursor-pointer items-center gap-2 rounded-lg border border-rose-300 bg-white/70 p-2 font-semibold">
+            <input type="checkbox" checked={allowConflict} onChange={e => setAllowConflict(e.target.checked)} />
+            Tôi xác nhận vẫn lưu trong khung giờ này
+          </label>
         </div>}
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
           <Button type="button" variant="secondary" onClick={close} disabled={saving || isPending}>
             Hủy bỏ
           </Button>
-          <Button type="submit" variant="primary" disabled={saving || isPending}>
+          <Button type="submit" variant="primary" disabled={saving || isPending || (conflicts.length > 0 && !allowConflict)}>
             <BookmarkPlus className="w-4 h-4" />
-            <span>{saving || isPending ? 'Đang lưu...' : 'Lưu lịch trình'}</span>
+            <span>{saving || isPending ? 'Đang lưu...' : conflicts.length > 0 && !allowConflict ? 'Xác nhận trùng lịch để lưu' : 'Lưu lịch trình'}</span>
           </Button>
         </div>
       </fieldset></form>
