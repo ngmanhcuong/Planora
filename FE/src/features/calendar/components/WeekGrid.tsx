@@ -353,6 +353,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                   return (
                     <div
                       key={evt.id}
+                      data-calendar-event-id={evt.id}
                       draggable={isDraggable}
                       onDragStart={(event) => {
                         if (!isDraggable) return;

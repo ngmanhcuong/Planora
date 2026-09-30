@@ -21,10 +21,12 @@ export const useCreateEvent = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateEventPayload) => calendarApi.createEvent(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['events'] });
-      queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: calendarKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ['events'] }),
+        queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
+      ]);
     },
   });
 };

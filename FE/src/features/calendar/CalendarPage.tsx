@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CalendarHeader } from './components/CalendarHeader';
 import { WeekGrid } from './components/WeekGrid';
 import { MonthGrid } from './components/MonthGrid';
@@ -36,6 +36,7 @@ export const CalendarPage: React.FC = () => {
   const updateTaskMutation = useUpdateTask();
   const deleteTimetableItemMutation = useDeleteTimetableItem();
   const convertingTimetableItemsRef = useRef<Set<string>>(new Set());
+  const pendingFocusEventIdRef = useRef<string | null>(null);
 
   const handlePrevWeek = () => {
     setCurrentDate((prev) => {
@@ -133,6 +134,26 @@ export const CalendarPage: React.FC = () => {
   });
   const todayKey = new Date().toDateString();
   const todayItemsCount = filteredEvents.filter((evt) => evt.dateKey === todayKey).length;
+
+  useEffect(() => {
+    const eventId = pendingFocusEventIdRef.current;
+    if (!eventId || !convertedEvents.some((event) => event.id === eventId)) return;
+
+    pendingFocusEventIdRef.current = null;
+    window.requestAnimationFrame(() => {
+      const card = Array.from(document.querySelectorAll<HTMLElement>('[data-calendar-event-id]'))
+        .find((element) => element.dataset.calendarEventId === eventId);
+      card?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    });
+  }, [convertedEvents]);
+
+  const handleCreateEvent = async (data: Parameters<typeof createEventMutation.mutateAsync>[0]) => {
+    const event = await createEventMutation.mutateAsync(data);
+    pendingFocusEventIdRef.current = event.id;
+    setCurrentDate(new Date(event.startAt));
+    if (viewMode === 'month') setViewMode('day');
+    return event;
+  };
 
   const getEventMutationId = (id: string) => {
     return id.includes('_rec_') ? id.split('_rec_')[0] : id;
@@ -259,7 +280,7 @@ export const CalendarPage: React.FC = () => {
             <CreateEventDrawer
               isOpen={isCreateOpen}
               onClose={() => setIsCreateOpen(false)}
-              onSave={createEventMutation.mutateAsync} initialDate={currentDate}
+              onSave={handleCreateEvent} initialDate={currentDate}
               isPending={createEventMutation.isPending}
             />
           )}
