@@ -33,6 +33,7 @@ export class ExternalAiProvider implements AiProvider {
   private apiKey: string;
   private providerName: string;
   private modelName: string;
+  private fallbackModelName: string;
   private isTestEnvironment: boolean;
   private testMockProvider: MockDeterministicAiProvider;
 
@@ -40,6 +41,7 @@ export class ExternalAiProvider implements AiProvider {
     this.apiKey = process.env.AI_API_KEY || '';
     this.providerName = process.env.AI_PROVIDER || 'none';
     this.modelName = process.env.AI_MODEL || 'none';
+    this.fallbackModelName = process.env.AI_FALLBACK_MODEL || 'gemini-3.5-flash';
     this.isTestEnvironment = overrideMode === 'test' || process.env.NODE_ENV === 'test';
     this.testMockProvider = new MockDeterministicAiProvider();
   }
@@ -122,27 +124,46 @@ export class ExternalAiProvider implements AiProvider {
     }
   }
   private async requestGemini(systemPrompt: string, message: string, json = false): Promise<string> {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.modelName)}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
-        signal: AbortSignal.timeout(30000),
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: 'user', parts: [{ text: message }] }],
-          generationConfig: { maxOutputTokens: 4096, ...(json ? { responseMimeType: 'application/json' } : {}) },
-        }),
+    const models = [...new Set([this.modelName, this.fallbackModelName].filter(model => model && model !== 'none'))];
+    let lastError: Error | undefined;
+
+    for (const model of models) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
+            signal: AbortSignal.timeout(30000),
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              contents: [{ role: 'user', parts: [{ text: message }] }],
+              generationConfig: { maxOutputTokens: 4096, ...(json ? { responseMimeType: 'application/json' } : {}) },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const details = await response.text();
+          throw new Error(`Gemini model ${model} returned HTTP ${response.status}: ${details.slice(0, 500)}`);
+        }
+
+        const data = await response.json() as {
+          candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[];
+        };
+        const candidate = data.candidates?.[0];
+        const text = candidate?.content?.parts?.filter(part => !part.thought).map(part => part.text || '').join('').trim();
+        if (!text || candidate?.finishReason !== 'STOP') {
+          throw new Error(`Gemini model ${model} returned an incomplete response (${candidate?.finishReason || 'no candidate'})`);
+        }
+        return text;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(`[AI provider] ${lastError.message}`);
       }
-    );
-    if (!response.ok) throw new Error(`Gemini HTTP ${response.status}`);
-    const data = await response.json() as {
-      candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[];
-    };
-    const candidate = data.candidates?.[0];
-    const text = candidate?.content?.parts?.filter(part => !part.thought).map(part => part.text || '').join('').trim();
-    if (!text || candidate?.finishReason !== 'STOP') throw new Error('Gemini response incomplete');
-    return text;
+    }
+
+    throw lastError || new Error('No Gemini model is available');
   }
 }
 
