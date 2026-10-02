@@ -47,6 +47,7 @@ const ui: Record<string, string[]> = {
 };
 export function notificationText(language: string, text: string): string {
   const normalized = normalizeLanguage(language);
+  if (normalized === 'vi') return text;
   const index = languages.indexOf(normalized);
   const values = ui[text];
   if (!values) return text;
@@ -56,6 +57,7 @@ export function notificationText(language: string, text: string): string {
 // Translate only recognized system templates, never user-entered names or text.
 export function localizeNotification(item: ApiNotification, language: string): ApiNotification {
   const normalized = normalizeLanguage(language);
+  if (normalized === 'vi') return item;
   const index = languages.indexOf(normalized);
   const pick = (values?: string[]) => values
     ? (index < 0 ? translateEnglishPhrase(normalized, values[0]) : values[index])
