@@ -32,6 +32,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const language = useCurrentLanguage();
   const isCompleted = task.status === 'COMPLETED';
   const isOverdue = task.isOverdue || task.displayStatus === 'OVERDUE';
+  const isInactive = isCompleted || isOverdue;
 
   const priorityStyles: Record<string, { bg: string; text: string; label: string }> = {
     URGENT: { bg: TASK_PRIORITY_PALETTE.URGENT.background, text: TASK_PRIORITY_PALETTE.URGENT.text, label: translate(language, 'tasks.card.urgent') },
@@ -54,7 +55,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   return (
     <div
-      className={`group flex items-start justify-between gap-4 p-4.5 rounded-2xl border transition-all ${
+      className={`group flex items-start justify-between gap-4 p-4.5 rounded-2xl border transition-all ${isInactive ? 'opacity-50 saturate-50 hover:opacity-70' : ''} ${
         isCompleted
           ? 'bg-white border-slate-200/80 hover:shadow-md hover:border-emerald-200 hover:-translate-y-0.5'
           : isOverdue
@@ -102,7 +103,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
           </div>
 
-          <h3 className="text-sm font-extrabold leading-snug text-slate-900">
+          <h3 className={`text-sm font-extrabold leading-snug text-slate-900 ${isCompleted ? 'line-through' : ''}`}>
             {task.title}
           </h3>
 

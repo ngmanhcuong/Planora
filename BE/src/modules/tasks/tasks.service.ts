@@ -13,7 +13,9 @@ const getVietnamDateKey = (date: Date) => new Intl.DateTimeFormat('en-CA', {
 export class TasksService {
   private formatTaskResponse(task: any): TaskResponse {
     const now = new Date();
-    const isOverdue = task.dueDate < now && task.status !== TaskStatus.COMPLETED;
+    const dueTime = /^\d{2}:\d{2}$/.test(task.dueTime || '') ? task.dueTime : '23:59';
+    const dueAt = new Date(`${getVietnamDateKey(task.dueDate)}T${dueTime}:00+07:00`);
+    const isOverdue = dueAt < now && task.status !== TaskStatus.COMPLETED;
     const displayStatus = isOverdue ? 'OVERDUE' : task.status;
 
     return {
