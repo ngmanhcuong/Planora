@@ -36,21 +36,25 @@ export const TomorrowPreviewWidget: React.FC<TomorrowPreviewWidgetProps> = ({ ev
           </div>
         ) : (
           events.slice(0, 4).map((event) => {
-            const startDate = new Date(event.startAt);
+            const rawStart = event.startAt || (event as ApiEvent & { start?: string; startTime?: string }).start || (event as ApiEvent & { startTime?: string }).startTime;
+            const startDate = rawStart ? new Date(rawStart) : null;
+            const hasValidDate = startDate !== null && !Number.isNaN(startDate.getTime());
             const timeStr = event.allDay
               ? translate(language, 'dashboard.allDay')
-              : `${startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-            const dayNum = startDate.getDate();
-            const monthNum = startDate.getMonth() + 1;
+              : hasValidDate
+                ? startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : getMultiLangText(language, { vi: 'Chưa đặt giờ', en: 'Time not set', ja: '時刻未設定', ko: '시간 미설정', zh: '时间未设置', fr: 'Heure non définie', de: 'Keine Uhrzeit', es: 'Hora no definida' });
+            const dayNum = hasValidDate ? startDate.getDate() : '--';
+            const monthNum = hasValidDate ? startDate.getMonth() + 1 : null;
             const monthLabel = getMultiLangText(language, {
-              vi: `T${monthNum}`,
-              en: `M${monthNum}`,
-              ja: `${monthNum}月`,
-              ko: `${monthNum}월`,
-              zh: `${monthNum}月`,
-              fr: `M${monthNum}`,
-              de: `M${monthNum}`,
-              es: `M${monthNum}`,
+              vi: monthNum ? `T${monthNum}` : 'NGÀY',
+              en: monthNum ? `M${monthNum}` : 'DATE',
+              ja: monthNum ? `${monthNum}月` : '日付',
+              ko: monthNum ? `${monthNum}월` : '날짜',
+              zh: monthNum ? `${monthNum}月` : '日期',
+              fr: monthNum ? `M${monthNum}` : 'DATE',
+              de: monthNum ? `M${monthNum}` : 'DATUM',
+              es: monthNum ? `M${monthNum}` : 'FECHA',
             });
 
             return (

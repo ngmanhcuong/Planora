@@ -227,8 +227,8 @@ export class DashboardService {
     const toDashboardEvent = (e: any): DashboardEventItem => ({
       id: e.id,
       title: e.title,
-      start: e.startAt || e.startTime,
-      end: e.endAt || e.endTime,
+      startAt: e.startAt || e.startTime,
+      endAt: e.endAt || e.endTime,
       allDay: e.allDay ?? e.isAllDay ?? false,
       location: e.location,
       category: e.category,

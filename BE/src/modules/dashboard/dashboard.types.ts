@@ -26,8 +26,8 @@ export interface DashboardTaskItem {
 export interface DashboardEventItem {
   id: string;
   title: string;
-  start: Date;
-  end: Date;
+  startAt: Date;
+  endAt: Date;
   allDay: boolean;
   location: string | null;
   category?: any;
