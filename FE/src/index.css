@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Keep Tailwind's dark utilities in sync with Planora's explicit theme setting.
+   Without this override Tailwind v4 follows the operating-system preference,
+   which can mix dark controls into the app while Planora is set to light. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 @layer base {
   :root {
     --font-heading: 'Be Vietnam Pro', sans-serif;
