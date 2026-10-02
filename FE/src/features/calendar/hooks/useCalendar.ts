@@ -15,6 +15,9 @@ export const useCalendarRange = (params: CalendarRangeParams) => {
     queryKey: calendarKeys.range(params),
     queryFn: () => calendarApi.getCalendarRange(params),
     enabled: !!params.start && !!params.end,
+    // Keep the grid mounted while navigating across weeks during a native drag.
+    // Replacing it with the loading state would cancel the browser drag session.
+    placeholderData: (previousData) => previousData,
   });
 };
 

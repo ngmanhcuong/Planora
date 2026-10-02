@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { MapPin, Video, AlertTriangle, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import type { CalendarEventItem } from '../types';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
@@ -44,20 +44,40 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
   const [draggedEvent, setDraggedEvent] = useState<CalendarEventItem | null>(null);
   const [dragOverDayKey, setDragOverDayKey] = useState<string | null>(null);
+  const edgeNavigationRef = useRef<'prev' | 'next' | null>(null);
   const language = useCurrentLanguage();
   const isDayView = weekDays.length === 1;
   const activeDay = weekDays[0];
 
-  const moveToAdjacentWeek = (direction: 'prev' | 'next') => {
+  const showAdjacentWeekWhileDragging = (direction: 'prev' | 'next') => {
+    const eventToMove = draggedEvent ?? events.find((event) => event.id === draggedEventId);
+    if (!eventToMove || !canDragEvent(eventToMove) || edgeNavigationRef.current === direction) return;
+    edgeNavigationRef.current = direction;
+    setDragOverDayKey(null);
+    if (direction === 'prev') onPrevRange?.(); else onNextRange?.();
+  };
+
+  const dropOnAdjacentWeek = (direction: 'prev' | 'next') => {
     const eventToMove = draggedEvent ?? events.find((event) => event.id === draggedEventId);
     if (!eventToMove || !canDragEvent(eventToMove)) return;
-    const target = new Date(eventToMove.startAt);
-    target.setDate(target.getDate() + (direction === 'prev' ? -7 : 7));
+
+    const visibleDays = fullWeekDays?.length ? fullWeekDays : weekDays;
+    const currentStart = new Date(eventToMove.startAt);
+    const dayIndex = (currentStart.getDay() + 6) % 7;
+    const visibleTarget = visibleDays[dayIndex]?.dateObj;
+    const target = visibleTarget ? new Date(visibleTarget) : new Date(currentStart);
+    target.setHours(currentStart.getHours(), currentStart.getMinutes(), 0, 0);
+
+    if (target.toDateString() === currentStart.toDateString()) {
+      target.setDate(target.getDate() + (direction === 'prev' ? -7 : 7));
+      if (direction === 'prev') onPrevRange?.(); else onNextRange?.();
+    }
+
     setDraggedEventId(null);
     setDraggedEvent(null);
     setDragOverDayKey(null);
+    edgeNavigationRef.current = null;
     onMoveEvent?.(eventToMove, target);
-    if (direction === 'prev') onPrevRange?.(); else onNextRange?.();
   };
 
   const handlePrevDay = () => {
@@ -100,31 +120,45 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
       {draggedEvent && (
         <>
           <div
-            onDragOver={(event) => event.preventDefault()}
+            onDragEnter={(event) => {
+              event.preventDefault();
+              showAdjacentWeekWhileDragging('prev');
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              showAdjacentWeekWhileDragging('prev');
+            }}
             onDrop={(event) => {
               event.preventDefault();
-              moveToAdjacentWeek('prev');
+              dropOnAdjacentWeek('prev');
             }}
             className="absolute inset-y-0 left-0 z-40 flex w-20 items-center justify-center bg-gradient-to-r from-indigo-600/35 to-transparent text-white backdrop-blur-[1px]"
             aria-label="Chuyển về tuần trước"
           >
             <div className="flex flex-col items-center gap-1 rounded-2xl bg-slate-950/75 px-3 py-2 text-[10px] font-bold shadow-xl">
               <ChevronLeft className="h-5 w-5" />
-              <span>Thả về tuần trước</span>
+              <span>Giữ để mở tuần trước</span>
             </div>
           </div>
           <div
-            onDragOver={(event) => event.preventDefault()}
+            onDragEnter={(event) => {
+              event.preventDefault();
+              showAdjacentWeekWhileDragging('next');
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              showAdjacentWeekWhileDragging('next');
+            }}
             onDrop={(event) => {
               event.preventDefault();
-              moveToAdjacentWeek('next');
+              dropOnAdjacentWeek('next');
             }}
             className="absolute inset-y-0 right-0 z-40 flex w-20 items-center justify-center bg-gradient-to-l from-indigo-600/35 to-transparent text-white backdrop-blur-[1px]"
             aria-label="Chuyển sang tuần sau"
           >
             <div className="flex flex-col items-center gap-1 rounded-2xl bg-slate-950/75 px-3 py-2 text-[10px] font-bold shadow-xl">
               <ChevronRight className="h-5 w-5" />
-              <span>Thả sang tuần sau</span>
+              <span>Giữ để mở tuần sau</span>
             </div>
           </div>
         </>
@@ -314,6 +348,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
               onDragEnter={(event) => {
                 if (!draggedEventId && !draggedEvent) return;
                 event.preventDefault();
+                edgeNavigationRef.current = null;
                 setDragOverDayKey((current) => current === dayKey ? current : dayKey);
               }}
               onDrop={(event) => {
@@ -356,6 +391,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                         setDraggedEventId(null);
                         setDraggedEvent(null);
                         setDragOverDayKey(null);
+                        edgeNavigationRef.current = null;
                       }}
                       onClick={() => onSelectEvent?.(evt)}
                       title={isDraggable ? 'Kéo sang ô ngày/giờ khác' : isInactive ? 'Lịch đã qua hoặc công việc đã hoàn thành' : undefined}
