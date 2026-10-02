@@ -62,6 +62,7 @@ export const CalendarPage: React.FC = () => {
 
   // Convert ApiCalendarItem to CalendarEventItem for WeekGrid
   const rawItems: ApiCalendarItem[] = calendarData || [];
+  const currentTime = new Date().getTime();
 
   const convertedEvents: CalendarEventItem[] = rawItems.map((item: ApiCalendarItem, idx: number) => {
     const normalizedSourceType = String(item.sourceType || 'EVENT').toUpperCase() as CalendarEventItem['sourceType'];
@@ -100,6 +101,10 @@ export const CalendarPage: React.FC = () => {
     const catBg = item.category?.bgColor || (isTask ? '#FFF7ED' : isTimetable ? '#ECFDF5' : '#EFF6FF');
     const catText = item.category?.textColor || (isTask ? '#9A3412' : isTimetable ? '#065F46' : '#1E3A8A');
     const catColor = item.category?.color || (isTask ? '#F97316' : isTimetable ? '#10B981' : '#2563EB');
+    const itemStartTime = new Date(item.start).getTime();
+    const itemEndTime = item.end ? new Date(item.end).getTime() : itemStartTime;
+    const isCompleted = isTask && item.status === 'COMPLETED';
+    const isPast = (Number.isFinite(itemEndTime) ? itemEndTime : itemStartTime) < currentTime;
 
     return {
       id: item.id || `evt_${idx}`,
@@ -122,6 +127,9 @@ export const CalendarPage: React.FC = () => {
       courseCode: item.courseCode || undefined,
       timetableId: item.timetableId || undefined,
       timetableItemId: item.timetableItemId || undefined,
+      isPast,
+      isCompleted,
+      dragLocked: isPast || isCompleted,
       color: catColor,
       bgColor: catBg,
       textColor: catText,
@@ -181,6 +189,7 @@ export const CalendarPage: React.FC = () => {
   };
 
   const handleMoveCalendarItem = (eventItem: CalendarEventItem, targetDate: Date) => {
+    if (eventItem.dragLocked || eventItem.isPast || eventItem.isCompleted) return;
     const currentStart = new Date(eventItem.startAt);
     const nextStart = new Date(targetDate);
     if (currentStart.getTime() === nextStart.getTime()) return;

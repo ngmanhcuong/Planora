@@ -30,7 +30,7 @@ export function MonthGrid({ currentDate, events, onSelectDay }: {
               {items.length > 0 && <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-extrabold text-indigo-700">{items.length}</span>}
             </div>
             <div className="mt-2 flex flex-col gap-1.5">
-              {items.slice(0, 3).map((event, index) => <span key={`${event.id}-${index}`} title={`${event.timeRange} ${event.title}`} className="truncate rounded-xl px-2 py-1.5 text-[11px] font-bold ring-1 ring-black/5" style={{ backgroundColor: event.bgColor, color: event.textColor }}>{event.timeRange.split(' – ')[0]} · {event.title}</span>)}
+              {items.slice(0, 3).map((event, index) => <span key={`${event.id}-${index}`} title={`${event.timeRange} ${event.title}`} className={`truncate rounded-xl px-2 py-1.5 text-[11px] font-bold ring-1 ring-black/5 ${event.isPast || event.isCompleted ? 'opacity-45 grayscale saturate-50' : ''}`} style={{ backgroundColor: event.bgColor, color: event.textColor }}>{event.timeRange.split(' – ')[0]} · {event.title}</span>)}
               {items.length > 3 && <span className="text-xs font-bold text-slate-500">+{items.length - 3} lịch khác</span>}
             </div>
           </button>;

@@ -26,6 +26,9 @@ export interface CalendarEventItem {
   speaker?: string;
   notes?: string;
   hasConflict?: boolean;
+  isPast?: boolean;
+  isCompleted?: boolean;
+  dragLocked?: boolean;
   color: string;
   bgColor: string;
   textColor: string;

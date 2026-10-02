@@ -50,7 +50,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
 
   const moveToAdjacentWeek = (direction: 'prev' | 'next') => {
     const eventToMove = draggedEvent ?? events.find((event) => event.id === draggedEventId);
-    if (!eventToMove) return;
+    if (!eventToMove || !canDragEvent(eventToMove)) return;
     const target = new Date(eventToMove.startAt);
     target.setDate(target.getDate() + (direction === 'prev' ? -7 : 7));
     setDraggedEventId(null);
@@ -73,8 +73,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
     next.setDate(next.getDate() + 1);
     onSelectDate(next);
   };
-  // Calendar cards can all be moved by dragging, including timetable-backed cards.
-  const canDragEvent = (_event: CalendarEventItem) => true;
+  const canDragEvent = (event: CalendarEventItem) => !event.dragLocked && !event.isPast && !event.isCompleted;
 
   const getDropDateTime = (targetDate: Date, clientY: number, columnElement: HTMLDivElement) => {
     const rect = columnElement.getBoundingClientRect();
@@ -331,6 +330,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
               {dayEvents.map((evt) => (
                 (() => {
                   const isDraggable = canDragEvent(evt);
+                  const isInactive = Boolean(evt.isPast || evt.isCompleted);
                   const snappedSlotTop = Math.max(
                     0,
                     Math.min(
@@ -358,8 +358,9 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                         setDragOverDayKey(null);
                       }}
                       onClick={() => onSelectEvent?.(evt)}
-                      title={isDraggable ? 'Kéo sang ô ngày/giờ khác' : undefined}
-                      className={`group absolute left-2.5 right-2.5 z-10 flex ${isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} flex-col justify-center overflow-hidden rounded-lg border-l-[4px] px-3 py-1.5 shadow-md shadow-slate-950/10 ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${draggedEventId === evt.id ? 'opacity-60 ring-2 ring-cyan-300' : ''}`}
+                      title={isDraggable ? 'Kéo sang ô ngày/giờ khác' : isInactive ? 'Lịch đã qua hoặc công việc đã hoàn thành' : undefined}
+                      aria-disabled={!isDraggable}
+                      className={`group absolute left-2.5 right-2.5 z-10 flex ${isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'} flex-col justify-center overflow-hidden rounded-lg border-l-[4px] px-3 py-1.5 shadow-md shadow-slate-950/10 ring-1 ring-black/5 transition-all duration-200 ${isInactive ? 'opacity-45 grayscale saturate-50' : 'hover:-translate-y-0.5 hover:shadow-xl'} ${draggedEventId === evt.id ? 'opacity-60 ring-2 ring-cyan-300' : ''}`}
                       style={{
                         top: `${cardTop}px`,
                         height: `${cardHeight}px`,
