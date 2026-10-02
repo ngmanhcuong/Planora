@@ -55,6 +55,8 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { Select } from '@/components/ui/Select';
 import { notifyLocalActivity } from '@/lib/activityNotifications';
 import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '@/features/goals/hooks/useGoals';
+import { useCreateNote, useDeleteNote, useNotes, useUpdateNote } from '@/features/notes/hooks/useNotes';
+import type { ApiNote } from '@/features/notes/api/notesApi';
 
 const cardClass = 'rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-200';
 
@@ -1339,68 +1341,20 @@ export const NotesPage: React.FC = () => {
     rose: { bg: 'bg-rose-50/90', border: 'border-rose-200/90', badge: 'bg-rose-100 text-rose-800', text: 'text-rose-950' },
   };
 
-  interface NoteItem {
-    id: number;
-    text: string;
-    done: boolean;
-    tag: string;
-    isPinned?: boolean;
-    color?: string;
-    createdAt?: string;
-  }
-
-  const initialNotes: NoteItem[] = [];
-  const decodeLegacyText = (value: string) => decodeURIComponent(escape(window.atob(value)));
-  const legacyDemoNoteTexts = new Set(
-    [
-      'Q2h14bqpbiBi4buLIHNsaWRlIHRodXnhur90IHRyw6xuaCBjaG8gbcO0biBM4buLY2ggc+G7rSB0xrAgdMaw4bufbmcgdHJp4bq/dCBo4buNYw==',
-      'S2nhu4NtIHRyYSBs4bqhaSBkZWFkbGluZSBiw6FvIGPDoW8gdGnhur9uIMSR4buZIMSR4buTIMOhbiB24bubaSBnaeG6o25nIHZpw6puIGjGsOG7m25nIGThuqtu',
-      'TXVhIHRow6ptIHPhu5UgZ2hpIGNow6lwIHbDoCBiw7p0IGhpZ2hsaWdodCBtw6B1IHBhc3RlbA==',
-      'w50gdMaw4bufbmcgdOG7kWkgxrB1IGdpYW8gZGnhu4duIERhc2hib2FyZCB24bubaSBXaWRnZXQgdGhlbyBkw7VpIG7Eg25nIHN14bqldA==',
-      'S2nhu4NtIEdp4bqjaSDEkOG6uXA=',
-    ].map(decodeLegacyText),
-  );
-
-  const isLegacyDemoNote = (note: NoteItem) => {
-    const text = typeof note.text === 'string' ? note.text.trim() : '';
-    return legacyDemoNoteTexts.has(text);
-  };
-
-  const [notes, setNotes] = useState<NoteItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('planora_quick_notes_v3');
-      if (!saved) return initialNotes;
-
-      const parsed = JSON.parse(saved) as NoteItem[];
-      if (!Array.isArray(parsed)) return initialNotes;
-
-      const cleanedNotes = parsed.filter((note) => !isLegacyDemoNote(note));
-      if (cleanedNotes.length !== parsed.length) {
-        localStorage.setItem('planora_quick_notes_v3', JSON.stringify(cleanedNotes));
-      }
-      return cleanedNotes;
-    } catch {
-      return initialNotes;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('planora_quick_notes_v3', JSON.stringify(notes));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [notes]);
+  const { data: notes = [], isLoading: isNotesLoading, isError: isNotesError } = useNotes();
+  const createNoteMutation = useCreateNote();
+  const updateNoteMutation = useUpdateNote();
+  const deleteNoteMutation = useDeleteNote();
 
   const [text, setText] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>(translateCategory(language, 'note'));
-  const [selectedColor, setSelectedColor] = useState<string>('white');
+  const [selectedColor, setSelectedColor] = useState<ApiNote['color']>('white');
   const [isPinnedInput, setIsPinnedInput] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeFilterTag, setActiveFilterTag] = useState<string>('all');
-  const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>('');
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const availableTags = getMultiLangArray(language, {
     vi: ['Học tập', 'Công việc', 'Cá nhân', 'Ý tưởng', 'Quan trọng', 'Ghi chú'],
@@ -1415,64 +1369,51 @@ export const NotesPage: React.FC = () => {
 
   const addNote = () => {
     const trimmedText = text.trim();
-    if (!trimmedText) return;
-    const newNote: NoteItem = {
-      id: Date.now(),
-      text: trimmedText,
-      done: false,
-      tag: selectedTag,
-      isPinned: isPinnedInput,
-      color: selectedColor,
-      createdAt: translateRelativeTime(language, 'Just now'),
-    };
-    setNotes((prev) => [newNote, ...prev]);
-    notifyLocalActivity('note', 'create');
-    setText('');
-    setIsPinnedInput(false);
+    if (!trimmedText || createNoteMutation.isPending) return;
+    createNoteMutation.mutate({ text: trimmedText, tag: selectedTag, isPinned: isPinnedInput, color: selectedColor }, {
+      onSuccess: () => {
+        notifyLocalActivity('note', 'create');
+        setText('');
+        setIsPinnedInput(false);
+      },
+    });
   };
 
-  const toggleDone = (id: number) => {
-    notifyLocalActivity('note', 'status');
-    setNotes((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
-    );
+  const toggleDone = (id: string) => {
+    const note = notes.find((item) => item.id === id);
+    if (!note) return;
+    updateNoteMutation.mutate({ id, payload: { done: !note.done } }, { onSuccess: () => notifyLocalActivity('note', 'status') });
   };
 
-  const togglePin = (id: number) => {
-    notifyLocalActivity('note', 'pin');
-    setNotes((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, isPinned: !item.isPinned } : item))
-    );
+  const togglePin = (id: string) => {
+    const note = notes.find((item) => item.id === id);
+    if (!note) return;
+    updateNoteMutation.mutate({ id, payload: { isPinned: !note.isPinned } }, { onSuccess: () => notifyLocalActivity('note', 'pin') });
   };
 
-  const deleteNote = (id: number) => {
-    setNotes((prev) => prev.filter((item) => item.id !== id));
-    notifyLocalActivity('note', 'delete');
+  const deleteNote = (id: string) => {
+    deleteNoteMutation.mutate(id, { onSuccess: () => notifyLocalActivity('note', 'delete') });
   };
 
-  const copyNoteText = (id: number, content: string) => {
+  const copyNoteText = (id: string, content: string) => {
     navigator.clipboard.writeText(content);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const convertToTask = (note: NoteItem) => {
+  const convertToTask = (note: ApiNote) => {
     navigate('/tasks', { state: { createTitle: note.text } });
   };
 
-  const startEdit = (note: NoteItem) => {
+  const startEdit = (note: ApiNote) => {
     setEditingNoteId(note.id);
     setEditingText(note.text);
   };
 
-  const saveEdit = (id: number) => {
+  const saveEdit = (id: string) => {
     if (editingText.trim()) {
-      if (notes.find((item) => item.id === id)?.text !== editingText.trim()) {
-        notifyLocalActivity('note', 'update');
-      }
-      setNotes((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, text: editingText.trim() } : item))
-      );
+      const changed = notes.find((item) => item.id === id)?.text !== editingText.trim();
+      if (changed) updateNoteMutation.mutate({ id, payload: { text: editingText.trim() } }, { onSuccess: () => notifyLocalActivity('note', 'update') });
     }
     setEditingNoteId(null);
   };
@@ -1496,7 +1437,7 @@ export const NotesPage: React.FC = () => {
   const completedCount = notes.filter((n) => n.done).length;
   const pinnedCount = notes.filter((n) => n.isPinned).length;
 
-  const renderNoteCard = (note: NoteItem) => {
+  const renderNoteCard = (note: ApiNote) => {
     const colorStyle = COLOR_MAP[note.color || 'white'] || COLOR_MAP.white;
     const isEditing = editingNoteId === note.id;
 
@@ -1693,13 +1634,19 @@ export const NotesPage: React.FC = () => {
           />
           <button
             onClick={addNote}
-            disabled={!text.trim()}
+            disabled={!text.trim() || createNoteMutation.isPending}
             className="inline-flex h-12 sm:h-auto items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 text-xs sm:text-sm font-extrabold text-white transition hover:bg-indigo-500 cursor-pointer shadow-md shadow-indigo-600/20 active:scale-95 disabled:opacity-50 shrink-0"
           >
             <Plus className="h-4 w-4" />
-            <span>{translate(language, 'notes.save')}</span>
+            <span>{createNoteMutation.isPending ? 'Đang lưu…' : translate(language, 'notes.save')}</span>
           </button>
         </div>
+
+        {(createNoteMutation.isError || isNotesError) && (
+          <p role="alert" className="text-xs font-bold text-rose-500">
+            Không thể lưu ghi chú. Vui lòng kiểm tra kết nối và thử lại.
+          </p>
+        )}
 
         {/* Options Toolbar: Tag, Color, Pin */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
@@ -1743,7 +1690,7 @@ export const NotesPage: React.FC = () => {
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setSelectedColor(c.id)}
+                  onClick={() => setSelectedColor(c.id as ApiNote['color'])}
                   className={clsx(
                     'w-5 h-5 rounded-full border transition-all cursor-pointer',
                     c.bg,
@@ -1841,7 +1788,12 @@ export const NotesPage: React.FC = () => {
       </div>
 
       {/* Grid Display: Pinned Notes & Regular Notes */}
-      {filteredNotes.length === 0 ? (
+      {isNotesLoading ? (
+        <div className="flex items-center justify-center p-12 rounded-3xl border border-slate-200 bg-white">
+          <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
+          <span className="ml-2 text-xs font-bold text-slate-500">Đang tải ghi chú...</span>
+        </div>
+      ) : filteredNotes.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-dashed border-slate-200 bg-white text-center">
           <StickyNote className="w-12 h-12 text-slate-300 mb-3" />
           <p className="text-sm font-bold text-slate-700">
