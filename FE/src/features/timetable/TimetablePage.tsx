@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TimetableHeader } from './components/TimetableHeader';
 import { TimetableGrid } from './components/TimetableGrid';
 import { ClassCardModal } from './components/ClassCardModal';
@@ -11,6 +11,7 @@ import { translate } from '@/lib/i18n';
 import { formatTimeRangeLabel, parseTimeToMinutes } from './utils/timetableTime';
 import { minutesToTimeString, TIMETABLE_GRID_END, rangesOverlap } from './utils/timetableTime';
 import { useUpdateTimetableItem } from './hooks/useTimetable';
+import { useCalendarRange } from '@/features/calendar/hooks/useCalendar';
 
 export const TimetablePage: React.FC = () => {
   const language = useCurrentLanguage();
@@ -24,6 +25,15 @@ export const TimetablePage: React.FC = () => {
   const [quickAddPosition, setQuickAddPosition] = useState<{ dayIndex: number; startTime: string } | null>(null);
 
   const { data: weeklyData, isLoading, isError } = useWeeklyTimetable();
+  const weekRange = useMemo(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return { start: start.toISOString(), end: end.toISOString() };
+  }, []);
+  const { data: calendarItems = [], isLoading: isCalendarLoading, isError: isCalendarError } = useCalendarRange(weekRange);
   const createItemMutation = useCreateTimetableItem();
   const deleteItemMutation = useDeleteTimetableItem();
   const createTimetableMutation = useCreateTimetable();
@@ -31,7 +41,7 @@ export const TimetablePage: React.FC = () => {
   const timetable = weeklyData?.timetable;
   const rawItems = weeklyData?.items || [];
 
-  const convertedClasses: TimetableClassItem[] = rawItems.map((item) => {
+  const timetableClasses: TimetableClassItem[] = rawItems.map((item) => {
     const startTime = (item.startTime || '09:00').slice(0, 5);
     const endTime = (item.endTime || '10:30').slice(0, 5);
 
@@ -66,8 +76,41 @@ export const TimetablePage: React.FC = () => {
       textColor: colorScheme.textColor,
       type: typeLower,
       typeLabel,
+      sourceType: 'TIMETABLE',
     };
   });
+
+  const calendarClasses: TimetableClassItem[] = calendarItems
+    .filter((item) => item.sourceType !== 'TIMETABLE')
+    .map((item) => {
+      const start = new Date(item.start);
+      const parsedEnd = item.end ? new Date(item.end) : new Date(start.getTime() + 60 * 60_000);
+      const end = parsedEnd > start ? parsedEnd : new Date(start.getTime() + 60 * 60_000);
+      const startTime = item.allDay ? '07:00' : start.toTimeString().slice(0, 5);
+      const endTime = item.allDay ? '08:00' : end.toTimeString().slice(0, 5);
+      const isTask = item.sourceType === 'TASK';
+      return {
+        id: `${item.sourceType.toLowerCase()}_${item.id}_${start.toISOString()}`,
+        subjectName: item.title,
+        courseCode: item.courseCode || '',
+        dayIndex: (start.getDay() + 6) % 7,
+        startTime,
+        endTime,
+        timeRange: item.allDay ? 'Cả ngày' : formatTimeRangeLabel(startTime, endTime),
+        room: item.location || item.room || 'Chưa xếp địa điểm',
+        lecturer: item.lecturer || '',
+        notes: item.description || undefined,
+        color: item.category?.color || (isTask ? '#2563EB' : '#E11D48'),
+        bgColor: item.category?.bgColor || (isTask ? '#DBEAFE' : '#FFE4E6'),
+        textColor: item.category?.textColor || (isTask ? '#1E3A8A' : '#9F1239'),
+        type: 'theory' as const,
+        typeLabel: isTask ? 'Công việc' : 'Lịch riêng',
+        sourceType: item.sourceType,
+        readOnly: true,
+      };
+    });
+
+  const convertedClasses = [...timetableClasses, ...calendarClasses];
 
   const handleSelectClass = (cls: TimetableClassItem) => {
     setSelectedClass(cls);
@@ -75,7 +118,7 @@ export const TimetablePage: React.FC = () => {
   };
 
   const handleMoveClass = (cls: TimetableClassItem, dayIndex: number, startTime: string) => {
-    if (!timetable?.id || moveMutation.isPending) return;
+    if (cls.readOnly || !timetable?.id || moveMutation.isPending) return;
     setMoveError('');
     if (cls.dayIndex === dayIndex && cls.startTime === startTime) return;
     const start = parseTimeToMinutes(startTime);
@@ -138,7 +181,7 @@ export const TimetablePage: React.FC = () => {
   const semesterInfo = {
     termName: timetable?.termName || `${translate(language, 'timetable.semester')} I`,
     academicYear: timetable?.academicYear || '2026 - 2027',
-    totalSubjects: timetable?.totalSubjects ?? convertedClasses.length,
+    totalSubjects: convertedClasses.length,
     totalCredits: convertedClasses.reduce((sum, c) => {
       const durationHours = (parseTimeToMinutes(c.endTime) - parseTimeToMinutes(c.startTime)) / 60;
       return sum + Math.max(1, Math.round(durationHours));
@@ -157,12 +200,12 @@ export const TimetablePage: React.FC = () => {
 
         {moveError && <p role="alert" className="text-sm text-rose-500">{moveError}</p>}
         <span role="status" className="sr-only">{moveMutation.isPending ? 'Đang lưu vị trí lịch…' : ''}</span>
-        {isLoading ? (
+        {isLoading || isCalendarLoading ? (
         <div className="flex items-center justify-center p-12 bg-white rounded-xl border border-[#E2E8F0] shadow-xs">
           <Loader2 className="w-6 h-6 animate-spin text-[#4F46E5]" />
           <span className="ml-2 text-xs font-semibold text-[#64748B]">{translate(language, 'timetable.loading')}</span>
         </div>
-      ) : isError ? (
+      ) : isError || isCalendarError ? (
         <div className="p-4 bg-[#FFF1F2] border border-[#FFE4E6] rounded-xl text-xs text-[#BA1A1A]">
           {translate(language, 'timetable.error')}
         </div>
@@ -182,8 +225,8 @@ export const TimetablePage: React.FC = () => {
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         selectedClass={selectedClass}
-        onDeleteClass={handleDeleteClass}
-        onEditClass={(cls) => { setIsDetailOpen(false); setEditingClass(cls); }}
+        onDeleteClass={selectedClass?.readOnly ? undefined : handleDeleteClass}
+        onEditClass={selectedClass?.readOnly ? undefined : (cls) => { setIsDetailOpen(false); setEditingClass(cls); }}
       />
 
       <AddSubjectModal

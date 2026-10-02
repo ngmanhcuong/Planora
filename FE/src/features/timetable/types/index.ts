@@ -14,6 +14,8 @@ export interface TimetableClassItem {
   type: 'theory' | 'practice' | 'exam';
   typeLabel: string;
   notes?: string;
+  sourceType?: 'TIMETABLE' | 'EVENT' | 'TASK';
+  readOnly?: boolean;
 }
 
 export interface TermSemesterInfo {

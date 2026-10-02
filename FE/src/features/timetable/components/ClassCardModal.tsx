@@ -100,20 +100,24 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
         )}
         {/* Modal Footer Actions */}
         <div className="flex items-center justify-between w-full pt-4 border-t border-[#E2E8F0] mt-2">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => {
-              onDeleteClass?.(selectedClass.id);
-              onClose();
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>Xóa môn này</span>
-          </Button>
+          {selectedClass.readOnly ? (
+            <span className="text-xs font-semibold text-[#64748B]">Quản lý mục này tại trang Lịch riêng</span>
+          ) : (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                onDeleteClass?.(selectedClass.id);
+                onClose();
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Xóa môn này</span>
+            </Button>
+          )}
 
           <div className="flex items-center gap-2">
-            {onEditClass && <Button variant="primary" size="sm" onClick={() => onEditClass(selectedClass)}>Chỉnh sửa</Button>}
+            {onEditClass && !selectedClass.readOnly && <Button variant="primary" size="sm" onClick={() => onEditClass(selectedClass)}>Chỉnh sửa</Button>}
             <Button variant="secondary" size="sm" onClick={onClose}>
               Đóng
             </Button>

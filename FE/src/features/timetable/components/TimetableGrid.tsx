@@ -171,8 +171,12 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
                     <button
                       type="button"
                       key={cls.id}
-                      draggable={!!onMoveClass && !isMoving}
+                      draggable={!!onMoveClass && !isMoving && !cls.readOnly}
                       onDragStart={(event) => {
+                        if (cls.readOnly) {
+                          event.preventDefault();
+                          return;
+                        }
                         event.dataTransfer.effectAllowed = 'move';
                         event.dataTransfer.setData('text/plain', cls.id);
                         setDragged(cls);
@@ -188,7 +192,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({ classes, onSelectC
                       title={`${cls.subjectName} · ${cls.timeRange} — Bấm để xem chi tiết`}
                       className={`group absolute left-1 right-1 z-10 flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-lg text-left shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${compact ? 'justify-center gap-0.5 px-2 py-0.5' : 'justify-between p-2'}`}
                       style={{
-                        cursor: isMoving ? 'wait' : 'grab',
+                        cursor: isMoving ? 'wait' : cls.readOnly ? 'pointer' : 'grab',
                         opacity: dragged?.id === cls.id ? 0.5 : 1,
                         top: `${topPx}px`,
                         height: `${heightPx}px`,
