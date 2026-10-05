@@ -36,6 +36,10 @@ export const updateSettings = async (req: Request, res: Response, next: NextFunc
     const settings = await settingsService.updateSettings(userId, parseResult.data);
     sendSuccess(res, 'Cập nhật cài đặt thành công', { settings }, 200);
   } catch (err: any) {
+    if (err.message === 'Chưa cấu hình SMTP nên chưa thể bật xác thực 2 yếu tố') {
+      sendError(res, err.message, undefined, 400);
+      return;
+    }
     next(err);
   }
 };

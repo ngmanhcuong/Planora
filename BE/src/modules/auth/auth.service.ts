@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../config/prisma';
 import { signAccessToken } from '../../utils/jwt';
-import { sendPasswordResetOtpEmail } from '../../utils/mailer';
+import { sendLoginAlertEmail, sendLoginOtpEmail, sendPasswordResetOtpEmail } from '../../utils/mailer';
 import type {
   RegisterInput,
   LoginInput,
@@ -10,7 +10,8 @@ import type {
   RequestPasswordResetOtpInput,
   VerifyPasswordResetOtpInput,
 } from './auth.schemas';
-import type { AuthSuccessData, SafeUserResponse } from './auth.types';
+import type { AuthSuccessData, SafeUserResponse, TwoFactorChallengeData } from './auth.types';
+import { randomUUID } from 'crypto';
 
 type GoogleTokenPayload = {
   aud?: string;
@@ -34,6 +35,10 @@ const PASSWORD_RESET_OTP_TTL_MS = 10 * 60 * 1000;
 const PASSWORD_RESET_OTP_MAX_ATTEMPTS = 5;
 
 const createOtpCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+type LoginChallenge = { userId: string; otpHash: string; expiresAt: number; attempts: number };
+const loginChallengeStore = new Map<string, LoginChallenge>();
+const LOGIN_OTP_TTL_MS = 10 * 60 * 1000;
 
 export class AuthService {
   async googleLogin(input: GoogleLoginInput): Promise<AuthSuccessData> {
@@ -224,7 +229,10 @@ export class AuthService {
     };
   }
 
-  async login(input: LoginInput): Promise<AuthSuccessData> {
+  async login(
+    input: LoginInput,
+    context: { ip?: string; userAgent?: string } = {}
+  ): Promise<AuthSuccessData | TwoFactorChallengeData> {
     const normalizedEmail = input.email.trim().toLowerCase();
 
     const user = await prisma.user.findUnique({
@@ -245,6 +253,42 @@ export class AuthService {
       throw new Error('Email hoặc mật khẩu không chính xác');
     }
 
+    const settings = await prisma.userSetting.findUnique({ where: { userId: user.id } });
+
+    if (settings?.twoFactorAuth) {
+      if (!input.challengeId || !input.otp) {
+        const otp = createOtpCode();
+        const challengeId = randomUUID();
+        loginChallengeStore.set(challengeId, {
+          userId: user.id,
+          otpHash: await bcrypt.hash(otp, 10),
+          expiresAt: Date.now() + LOGIN_OTP_TTL_MS,
+          attempts: 0,
+        });
+        await sendLoginOtpEmail(user.email, otp);
+        return {
+          requiresTwoFactor: true,
+          challengeId,
+          emailHint: user.email.replace(/^(.{2}).*(@.*)$/, '$1***$2'),
+        };
+      }
+
+      const challenge = loginChallengeStore.get(input.challengeId);
+      if (!challenge || challenge.userId !== user.id || challenge.expiresAt < Date.now()) {
+        loginChallengeStore.delete(input.challengeId);
+        throw new Error('Mã xác thực không tồn tại hoặc đã hết hạn');
+      }
+      if (challenge.attempts >= 5) {
+        loginChallengeStore.delete(input.challengeId);
+        throw new Error('Bạn đã nhập sai OTP quá nhiều lần');
+      }
+      if (!(await bcrypt.compare(input.otp, challenge.otpHash))) {
+        challenge.attempts += 1;
+        throw new Error('Mã xác thực không chính xác');
+      }
+      loginChallengeStore.delete(input.challengeId);
+    }
+
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,
@@ -261,6 +305,14 @@ export class AuthService {
       isVerified: user.isVerified,
       createdAt: user.createdAt,
     };
+
+    if (settings?.loginAlerts) {
+      void sendLoginAlertEmail(user.email, {
+        ip: context.ip,
+        userAgent: context.userAgent,
+        loggedInAt: new Date(),
+      }).catch((error) => console.error('[Login Alert] Failed to send email:', error));
+    }
 
     return {
       user: safeUser,

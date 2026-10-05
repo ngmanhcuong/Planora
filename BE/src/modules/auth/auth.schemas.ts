@@ -27,6 +27,8 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(1, { message: 'Mật khẩu không được để trống' }),
+  challengeId: z.string().min(1).optional(),
+  otp: z.string().regex(/^\d{6}$/, { message: 'Mã OTP phải gồm đúng 6 chữ số' }).optional(),
 });
 
 export const googleLoginSchema = z.object({

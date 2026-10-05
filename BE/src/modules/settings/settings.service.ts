@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../../config/prisma';
 import type { UpdateSettingsInput, ChangePasswordInput } from './settings.schemas';
 import type { UserSettingsResponse } from './settings.types';
+import { config } from '../../config';
 
 export class SettingsService {
   async getSettings(userId: string): Promise<UserSettingsResponse> {
@@ -35,6 +36,13 @@ export class SettingsService {
 
     if (!existing) {
       throw new Error('Cài đặt người dùng không tồn tại');
+    }
+
+    if (input.twoFactorAuth === true) {
+      const smtp = config.smtp;
+      if (!smtp.host || !smtp.port || !smtp.user || !smtp.pass || !smtp.from) {
+        throw new Error('Chưa cấu hình SMTP nên chưa thể bật xác thực 2 yếu tố');
+      }
     }
 
     await prisma.userSetting.update({

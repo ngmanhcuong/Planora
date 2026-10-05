@@ -1,0 +1,29 @@
+name: Planora reminder scheduler
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: planora-reminder-scheduler
+  cancel-in-progress: false
+
+jobs:
+  run-reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Wake backend and process due reminders
+        env:
+          BACKEND_URL: ${{ vars.PLANORA_BACKEND_URL || 'https://planora-backend-dsfn.onrender.com' }}
+          CRON_SECRET: ${{ secrets.PLANORA_CRON_SECRET }}
+        run: |
+          test -n "$CRON_SECRET"
+          curl --fail-with-body \
+            --retry 2 \
+            --retry-all-errors \
+            --connect-timeout 30 \
+            --max-time 150 \
+            -X POST "$BACKEND_URL/api/notifications/run-scheduler" \
+            -H "x-cron-secret: $CRON_SECRET"

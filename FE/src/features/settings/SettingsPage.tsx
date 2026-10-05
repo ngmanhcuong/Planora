@@ -54,6 +54,17 @@ export const SettingsPage: React.FC = () => {
     updateSettingsMutation.mutate(updated);
   };
 
+  const handleUpdateSecuritySettings = async (updated: Partial<UserSettingsState>) => {
+    const previous = settings;
+    setLocalSettings((current) => ({ ...(current ?? settings), ...updated }));
+    try {
+      await updateSettingsMutation.mutateAsync(updated);
+    } catch (error) {
+      setLocalSettings(previous);
+      throw error;
+    }
+  };
+
   const handleUpdateNotificationSettings = (updated: Partial<UserSettingsState>) => {
     setLocalSettings((current) => ({
       ...(current ?? settings),
@@ -118,7 +129,7 @@ export const SettingsPage: React.FC = () => {
           isSaving={updateSettingsMutation.isPending}
           isSaved={notificationSaved}
         />
-        <SecuritySettingsSection settings={settings} onUpdate={handleUpdateSettings} />
+        <SecuritySettingsSection settings={settings} onUpdate={handleUpdateSecuritySettings} />
         <AppearanceSettingsSection settings={settings} onUpdate={handleUpdateSettings} />
       </div>
     </div>

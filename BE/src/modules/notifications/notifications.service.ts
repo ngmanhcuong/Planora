@@ -50,7 +50,7 @@ function getTaskDueAt(task: { dueDate: Date; dueTime?: string | null }): Date {
 
 export class NotificationsService {
   private static pendingGeneration = new Map<string, Promise<{ createdCount: number }>>();
-  private static allUsersGeneration: Promise<void> | null = null;
+  private static allUsersGeneration: Promise<{ processedUsers: number; createdCount: number }> | null = null;
   /**
    * Internal method to create a notification with duplicate prevention
    */
@@ -277,18 +277,21 @@ export class NotificationsService {
     return work;
   }
 
-  static async generateDueNotificationsForAllUsers(): Promise<void> {
+  static async generateDueNotificationsForAllUsers(): Promise<{ processedUsers: number; createdCount: number }> {
     if (this.allUsersGeneration) return this.allUsersGeneration;
 
     this.allUsersGeneration = (async () => {
       const users = await prisma.user.findMany({ select: { id: true } });
+      let createdCount = 0;
       for (const user of users) {
         try {
-          await this.generateDueNotifications(user.id);
+          const result = await this.generateDueNotifications(user.id);
+          createdCount += result.createdCount;
         } catch (error) {
           console.error('[Reminder scheduler] User generation failed:', user.id, error instanceof Error ? error.message : error);
         }
       }
+      return { processedUsers: users.length, createdCount };
     })().finally(() => {
       this.allUsersGeneration = null;
     });

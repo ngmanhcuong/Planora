@@ -13,3 +13,9 @@ export interface AuthSuccessData {
   user: SafeUserResponse;
   accessToken: string;
 }
+
+export interface TwoFactorChallengeData {
+  requiresTwoFactor: true;
+  challengeId: string;
+  emailHint: string;
+}

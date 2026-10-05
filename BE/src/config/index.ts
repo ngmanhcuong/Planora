@@ -17,4 +17,5 @@ export const config = {
     pass: env.SMTP_PASS,
     from: env.SMTP_FROM,
   },
+  cronSecret: env.CRON_SECRET,
 };

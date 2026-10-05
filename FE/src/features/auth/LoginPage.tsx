@@ -37,6 +37,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [loginChallenge, setLoginChallenge] = useState<{ id: string; emailHint: string; email: string; password: string } | null>(null);
+  const [loginOtp, setLoginOtp] = useState('');
 
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -80,6 +82,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
       });
 
       if (response.data && response.data.success) {
+        if (response.data.data?.requiresTwoFactor) {
+          setLoginChallenge({
+            id: response.data.data.challengeId,
+            emailHint: response.data.data.emailHint,
+            email: data.email,
+            password: data.password,
+          });
+          setLoginOtp('');
+          setIsSubmitting(false);
+          return;
+        }
         const { accessToken, user: apiUser } = response.data.data;
         const user: User = {
           id: apiUser.id,
@@ -99,6 +112,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Email hoặc mật khẩu không chính xác.';
       setAuthError(msg);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLoginOtpSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!loginChallenge || loginOtp.length !== 6) {
+      setAuthError('Vui lòng nhập đúng mã OTP gồm 6 chữ số.');
+      return;
+    }
+    setIsSubmitting(true);
+    setAuthError(null);
+    try {
+      const response = await apiClient.post('/auth/login', {
+        email: loginChallenge.email,
+        password: loginChallenge.password,
+        challengeId: loginChallenge.id,
+        otp: loginOtp,
+      });
+      const { accessToken, user: apiUser } = response.data.data;
+      const user: User = {
+        id: apiUser.id,
+        name: apiUser.name,
+        email: apiUser.email,
+        role: apiUser.role,
+        isVerified: apiUser.isVerified,
+      };
+      setAuth(accessToken, user);
+      navigate(user.role === 'ADMIN' ? '/admin' : '/dashboard');
+    } catch (err: any) {
+      setAuthError(err.response?.data?.message || 'Mã xác thực không chính xác hoặc đã hết hạn.');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -274,6 +319,35 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
                 </div>
               )}
 
+              {loginChallenge ? (
+                <form onSubmit={handleLoginOtpSubmit} className="space-y-3">
+                  <div className="rounded-xl border border-indigo-800/60 bg-indigo-950/40 p-3 text-xs text-slate-300">
+                    <div className="mb-1 flex items-center gap-2 font-semibold text-indigo-300">
+                      <ShieldCheck className="h-4 w-4" /> Xác thực 2 yếu tố
+                    </div>
+                    Mã OTP đã được gửi tới <strong className="text-white">{loginChallenge.emailHint}</strong>.
+                  </div>
+                  <div>
+                    <label htmlFor="login-otp" className="mb-1 block text-xs font-medium text-slate-300">Mã OTP</label>
+                    <input
+                      id="login-otp"
+                      value={loginOtp}
+                      onChange={(event) => setLoginOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      className="block w-full rounded-xl border border-slate-800 bg-[#0F172A] px-3 py-2.5 text-center font-mono text-lg tracking-[0.45em] text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/15"
+                      placeholder="000000"
+                      autoFocus
+                    />
+                  </div>
+                  <button type="submit" disabled={isSubmitting || loginOtp.length !== 6} className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+                    {isSubmitting ? 'Đang xác thực...' : 'Xác nhận và đăng nhập'}
+                  </button>
+                  <button type="button" onClick={() => { setLoginChallenge(null); setLoginOtp(''); setAuthError(null); }} className="w-full text-xs text-slate-400 hover:text-white">
+                    Quay lại đăng nhập
+                  </button>
+                </form>
+              ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
                 <div>
                   <label htmlFor="email" className="block text-xs font-medium text-slate-300 mb-1">
@@ -382,6 +456,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
                   </button>
                 </div>
               </form>
+              )}
 
               <div className="mt-3 text-center text-xs text-slate-400">
                 Chưa có tài khoản?{' '}

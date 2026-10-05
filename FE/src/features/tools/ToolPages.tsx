@@ -2276,13 +2276,13 @@ export const ReportsPage: React.FC = () => {
         ].map((item) => (
           <article
             key={item.label}
-            className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm hover:-translate-y-1 hover:shadow-lg transition-all"
+            className="rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all dark:border-slate-700/80 dark:bg-slate-900/90"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`w-10 h-10 rounded-2xl border ${item.bg} ${item.color} flex items-center justify-center`}>
                 <item.icon className="h-5 w-5" />
               </div>
-              <span className="text-[11px] font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+              <span className="text-[11px] font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 dark:text-indigo-200 dark:bg-indigo-500/15 dark:border-indigo-400/20">
                 {item.trend}
               </span>
             </div>
@@ -2295,9 +2295,9 @@ export const ReportsPage: React.FC = () => {
       </div>
 
       {/* Main Bar Chart & Day Detail Column */}
-      <section className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+      <section className="grid gap-6 lg:grid-cols-5">
         {/* Interactive Bar Chart Card */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+        <div className="rounded-[30px] border border-slate-200/80 bg-white/95 p-6 shadow-sm flex flex-col justify-between relative overflow-hidden lg:col-span-3 dark:border-slate-700/80 dark:bg-slate-900/90">
           {/* Top Card Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -2380,7 +2380,7 @@ export const ReportsPage: React.FC = () => {
                     </div>
 
                     {/* Glassmorphic Bar Container */}
-                    <div className="report-chart-rail flex h-48 w-full items-end rounded-2xl bg-slate-100/60 p-1.5 transition-all group-hover:bg-indigo-50/80 border border-slate-200/50">
+                    <div className="flex h-48 w-full items-end rounded-[18px] bg-slate-100/80 p-1.5 transition-all group-hover:bg-indigo-50/80 border border-slate-200/60 dark:bg-slate-800/80 dark:border-slate-700/80 dark:group-hover:bg-indigo-950/40">
                       <div
                         className={clsx(
                           'w-full rounded-xl transition-all duration-500 relative overflow-hidden',
@@ -2390,7 +2390,7 @@ export const ReportsPage: React.FC = () => {
                               ? 'bg-gradient-to-t from-indigo-700 via-indigo-600 to-violet-500 shadow-[0_4px_20px_rgba(79,70,229,0.45)] ring-2 ring-indigo-600 ring-offset-2 scale-[1.03]'
                               : item.value > 0
                                 ? 'bg-gradient-to-t from-indigo-500 via-indigo-400 to-violet-400 opacity-75 group-hover:opacity-100 group-hover:shadow-md'
-                                : 'report-empty-bar bg-slate-200/60'
+                                : 'bg-slate-300/70 dark:bg-slate-600/70'
                         )}
                         style={{ height: `${Math.max(8, item.value)}%` }}
                       >
@@ -2418,7 +2418,7 @@ export const ReportsPage: React.FC = () => {
         </div>
 
         {/* Selected Day Inspector & Breakdown */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm space-y-5 flex flex-col justify-between">
+        <div className="rounded-[30px] border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-5 flex flex-col justify-between lg:col-span-2 dark:border-slate-700/80 dark:bg-slate-900/90">
           <div>
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
               <div className="flex items-center gap-2.5">
@@ -2436,7 +2436,7 @@ export const ReportsPage: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between dark:bg-slate-800/70 dark:border-slate-700/80">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>{getMultiLangText(language, { vi: 'Task hoàn thành', en: 'Completed tasks', ja: '完了したタスク', ko: '완료된 작업', zh: '已完成任务', fr: 'Tâches terminées', de: 'Erledigte Aufgaben', es: 'Tareas completadas' })}</span>
@@ -2444,7 +2444,7 @@ export const ReportsPage: React.FC = () => {
                 <span className="text-xs font-black text-slate-900">{selectedData.tasksCompleted}/{selectedData.tasksTotal || selectedData.tasksCompleted}</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between dark:bg-slate-800/70 dark:border-slate-700/80">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
                   <Clock className="w-4 h-4 text-indigo-600" />
                   <span>{getMultiLangText(language, { vi: 'Sự kiện & Lịch trình', en: 'Events & Schedules', ja: 'イベント & スケジュール', ko: '일정 & 스케줄', zh: '事件与日程', fr: 'Événements & Plannings', de: 'Termine & Zeitpläne', es: 'Eventos y Horarios' })}</span>
@@ -2452,7 +2452,7 @@ export const ReportsPage: React.FC = () => {
                 <span className="text-xs font-black text-slate-900">{selectedData.events} {getMultiLangText(language, { vi: 'mục', en: 'items', ja: '件', ko: '개', zh: '项', fr: 'éléments', de: 'Elemente', es: 'elementos' })}</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between dark:bg-slate-800/70 dark:border-slate-700/80">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
                   <Zap className="w-4 h-4 text-amber-500" />
                   <span>{getMultiLangText(language, { vi: 'Thói quen tích lũy', en: 'Accumulated habits', ja: '蓄積された習慣', ko: '누적 습관', zh: '累计习惯', fr: 'Habitudes accumulées', de: 'Kumulierte Gewohnheiten', es: 'Hábitos acumulados' })}</span>
@@ -2462,7 +2462,7 @@ export const ReportsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="report-live-note p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100 dark:from-indigo-950/50 dark:to-slate-800 dark:border-indigo-400/20">
             <div className="flex items-center gap-2 text-xs font-extrabold text-indigo-950 mb-1">
               <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
               <span>{translate(language, 'reports.realtimeData')}</span>
@@ -2477,7 +2477,7 @@ export const ReportsPage: React.FC = () => {
       {/* Category Breakdown & AI Advice Section */}
       <section className="grid gap-6 md:grid-cols-2">
         {/* Category Time Distribution */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm space-y-4">
+        <div className="rounded-[30px] border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-4 dark:border-slate-700/80 dark:bg-slate-900/90">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
@@ -2501,7 +2501,7 @@ export const ReportsPage: React.FC = () => {
                     <span className={`font-black ${cat.text}`}>{cat.percent}%</span>
                   </div>
                 </div>
-                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
                   <div
                     className={`h-full rounded-full ${cat.color} transition-all duration-500`}
                     style={{ width: `${Math.max(5, cat.percent)}%` }}
@@ -2513,7 +2513,7 @@ export const ReportsPage: React.FC = () => {
         </div>
 
         {/* AI Productivity Suggestions */}
-        <div className="reports-ai-advice-card relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 shadow-sm">
+        <div className="reports-ai-advice-card relative flex flex-col justify-between overflow-hidden rounded-[30px] p-6 shadow-sm">
           <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
 
           <div className="space-y-4 relative z-10">
@@ -2606,4 +2606,6 @@ export const ReportsPage: React.FC = () => {
     </div>
   );
 };
+
+
 

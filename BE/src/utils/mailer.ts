@@ -216,3 +216,29 @@ export const sendPasswordResetOtpEmail = async (to: string, otp: string): Promis
     `,
   });
 };
+
+export const sendLoginOtpEmail = async (to: string, otp: string): Promise<void> => {
+  const { mailConfig, transporter } = createTransporter();
+  await transporter.sendMail({
+    from: mailConfig.from,
+    to,
+    subject: 'Mã xác thực đăng nhập Planora',
+    text: `Mã xác thực đăng nhập Planora của bạn là ${otp}. Mã có hiệu lực trong 10 phút.`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:32px;color:#172033"><img src="${EMAIL_LOGO_URL}" width="132" alt="Planora"><h2>Xác thực đăng nhập</h2><p>Dùng mã sau để hoàn tất đăng nhập. Mã có hiệu lực trong 10 phút.</p><div style="font-size:34px;font-weight:800;letter-spacing:8px;background:#f1f5f9;padding:20px;text-align:center;border-radius:12px">${otp}</div><p style="color:#64748b">Nếu bạn không thực hiện đăng nhập này, hãy đổi mật khẩu ngay.</p></div>`,
+  });
+};
+
+export const sendLoginAlertEmail = async (
+  to: string,
+  details: { ip?: string; userAgent?: string; loggedInAt: Date }
+): Promise<void> => {
+  const { mailConfig, transporter } = createTransporter();
+  const time = details.loggedInAt.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+  await transporter.sendMail({
+    from: mailConfig.from,
+    to,
+    subject: 'Cảnh báo đăng nhập tài khoản Planora',
+    text: `Tài khoản của bạn vừa đăng nhập lúc ${time}. IP: ${details.ip || 'Không xác định'}. Thiết bị: ${details.userAgent || 'Không xác định'}.`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:32px;color:#172033"><img src="${EMAIL_LOGO_URL}" width="132" alt="Planora"><h2>Phát hiện lượt đăng nhập mới</h2><p>Tài khoản Planora của bạn vừa được đăng nhập.</p><table style="width:100%;background:#f8fafc;padding:16px;border-radius:10px"><tr><td>Thời gian</td><td><b>${escapeHtml(time)}</b></td></tr><tr><td>IP</td><td><b>${escapeHtml(details.ip || 'Không xác định')}</b></td></tr><tr><td>Thiết bị</td><td><b>${escapeHtml(details.userAgent || 'Không xác định')}</b></td></tr></table><p>Nếu đây không phải bạn, hãy đổi mật khẩu ngay.</p></div>`,
+  });
+};

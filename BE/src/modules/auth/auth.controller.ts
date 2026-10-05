@@ -39,11 +39,18 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       return;
     }
 
-    const result = await authService.login(parseResult.data);
-    sendSuccess(res, 'Đăng nhập thành công', result, 200);
+    const result = await authService.login(parseResult.data, {
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+    sendSuccess(res, 'requiresTwoFactor' in result ? 'Vui lòng nhập mã xác thực đã gửi qua email' : 'Đăng nhập thành công', result, 200);
   } catch (err: any) {
     if (err.message === 'Email hoặc mật khẩu không chính xác') {
       sendError(res, err.message, undefined, 401);
+      return;
+    }
+    if (String(err.message).includes('Mã xác thực') || String(err.message).includes('OTP quá nhiều')) {
+      sendError(res, err.message, undefined, 400);
       return;
     }
     next(err);

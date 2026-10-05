@@ -6,10 +6,11 @@ import { normalizeLanguage, translate } from '@/lib/i18n';
 import type { UserSettingsState } from '../types';
 
 import { useChangePassword } from '../hooks/useSettings';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export interface SecuritySettingsProps {
   settings: UserSettingsState;
-  onUpdate: (updated: Partial<UserSettingsState>) => void;
+  onUpdate: (updated: Partial<UserSettingsState>) => Promise<void> | void;
 }
 
 export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
@@ -17,13 +18,28 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
   onUpdate,
 }) => {
   const language = normalizeLanguage(settings.language);
+  const currentUser = useAuthStore((state) => state.user);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passSuccess, setPassSuccess] = useState(false);
   const [passError, setPassError] = useState('');
+  const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const changePasswordMutation = useChangePassword();
+
+  const updateSecuritySetting = async (updated: Partial<UserSettingsState>) => {
+    setSecurityMessage(null);
+    try {
+      await onUpdate(updated);
+      setSecurityMessage({ type: 'success', text: 'Đã lưu thiết lập bảo mật vào tài khoản.' });
+    } catch (error: any) {
+      setSecurityMessage({
+        type: 'error',
+        text: error.response?.data?.message || 'Không thể lưu thiết lập bảo mật.',
+      });
+    }
+  };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +47,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       setPassError(translate(language, 'settings.security.password.error.currentRequired'));
       return;
     }
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       setPassError(translate(language, 'settings.security.password.error.minLength'));
       return;
     }
@@ -67,7 +83,21 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       </div>
 
       {/* Password Form */}
-      <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4 border-b border-[#F1F5F9] pb-6">
+      <form
+        onSubmit={handlePasswordSubmit}
+        autoComplete="off"
+        className="flex flex-col gap-4 border-b border-[#F1F5F9] pb-6"
+      >
+        <input
+          type="text"
+          name="username"
+          value={currentUser?.email || ''}
+          autoComplete="username"
+          readOnly
+          tabIndex={-1}
+          aria-hidden="true"
+          className="sr-only"
+        />
         <h4 className="text-xs font-bold text-[#131B2E] uppercase tracking-wider">
           {translate(language, 'settings.security.password.title')}
         </h4>
@@ -88,6 +118,10 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
         <Input
           label={translate(language, 'settings.security.password.current')}
           type="password"
+          name={`planora-current-password-${currentUser?.id || 'user'}`}
+          autoComplete="new-password"
+          data-lpignore="true"
+          data-1p-ignore="true"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
           placeholder="••••••••"
@@ -98,6 +132,10 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
           <Input
             label={translate(language, 'settings.security.password.new')}
             type="password"
+            name="new-password"
+            autoComplete="new-password"
+            data-lpignore="true"
+            data-1p-ignore="true"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="••••••••"
@@ -107,6 +145,10 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
           <Input
             label={translate(language, 'settings.security.password.confirm')}
             type="password"
+            name="confirm-password"
+            autoComplete="new-password"
+            data-lpignore="true"
+            data-1p-ignore="true"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••••"
@@ -115,20 +157,25 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
         </div>
 
         <div className="flex justify-end pt-2">
-          <Button type="submit" variant="primary" size="sm">
+          <Button type="submit" variant="primary" size="sm" disabled={changePasswordMutation.isPending}>
             <span>{translate(language, 'settings.security.password.update')}</span>
           </Button>
         </div>
       </form>
 
       {/* 2FA Toggle */}
+      {securityMessage && (
+        <div className={`rounded-lg border p-2.5 text-xs font-semibold ${securityMessage.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+          {securityMessage.text}
+        </div>
+      )}
       <div className="flex items-center justify-between gap-4 py-2 border-b border-[#F1F5F9]">
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.security.twoFactor.title')}</span>
           <span className="text-xs text-[#64748B]">{translate(language, 'settings.security.twoFactor.subtitle')}</span>
         </div>
         <button
-          onClick={() => onUpdate({ twoFactorAuth: !settings.twoFactorAuth })}
+          onClick={() => updateSecuritySetting({ twoFactorAuth: !settings.twoFactorAuth })}
           className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.twoFactorAuth ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}
@@ -148,7 +195,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
           <span className="text-xs text-[#64748B]">{translate(language, 'settings.security.loginAlerts.subtitle')}</span>
         </div>
         <button
-          onClick={() => onUpdate({ loginAlerts: !settings.loginAlerts })}
+          onClick={() => updateSecuritySetting({ loginAlerts: !settings.loginAlerts })}
           className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
             settings.loginAlerts ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
           }`}

@@ -4,8 +4,41 @@ import { authenticate } from '../../middlewares/auth.middleware';
 import { z } from 'zod';
 import { prisma } from '../../config/prisma';
 import { sendSuccess, sendError } from '../../utils/response';
+import { timingSafeEqual } from 'crypto';
+import { config } from '../../config';
+import { NotificationsService } from './notifications.service';
 
 const notificationRouter = Router();
+
+const hasValidCronSecret = (providedSecret?: string) => {
+  const configuredSecret = config.cronSecret;
+  if (!configuredSecret || !providedSecret) return false;
+  const configured = Buffer.from(configuredSecret);
+  const provided = Buffer.from(providedSecret);
+  return configured.length === provided.length && timingSafeEqual(configured, provided);
+};
+
+// This endpoint is called by an external scheduler so reminders continue to
+// run while a free Render instance has no active users. It intentionally sits
+// before authenticate and is protected by a dedicated secret.
+notificationRouter.post('/run-scheduler', async (req, res, next) => {
+  const secret = req.header('x-cron-secret');
+  if (!config.cronSecret) {
+    sendError(res, 'Chưa cấu hình CRON_SECRET cho bộ lập lịch', undefined, 503);
+    return;
+  }
+  if (!hasValidCronSecret(secret)) {
+    sendError(res, 'Không có quyền chạy bộ lập lịch', undefined, 401);
+    return;
+  }
+
+  try {
+    const result = await NotificationsService.generateDueNotificationsForAllUsers();
+    sendSuccess(res, 'Đã chạy bộ lập lịch nhắc hạn', result);
+  } catch (error) {
+    next(error);
+  }
+});
 
 notificationRouter.use(authenticate);
 

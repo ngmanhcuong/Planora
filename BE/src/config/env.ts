@@ -17,6 +17,7 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
+  CRON_SECRET: z.string().optional(),
 });
 
 const parseEnv = () => {
