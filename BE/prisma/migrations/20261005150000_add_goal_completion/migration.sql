@@ -1,0 +1,3 @@
+ALTER TABLE `goals`
+  ADD COLUMN `isCompleted` BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN `completedAt` DATETIME(3) NULL;

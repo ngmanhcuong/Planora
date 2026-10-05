@@ -259,6 +259,8 @@ model Goal {
   categoryColor  String   @default("indigo")
   targetDate     DateTime
   targetWorkload Int      @default(1)
+  isCompleted    Boolean  @default(false)
+  completedAt    DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

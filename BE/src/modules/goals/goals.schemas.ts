@@ -8,6 +8,7 @@ export const createGoalSchema = z.object({
   categoryColor: z.enum(['indigo', 'emerald', 'rose', 'amber', 'purple', 'sky']).optional().default('indigo'),
   targetDate: z.string().refine((value) => !Number.isNaN(Date.parse(value)), 'Hạn chót không hợp lệ'),
   targetWorkload: z.number().int().min(1).max(1000).optional().default(1),
+  isCompleted: z.boolean().optional().default(false),
 });
 
 export const updateGoalSchema = createGoalSchema;

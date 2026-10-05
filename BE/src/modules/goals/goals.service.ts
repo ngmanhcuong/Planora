@@ -19,12 +19,17 @@ export class GoalsService {
         categoryColor: input.categoryColor,
         targetDate: new Date(input.targetDate),
         targetWorkload: input.targetWorkload,
+        isCompleted: input.isCompleted,
+        completedAt: input.isCompleted ? new Date() : null,
       },
     });
   }
 
   static async update(userId: string, goalId: string, input: CreateGoalInput) {
-    const goal = await prisma.goal.findFirst({ where: { id: goalId, userId }, select: { id: true } });
+    const goal = await prisma.goal.findFirst({
+      where: { id: goalId, userId },
+      select: { id: true, completedAt: true },
+    });
     if (!goal) throw new Error('Không tìm thấy mục tiêu');
     return prisma.goal.update({
       where: { id: goalId },
@@ -35,6 +40,8 @@ export class GoalsService {
         categoryColor: input.categoryColor,
         targetDate: new Date(input.targetDate),
         targetWorkload: input.targetWorkload,
+        isCompleted: input.isCompleted,
+        completedAt: input.isCompleted ? (goal.completedAt || new Date()) : null,
       },
     });
   }

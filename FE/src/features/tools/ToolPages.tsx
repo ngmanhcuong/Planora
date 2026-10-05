@@ -167,12 +167,13 @@ const calculateGoalEvaluation = (goal: GoalItem, tasks: Array<any>) => {
         ? 50
         : 0;
 
-  const progress = clampPercent(taskProgress * 0.4 + timeScore * 0.3 + workloadScore * 0.3);
+  const calculatedProgress = clampPercent(taskProgress * 0.4 + timeScore * 0.3 + workloadScore * 0.3);
+  const progress = goal.isCompleted ? 100 : calculatedProgress;
 
   return {
     ...goal,
     progress,
-    isCompleted: progress >= 100,
+    isCompleted: Boolean(goal.isCompleted) || progress >= 100,
     metrics: {
       taskProgress: clampPercent(taskProgress),
       timeScore: clampPercent(timeScore),
@@ -565,6 +566,7 @@ export const GoalsPage: React.FC = () => {
     categoryColor: goal.categoryColor,
     targetDate: goal.targetDate.slice(0, 10),
     targetWorkload: goal.targetWorkload,
+    isCompleted: goal.isCompleted,
     progress: 0,
   })), [goalsData]);
   const evaluatedGoals = useMemo(
@@ -656,8 +658,24 @@ export const GoalsPage: React.FC = () => {
         categoryColor: isCustomCategory ? editCategoryColor : 'indigo',
         targetDate: new Date(`${editTargetDate}T23:59:59`).toISOString(),
         targetWorkload: editTargetWorkload,
+        isCompleted: editingGoal.isCompleted,
       },
     }, { onSuccess: () => setEditingGoal(null) });
+  };
+
+  const handleToggleGoalCompletion = (goal: GoalItem) => {
+    updateGoalMutation.mutate({
+      id: goal.id,
+      payload: {
+        title: goal.title,
+        description: goal.description,
+        category: goal.category,
+        categoryColor: goal.categoryColor || 'indigo',
+        targetDate: new Date(`${goal.targetDate}T23:59:59`).toISOString(),
+        targetWorkload: goal.targetWorkload || 1,
+        isCompleted: !goal.isCompleted,
+      },
+    });
   };
 
   return (
@@ -1183,16 +1201,37 @@ export const GoalsPage: React.FC = () => {
                     {translateCategory(language, catConfig.label)}
                   </span>
 
-                  <button
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      deleteGoalMutation.mutate(goal.id);
-                    }}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
-                    title={goalsCopy.deleteGoal}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleToggleGoalCompletion(goal);
+                      }}
+                      disabled={updateGoalMutation.isPending}
+                      className={clsx(
+                        'grid h-8 w-8 place-items-center rounded-full border-2 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-60',
+                        isDone
+                          ? 'border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/25'
+                          : 'border-slate-300 bg-white text-transparent hover:border-emerald-500 hover:bg-emerald-50'
+                      )}
+                      title={isDone ? getMultiLangText(language, { vi: 'Đánh dấu chưa hoàn thành', en: 'Mark as incomplete', ja: '未完了にする', ko: '미완료로 표시', zh: '标记为未完成', fr: 'Marquer comme non terminé', de: 'Als nicht erledigt markieren', es: 'Marcar como incompleto' }) : goalsCopy.completed}
+                      aria-label={isDone ? 'Đánh dấu chưa hoàn thành' : goalsCopy.completed}
+                    >
+                      <Check className="h-4 w-4" strokeWidth={3} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        deleteGoalMutation.mutate(goal.id);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                      title={goalsCopy.deleteGoal}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Title */}

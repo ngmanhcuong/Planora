@@ -9,6 +9,8 @@ export interface ApiGoal {
   categoryColor: string;
   targetDate: string;
   targetWorkload: number;
+  isCompleted: boolean;
+  completedAt?: string | null;
 }
 
 export interface CreateGoalPayload {
@@ -18,6 +20,7 @@ export interface CreateGoalPayload {
   categoryColor?: string;
   targetDate: string;
   targetWorkload?: number;
+  isCompleted?: boolean;
 }
 
 export type UpdateGoalPayload = CreateGoalPayload;
