@@ -1190,18 +1190,17 @@ export const GoalsPage: React.FC = () => {
               <div>
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <span
-                    className={clsx(
-                      'inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-extrabold border',
-                      catConfig.bg,
-                      catConfig.color
-                    )}
-                  >
-                    <CatIcon className="w-3.5 h-3.5" />
-                    {translateCategory(language, catConfig.label)}
-                  </span>
-
-                  <div className="flex items-center gap-1.5">
+                  <div className="relative inline-flex">
+                    <span
+                      className={clsx(
+                        'inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-extrabold border',
+                        catConfig.bg,
+                        catConfig.color
+                      )}
+                    >
+                      <CatIcon className="w-3.5 h-3.5" />
+                      {translateCategory(language, catConfig.label)}
+                    </span>
                     <button
                       type="button"
                       onClick={(event) => {
@@ -1210,28 +1209,29 @@ export const GoalsPage: React.FC = () => {
                       }}
                       disabled={updateGoalMutation.isPending}
                       className={clsx(
-                        'group/check relative grid h-7 w-7 place-items-center rounded-full border transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60',
+                        'group/check absolute -right-2 -top-2 grid h-5 w-5 place-items-center rounded-full border transition-all duration-200 cursor-pointer ring-2 ring-white disabled:cursor-not-allowed disabled:opacity-60',
                         isDone
-                          ? 'border-emerald-400 bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-sm shadow-emerald-500/25 ring-2 ring-emerald-100'
-                          : 'border-slate-200 bg-slate-50 text-slate-300 shadow-inner hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-500 hover:ring-2 hover:ring-indigo-100'
+                          ? 'border-emerald-400 bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-sm shadow-emerald-500/25'
+                          : 'border-slate-200 bg-white text-slate-300 shadow-sm hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-500'
                       )}
                       title={isDone ? getMultiLangText(language, { vi: 'Đánh dấu chưa hoàn thành', en: 'Mark as incomplete', ja: '未完了にする', ko: '미완료로 표시', zh: '标记为未完成', fr: 'Marquer comme non terminé', de: 'Als nicht erledigt markieren', es: 'Marcar como incompleto' }) : goalsCopy.completed}
                       aria-label={isDone ? 'Đánh dấu chưa hoàn thành' : goalsCopy.completed}
                     >
-                      <Check className={clsx('h-3.5 w-3.5 transition-all duration-200', !isDone && 'scale-75 opacity-0 group-hover/check:scale-100 group-hover/check:opacity-100')} strokeWidth={3} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        deleteGoalMutation.mutate(goal.id);
-                      }}
-                      className="rounded-lg p-1.5 text-slate-300 opacity-60 transition-all cursor-pointer hover:bg-rose-50 hover:text-rose-500 hover:opacity-100 group-hover:opacity-100"
-                      title={goalsCopy.deleteGoal}
-                    >
-                      <Trash2 className="w-4 h-4" />
+                      <Check className={clsx('h-2.5 w-2.5 transition-all duration-200', !isDone && 'scale-75 opacity-0 group-hover/check:scale-100 group-hover/check:opacity-100')} strokeWidth={3.5} />
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      deleteGoalMutation.mutate(goal.id);
+                    }}
+                    className="rounded-lg p-1.5 text-slate-300 opacity-60 transition-all cursor-pointer hover:bg-rose-50 hover:text-rose-500 hover:opacity-100 group-hover:opacity-100"
+                    title={goalsCopy.deleteGoal}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 {/* Title */}
