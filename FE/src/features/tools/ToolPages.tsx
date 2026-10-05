@@ -1210,15 +1210,15 @@ export const GoalsPage: React.FC = () => {
                       }}
                       disabled={updateGoalMutation.isPending}
                       className={clsx(
-                        'grid h-8 w-8 place-items-center rounded-full border-2 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-60',
+                        'group/check relative grid h-7 w-7 place-items-center rounded-full border transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60',
                         isDone
-                          ? 'border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/25'
-                          : 'border-slate-300 bg-white text-transparent hover:border-emerald-500 hover:bg-emerald-50'
+                          ? 'border-emerald-400 bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-sm shadow-emerald-500/25 ring-2 ring-emerald-100'
+                          : 'border-slate-200 bg-slate-50 text-slate-300 shadow-inner hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-500 hover:ring-2 hover:ring-indigo-100'
                       )}
                       title={isDone ? getMultiLangText(language, { vi: 'Đánh dấu chưa hoàn thành', en: 'Mark as incomplete', ja: '未完了にする', ko: '미완료로 표시', zh: '标记为未完成', fr: 'Marquer comme non terminé', de: 'Als nicht erledigt markieren', es: 'Marcar como incompleto' }) : goalsCopy.completed}
                       aria-label={isDone ? 'Đánh dấu chưa hoàn thành' : goalsCopy.completed}
                     >
-                      <Check className="h-4 w-4" strokeWidth={3} />
+                      <Check className={clsx('h-3.5 w-3.5 transition-all duration-200', !isDone && 'scale-75 opacity-0 group-hover/check:scale-100 group-hover/check:opacity-100')} strokeWidth={3} />
                     </button>
                     <button
                       type="button"
@@ -1226,7 +1226,7 @@ export const GoalsPage: React.FC = () => {
                         event.stopPropagation();
                         deleteGoalMutation.mutate(goal.id);
                       }}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                      className="rounded-lg p-1.5 text-slate-300 opacity-60 transition-all cursor-pointer hover:bg-rose-50 hover:text-rose-500 hover:opacity-100 group-hover:opacity-100"
                       title={goalsCopy.deleteGoal}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -1235,7 +1235,7 @@ export const GoalsPage: React.FC = () => {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-base font-bold text-slate-900 leading-snug tracking-tight mb-2">
+                <h3 className={clsx('text-base font-bold leading-snug tracking-tight mb-2 transition-colors', isDone ? 'text-slate-400 line-through decoration-emerald-400/70' : 'text-slate-900')}>
                   {goal.title}
                 </h3>
 
