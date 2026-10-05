@@ -21,7 +21,6 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
     <UserHeroBanner
       tone="timetable"
       icon={Calendar}
-      iconClassName="text-emerald-100"
       badge={`${localizedTermName} (${semesterInfo.academicYear})`}
       badges={(
         <>

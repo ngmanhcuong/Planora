@@ -26,7 +26,6 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
     <UserHeroBanner
       tone="tasks"
       icon={CheckSquare}
-      iconClassName="text-amber-100"
       badge={`${stats.total} ${translate(language, 'tasks.total')}`}
       badges={(
         <>

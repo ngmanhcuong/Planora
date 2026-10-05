@@ -111,6 +111,7 @@ export interface WeeklyStatisticsResponse {
     tasksTotal: number;
     habitCheckIns: number;
     events: number;
+    productivityScore: number;
   }[];
   productivityScore: number;
 }
@@ -129,5 +130,16 @@ export interface MonthlyStatisticsResponse {
   events: {
     total: number;
   };
+  weeks: {
+    week: number;
+    startDate: string;
+    endDate: string;
+    totalTasks: number;
+    completedTasks: number;
+    habits: number;
+    events: number;
+    completionRate: number;
+    productivityScore: number;
+  }[];
   productivityScore: number;
 }

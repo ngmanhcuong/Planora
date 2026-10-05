@@ -196,7 +196,7 @@ export const SmartScheduleModal: React.FC<SmartScheduleModalProps> = ({
                       />
                       <span className="font-semibold text-[#131B2E] truncate">{t.title}</span>
                     </div>
-                    <span className="text-[10px] font-mono text-[#64748B] shrink-0">
+                    <span className="shrink-0 text-[10px] font-semibold tabular-nums text-[#64748B]">
                       Hạn: {new Date(t.dueDate).toLocaleDateString('vi-VN')}
                     </span>
                   </label>

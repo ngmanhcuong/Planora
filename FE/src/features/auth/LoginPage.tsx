@@ -335,7 +335,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
                       onChange={(event) => setLoginOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
                       inputMode="numeric"
                       autoComplete="one-time-code"
-                      className="block w-full rounded-xl border border-slate-800 bg-[#0F172A] px-3 py-2.5 text-center font-mono text-lg tracking-[0.45em] text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/15"
+                      className="block w-full rounded-xl border border-slate-800 bg-[#0F172A] px-3 py-2.5 text-center text-lg font-bold tabular-nums tracking-[0.45em] text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/15"
                       placeholder="000000"
                       autoFocus
                     />
@@ -701,7 +701,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ initialMode = 'login' }) =
                             value={otpCode}
                             onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                             placeholder="Nhập 6 chữ số OTP"
-                            className="block w-full rounded-xl border border-slate-800 bg-[#0F172A]/70 hover:bg-[#0F172A] focus:bg-[#0A0E17] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 pl-9 pr-3 py-2.5 text-sm font-mono tracking-widest text-white placeholder:text-slate-500 focus:outline-none transition duration-150"
+                            className="block w-full rounded-xl border border-slate-800 bg-[#0F172A]/70 hover:bg-[#0F172A] focus:bg-[#0A0E17] focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 pl-9 pr-3 py-2.5 text-sm font-bold tabular-nums tracking-widest text-white placeholder:text-slate-500 focus:outline-none transition duration-150"
                           />
                         </div>
                       </div>

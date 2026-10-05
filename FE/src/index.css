@@ -29,8 +29,13 @@
     --color-border: #E2E8F0;
   }
 
-  body {
+  html,
+  body,
+  #root {
     font-family: var(--font-sans);
+  }
+
+  body {
     font-weight: 500;
     line-height: 1.5;
     letter-spacing: -0.012em;
@@ -44,9 +49,47 @@
   button,
   input,
   textarea,
-  select {
+  select,
+  option,
+  optgroup,
+  table,
+  th,
+  td,
+  dialog {
     font: inherit;
     letter-spacing: inherit;
+  }
+
+  /* Ensure every application surface, including portals and native controls,
+     uses the shared UI font instead of falling back to the browser default. */
+  :where(
+    main,
+    header,
+    footer,
+    nav,
+    aside,
+    section,
+    article,
+    div,
+    span,
+    p,
+    a,
+    label,
+    button,
+    input,
+    textarea,
+    select,
+    option,
+    table,
+    th,
+    td,
+    dialog,
+    [role='dialog'],
+    [role='menu'],
+    [role='listbox'],
+    [role='tooltip']
+  ) {
+    font-family: var(--font-sans);
   }
 
   :root[data-theme='dark'] {
@@ -80,6 +123,15 @@
     font-family: var(--font-heading);
     letter-spacing: -0.028em;
     text-wrap: balance;
+  }
+
+  .font-sans {
+    font-family: var(--font-sans) !important;
+  }
+
+  .font-heading,
+  [class*='font-[family-name:var(--font-heading)]'] {
+    font-family: var(--font-heading) !important;
   }
 
   strong,

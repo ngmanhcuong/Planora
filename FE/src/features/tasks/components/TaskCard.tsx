@@ -103,7 +103,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
           </div>
 
-          <h3 className={`text-sm font-extrabold leading-snug text-slate-900 ${isCompleted ? 'line-through' : ''}`}>
+          <h3 className="text-sm font-extrabold leading-snug text-slate-900">
             {task.title}
           </h3>
 

@@ -269,7 +269,6 @@ export const NotificationsPage: React.FC = () => {
       <UserHeroBanner
         tone="notifications"
         icon={Bell}
-        iconClassName="text-pink-100"
         badge={copy.title}
         badges={unreadCount > 0 ? (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300/40 bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm">

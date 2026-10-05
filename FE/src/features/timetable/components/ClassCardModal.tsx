@@ -45,7 +45,7 @@ export const ClassCardModal: React.FC<ClassCardModalProps> = ({
             <Badge customBg="#FFFFFF" customColor={selectedClass.color} size="sm">
               {selectedClass.typeLabel}
             </Badge>
-            <span className="min-w-0 break-all text-xs font-mono font-bold tracking-wider opacity-80">
+            <span className="min-w-0 break-all text-xs font-bold tracking-wider opacity-80">
               {selectedClass.courseCode}
             </span>
           </div>

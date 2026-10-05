@@ -92,7 +92,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       <UserHeroBanner
         tone="calendar"
         icon={CalendarIcon}
-        iconClassName="text-cyan-100"
         badge={formatBadgeText()}
         badges={(
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/85 backdrop-blur-md">

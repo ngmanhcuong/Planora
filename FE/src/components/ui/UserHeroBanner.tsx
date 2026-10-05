@@ -8,55 +8,45 @@ interface UserHeroBannerProps {
   badge?: React.ReactNode;
   badges?: React.ReactNode;
   actions?: React.ReactNode;
-  iconClassName?: string;
   tone?: 'dashboard' | 'calendar' | 'timetable' | 'tasks' | 'assistant' | 'goals' | 'notes' | 'reports' | 'notifications';
 }
 
-const bannerTones: Record<NonNullable<UserHeroBannerProps['tone']>, { gradient: string; glow: string; icon: string }> = {
+const bannerTones: Record<NonNullable<UserHeroBannerProps['tone']>, { gradient: string; glow: string }> = {
   dashboard: {
     gradient: 'from-indigo-950 via-violet-900 to-slate-950',
     glow: 'bg-indigo-400/10',
-    icon: 'text-amber-300',
   },
   calendar: {
     gradient: 'from-sky-950 via-cyan-900 to-slate-950',
     glow: 'bg-cyan-300/12',
-    icon: 'text-cyan-100',
   },
   timetable: {
     gradient: 'from-emerald-950 via-teal-900 to-slate-950',
     glow: 'bg-emerald-300/12',
-    icon: 'text-emerald-100',
   },
   tasks: {
     gradient: 'from-orange-950 via-amber-900 to-slate-950',
     glow: 'bg-amber-300/12',
-    icon: 'text-amber-100',
   },
   assistant: {
     gradient: 'from-purple-950 via-violet-900 to-fuchsia-950',
     glow: 'bg-fuchsia-300/12',
-    icon: 'text-fuchsia-100',
   },
   goals: {
     gradient: 'from-rose-950 via-pink-900 to-slate-950',
     glow: 'bg-rose-300/12',
-    icon: 'text-rose-100',
   },
   notes: {
     gradient: 'from-teal-950 via-cyan-900 to-slate-950',
     glow: 'bg-teal-300/12',
-    icon: 'text-teal-100',
   },
   reports: {
     gradient: 'from-sky-950 via-blue-900 to-cyan-950',
     glow: 'bg-cyan-300/12',
-    icon: 'text-sky-100',
   },
   notifications: {
     gradient: 'from-fuchsia-950 via-rose-950 to-slate-950',
     glow: 'bg-pink-300/12',
-    icon: 'text-pink-100',
   },
 };
 
@@ -67,7 +57,6 @@ export const UserHeroBanner: React.FC<UserHeroBannerProps> = ({
   badge,
   badges,
   actions,
-  iconClassName,
   tone = 'dashboard',
 }) => {
   const selectedTone = bannerTones[tone];
@@ -79,8 +68,8 @@ export const UserHeroBanner: React.FC<UserHeroBannerProps> = ({
 
       <div className="relative flex w-full flex-col gap-5 self-center lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-start gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl border border-white/15 bg-white/12 shadow-2xl shadow-black/10 backdrop-blur-md">
-            <Icon className={clsx('h-8 w-8', iconClassName || selectedTone.icon)} />
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/25 bg-white/12 shadow-lg shadow-black/10 backdrop-blur-sm">
+            <Icon className="h-7 w-7 text-white" strokeWidth={2} />
           </div>
 
           <div className="min-w-0">

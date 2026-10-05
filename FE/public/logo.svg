@@ -10,5 +10,5 @@
   <rect x="0" y="0" width="512" height="512" rx="140" fill="url(#p-bg-grad)" />
 
   <!-- Bold White Letter P -->
-  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="340">P</text>
+  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="340">P</text>
 </svg>

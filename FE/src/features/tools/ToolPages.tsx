@@ -5,13 +5,11 @@ import {
   BarChart3,
   CheckCircle2,
   Circle,
-  Flag,
   Lightbulb,
   Plus,
   Send,
   Target,
   Trash2,
-  TrendingUp,
   Sparkles,
   Award,
   Calendar,
@@ -288,7 +286,6 @@ export const AssistantPage: React.FC = () => {
       <UserHeroBanner
         tone="assistant"
         icon={Bot}
-        iconClassName="text-fuchsia-100"
         badge={(
           <>
             <Sparkles className="h-3.5 w-3.5 text-amber-300" />
@@ -668,7 +665,6 @@ export const GoalsPage: React.FC = () => {
       <UserHeroBanner
         tone="goals"
         icon={Target}
-        iconClassName="text-rose-100"
         badge="Planora Goals KPI"
         badges={(
           <>
@@ -1598,7 +1594,6 @@ export const NotesPage: React.FC = () => {
       <UserHeroBanner
         tone="notes"
         icon={StickyNote}
-        iconClassName="text-teal-100"
         badge={translate(language, 'notes.title')}
         title={translate(language, 'notes.title')}
         subtitle={translate(language, 'notes.subtitle')}
@@ -1846,14 +1841,28 @@ export const ReportsPage: React.FC = () => {
 
   const [range, setRange] = useState<'week' | 'month' | 'quarter'>('week');
   const [selectedDay, setSelectedDay] = useState<string>('T6');
+  const [hasResolvedInitialReportRange, setHasResolvedInitialReportRange] = useState(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [exportedToast, setExportedToast] = useState<boolean>(false);
 
-  // Real backend query hooks
+  const now = new Date();
+  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+  const quarterMonthKeys = Array.from({ length: 3 }, (_, index) => {
+    const date = new Date(now.getFullYear(), quarterStartMonth + index, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const currentMonthNumber = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  // Every report view is backed by the authenticated user's API data.
   const { data: dashboardData, isLoading: isDashboardLoading } = useDashboard();
   const { data: weeklyStats, isLoading: isWeeklyLoading } = useWeeklyStats();
-  const { data: monthlyStats } = useMonthlyStats();
-  const { data: tasksData } = useTasks();
+  const { data: monthlyStats, isLoading: isMonthlyLoading } = useMonthlyStats(currentMonthKey);
+  const { data: quarterMonthOne, isLoading: isQuarterMonthOneLoading } = useMonthlyStats(quarterMonthKeys[0]);
+  const { data: quarterMonthTwo, isLoading: isQuarterMonthTwoLoading } = useMonthlyStats(quarterMonthKeys[1]);
+  const { data: quarterMonthThree, isLoading: isQuarterMonthThreeLoading } = useMonthlyStats(quarterMonthKeys[2]);
+  const { data: tasksData, isLoading: isTasksLoading } = useTasks({ limit: 100 });
 
   const allTasks = useMemo(() => tasksData?.tasks || [], [tasksData]);
   const completedTasksCount = useMemo(
@@ -1884,6 +1893,14 @@ export const ReportsPage: React.FC = () => {
     es: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
   });
 
+  const currentDayIndex = (new Date().getDay() + 6) % 7;
+
+  useEffect(() => {
+    if (range === 'week') {
+      setSelectedDay(DAY_LABELS[currentDayIndex] || DAY_LABELS[0]);
+    }
+  }, [range, language, currentDayIndex, DAY_LABELS]);
+
   // Process Weekly Stats Data directly from backend API
   const weeklyChartData = useMemo(() => {
     if (weeklyStats && weeklyStats.daily && weeklyStats.daily.length === 7) {
@@ -1893,18 +1910,10 @@ export const ReportsPage: React.FC = () => {
         const habitCheckIns = d.habitCheckIns || 0;
         const events = d.events || 0;
 
-        // Backend formula calculation / normalized score
-        let dayScore = 0;
-        if (tasksTotal > 0 || habitCheckIns > 0 || events > 0) {
-          const taskRate = tasksTotal > 0 ? tasksCompleted / tasksTotal : 0;
-          const habitRate = habitCheckIns > 0 ? Math.min(1, habitCheckIns / 2) : 0;
-          dayScore = Math.round((taskRate * 0.7 + habitRate * 0.3) * 100);
-        }
-
         return {
           label: DAY_LABELS[idx],
           fullName: DAY_NAMES_FULL[idx],
-          value: dayScore,
+          value: d.productivityScore ?? 0,
           tasksCompleted,
           tasksTotal,
           habitCheckIns,
@@ -1981,14 +1990,14 @@ export const ReportsPage: React.FC = () => {
 
   // Monthly Data Processed from Backend
   const monthlyChartData = useMemo(() => {
-    const getWeekLabel = (idx: number) => getMultiLangText(language, { vi: `T${idx + 1}`, en: `W${idx + 1}`, ja: `${idx + 1}週`, ko: `${idx + 1}주`, zh: `第${idx + 1}周`, fr: `S${idx + 1}`, de: `W${idx + 1}`, es: `S${idx + 1}` });
+    const getWeekLabel = (idx: number) => getMultiLangText(language, { vi: `Tuần ${idx + 1}`, en: `W${idx + 1}`, ja: `${idx + 1}週`, ko: `${idx + 1}주`, zh: `第${idx + 1}周`, fr: `S${idx + 1}`, de: `W${idx + 1}`, es: `S${idx + 1}` });
     const getWeekFull = (idx: number) => getMultiLangText(language, { vi: `Tuần ${idx + 1}`, en: `Week ${idx + 1}`, ja: `第${idx + 1}週`, ko: `${idx + 1}주차`, zh: `第${idx + 1}周`, fr: `Semaine ${idx + 1}`, de: `Woche ${idx + 1}`, es: `Semana ${idx + 1}` });
 
     if (monthlyStats && monthlyStats.weeks) {
       return monthlyStats.weeks.map((w: any, idx: number) => ({
         label: getWeekLabel(idx),
-        fullName: getWeekFull(idx),
-        value: w.completionRate || 0,
+        fullName: `${getWeekFull(idx)} (${String(new Date(w.startDate).getDate()).padStart(2, '0')}/${currentMonthNumber}–${String(new Date(w.endDate).getDate()).padStart(2, '0')}/${currentMonthNumber})`,
+        value: w.productivityScore || 0,
         tasksCompleted: w.completedTasks || 0,
         tasksTotal: w.totalTasks || 0,
         habitCheckIns: w.habits || 0,
@@ -2005,88 +2014,77 @@ export const ReportsPage: React.FC = () => {
         }),
       }));
     }
-    const avgScore = weeklyStats?.productivityScore || dashboardData?.productivity.todayScore || 0;
-    return [
-      {
-        label: getWeekLabel(0),
-        fullName: getWeekFull(0),
-        value: avgScore || 70,
-        tasksCompleted: completedTasksCount,
-        tasksTotal: totalTasksCount,
-        habitCheckIns: 12,
-        events: 4,
-        detail: getMultiLangText(language, {
-          vi: 'Tuần 1: Nhịp làm việc mượt',
-          en: 'Week 1: Smooth rhythm',
-          ja: '第1週: スムーズな作業リズム',
-          ko: '1주차: 원활한 작업 리듬',
-          zh: '第1周: 顺畅的工作节奏',
-          fr: 'Semaine 1 : Rythme fluide',
-          de: 'Woche 1: Reibungsloser Rhythmus',
-          es: 'Semana 1: Ritmo fluido',
-        }),
-      },
-      {
-        label: getWeekLabel(1),
-        fullName: getWeekFull(1),
-        value: Math.min(100, avgScore + 10),
-        tasksCompleted: completedTasksCount,
-        tasksTotal: totalTasksCount,
-        habitCheckIns: 15,
-        events: 5,
-        detail: getMultiLangText(language, {
-          vi: 'Tuần 2: Tiến độ tốt',
-          en: 'Week 2: Good progress',
-          ja: '第2週: 順調な進捗',
-          ko: '2주차: 좋은 진행 상태',
-          zh: '第2周: 良好的进度',
-          fr: 'Semaine 2 : Bon progrès',
-          de: 'Woche 2: Guter Fortschritt',
-          es: 'Semana 2: Buen progreso',
-        }),
-      },
-      {
-        label: getWeekLabel(2),
-        fullName: getWeekFull(2),
-        value: Math.max(0, avgScore - 15),
-        tasksCompleted: completedTasksCount,
-        tasksTotal: totalTasksCount,
-        habitCheckIns: 8,
-        events: 3,
-        detail: getMultiLangText(language, {
-          vi: 'Tuần 3: Tập trung cao',
-          en: 'Week 3: High focus',
-          ja: '第3週: 高い集中力',
-          ko: '3주차: 높은 집중력',
-          zh: '第3周: 高度专注',
-          fr: 'Semaine 3 : Forte concentration',
-          de: 'Woche 3: Hohe Konzentration',
-          es: 'Semana 3: Alta concentración',
-        }),
-      },
-      {
-        label: getWeekLabel(3),
-        fullName: getWeekFull(3),
-        value: avgScore || 80,
-        tasksCompleted: completedTasksCount,
-        tasksTotal: totalTasksCount,
-        habitCheckIns: 14,
-        events: 6,
-        detail: getMultiLangText(language, {
-          vi: 'Tuần 4: Đạt 100% KPI',
-          en: 'Week 4: Reached 100% KPI',
-          ja: '第4週: KPI 100% 達成',
-          ko: '4주차: KPI 100% 달성',
-          zh: '第4周: 达到100% KPI',
-          fr: 'Semaine 4 : 100% du KPI atteint',
-          de: 'Woche 4: 100% KPI erreicht',
-          es: 'Semana 4: 100% de KPI alcanzado',
-        }),
-      },
-    ];
-  }, [monthlyStats, weeklyStats, dashboardData, completedTasksCount, totalTasksCount, language]);
+    return [];
+  }, [monthlyStats, language, currentMonthNumber]);
 
-  const currentChartData = range === 'month' ? monthlyChartData : weeklyChartData;
+  useEffect(() => {
+    if (hasResolvedInitialReportRange || isWeeklyLoading || isMonthlyLoading) return;
+
+    const weekHasData = Boolean(
+      (weeklyStats?.tasks?.total || 0) > 0
+      || (weeklyStats?.habits?.totalCheckIns || 0) > 0
+      || (weeklyStats?.events?.total || 0) > 0
+    );
+    const monthHasData = Boolean(
+      (monthlyStats?.tasks?.total || 0) > 0
+      || (monthlyStats?.habits?.checkIns || 0) > 0
+      || (monthlyStats?.events?.total || 0) > 0
+    );
+
+    if (!weekHasData && monthHasData) {
+      setRange('month');
+      setSelectedDay(getMultiLangText(language, { vi: 'Tuần 1', en: 'W1', ja: '1週', ko: '1주', zh: '第1周', fr: 'S1', de: 'W1', es: 'S1' }));
+    }
+    setHasResolvedInitialReportRange(true);
+  }, [hasResolvedInitialReportRange, isWeeklyLoading, isMonthlyLoading, weeklyStats, monthlyStats, language]);
+
+  const quarterChartData = useMemo(() => {
+    return [quarterMonthOne, quarterMonthTwo, quarterMonthThree].filter(Boolean).map((month: any, index) => ({
+      label: getMultiLangText(language, { vi: `T${quarterStartMonth + index + 1}`, en: `M${quarterStartMonth + index + 1}`, ja: `${quarterStartMonth + index + 1}月`, ko: `${quarterStartMonth + index + 1}월`, zh: `${quarterStartMonth + index + 1}月`, fr: `M${quarterStartMonth + index + 1}`, de: `M${quarterStartMonth + index + 1}`, es: `M${quarterStartMonth + index + 1}` }),
+      fullName: month.month,
+      value: month.productivityScore || 0,
+      tasksCompleted: month.tasks?.completed || 0,
+      tasksTotal: month.tasks?.total || 0,
+      habitCheckIns: month.habits?.checkIns || 0,
+      events: month.events?.total || 0,
+      detail: `${month.tasks?.completed || 0}/${month.tasks?.total || 0} ${getMultiLangText(language, { vi: 'công việc hoàn thành', en: 'tasks completed', ja: 'タスク完了', ko: '작업 완료', zh: '任务已完成', fr: 'tâches terminées', de: 'Aufgaben erledigt', es: 'tareas completadas' })}`,
+    }));
+  }, [quarterMonthOne, quarterMonthTwo, quarterMonthThree, language, quarterStartMonth]);
+
+  const currentChartData = range === 'month' ? monthlyChartData : range === 'quarter' ? quarterChartData : weeklyChartData;
+
+  const rangeTotals = useMemo(() => currentChartData.reduce(
+    (totals: { tasksCompleted: number; tasksTotal: number; habitCheckIns: number; events: number }, item: any) => ({
+      tasksCompleted: totals.tasksCompleted + (item.tasksCompleted || 0),
+      tasksTotal: totals.tasksTotal + (item.tasksTotal || 0),
+      habitCheckIns: totals.habitCheckIns + (item.habitCheckIns || 0),
+      events: totals.events + (item.events || 0),
+    }),
+    { tasksCompleted: 0, tasksTotal: 0, habitCheckIns: 0, events: 0 }
+  ), [currentChartData]);
+
+  const tasksInSelectedRange = useMemo(() => {
+    let start: Date;
+    let end: Date;
+
+    if (range === 'week' && weeklyStats?.weekStart && weeklyStats?.weekEnd) {
+      start = new Date(`${weeklyStats.weekStart}T00:00:00`);
+      end = new Date(`${weeklyStats.weekEnd}T23:59:59.999`);
+    } else if (range === 'quarter') {
+      start = new Date(now.getFullYear(), quarterStartMonth, 1);
+      end = new Date(now.getFullYear(), quarterStartMonth + 3, 0, 23, 59, 59, 999);
+    } else {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    }
+
+    return allTasks.filter((task) => {
+      const dueDate = new Date(task.dueDate);
+      const completedAt = task.completedAt ? new Date(task.completedAt) : null;
+      return (dueDate >= start && dueDate <= end)
+        || Boolean(completedAt && completedAt >= start && completedAt <= end);
+    });
+  }, [allTasks, range, weeklyStats?.weekStart, weeklyStats?.weekEnd, now.getFullYear(), now.getMonth(), quarterStartMonth]);
 
   const averageValue = useMemo(() => {
     if (range === 'week' && weeklyStats?.productivityScore !== undefined) {
@@ -2109,17 +2107,10 @@ export const ReportsPage: React.FC = () => {
 
   // Real Category Breakdown computed directly from tasksData API!
   const categoriesBreakdown = useMemo(() => {
-    if (!allTasks.length) {
-      return [
-        { label: translateCategory(language, 'Study'), percent: 40, count: 0, hours: '0h', color: 'bg-indigo-600', text: 'text-indigo-600', bgLight: 'bg-indigo-50 border-indigo-100' },
-        { label: translateCategory(language, 'Work'), percent: 30, count: 0, hours: '0h', color: 'bg-blue-600', text: 'text-blue-600', bgLight: 'bg-blue-50 border-blue-100' },
-        { label: translateCategory(language, 'Personal'), percent: 20, count: 0, hours: '0h', color: 'bg-amber-500', text: 'text-amber-600', bgLight: 'bg-amber-50 border-amber-100' },
-        { label: translateCategory(language, 'Other'), percent: 10, count: 0, hours: '0h', color: 'bg-rose-500', text: 'text-rose-600', bgLight: 'bg-rose-50 border-rose-100' },
-      ];
-    }
+    if (!tasksInSelectedRange.length) return [];
 
     const categoryCounts: Record<string, number> = {};
-    allTasks.forEach((t) => {
+    tasksInSelectedRange.forEach((t) => {
       const catName = translateCategory(language, t.category?.name || t.category?.type || 'Chung');
       categoryCounts[catName] = (categoryCounts[catName] || 0) + 1;
     });
@@ -2134,16 +2125,15 @@ export const ReportsPage: React.FC = () => {
 
     return Object.entries(categoryCounts).map(([label, count], idx) => {
       const style = COLOR_LIST[idx % COLOR_LIST.length];
-      const percent = Math.round((count / allTasks.length) * 100);
+      const percent = Math.round((count / tasksInSelectedRange.length) * 100);
       return {
         label,
         count,
         percent,
-        hours: `${count * 1.5}h`,
         ...style,
       };
     });
-  }, [allTasks, language]);
+  }, [tasksInSelectedRange, language]);
 
   const handleExport = () => {
     setIsExporting(true);
@@ -2154,7 +2144,8 @@ export const ReportsPage: React.FC = () => {
     }, 1000);
   };
 
-  const isRealDataLoading = isDashboardLoading || isWeeklyLoading;
+  const isRealDataLoading = isDashboardLoading || isWeeklyLoading || isMonthlyLoading || isTasksLoading
+    || isQuarterMonthOneLoading || isQuarterMonthTwoLoading || isQuarterMonthThreeLoading;
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
@@ -2176,16 +2167,18 @@ export const ReportsPage: React.FC = () => {
                   {translate(language, 'reports.title')}
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-indigo-50/85">
-                  {translate(language, 'reports.subtitle')}
+                  {range === 'month'
+                    ? getMultiLangText(language, { vi: `Tổng hợp nhịp làm việc và hiệu suất trong tháng ${currentMonthNumber}/${currentYear}.`, en: `Work rhythm and productivity overview for ${currentMonthNumber}/${currentYear}.`, ja: `${currentYear}年${currentMonthNumber}月の作業リズムと生産性。`, ko: `${currentYear}년 ${currentMonthNumber}월 업무 리듬 및 생산성.`, zh: `${currentYear}年${currentMonthNumber}月的工作节奏和生产力。`, fr: `Rythme de travail et productivité pour ${currentMonthNumber}/${currentYear}.`, de: `Arbeitsrhythmus und Produktivität für ${currentMonthNumber}/${currentYear}.`, es: `Ritmo de trabajo y productividad de ${currentMonthNumber}/${currentYear}.` })
+                    : translate(language, 'reports.subtitle')}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center rounded-2xl border border-white/15 bg-white/10 p-1 backdrop-blur-md">
-                <button onClick={() => { setRange('week'); setSelectedDay(DAY_LABELS[4] || 'T6'); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'week' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.thisWeek')}</button>
-                <button onClick={() => { setRange('month'); setSelectedDay(getMultiLangText(language, { vi: 'T1', en: 'W1', ja: '1週', ko: '1주', zh: '第1周', fr: 'S1', de: 'W1', es: 'S1' })); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'month' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.thisMonth')}</button>
-                <button onClick={() => { setRange('quarter'); setSelectedDay('Q3'); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'quarter' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.quarter')}</button>
+                <button onClick={() => { setRange('week'); setSelectedDay(DAY_LABELS[currentDayIndex] || DAY_LABELS[0]); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'week' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.thisWeek')}</button>
+                <button onClick={() => { setRange('month'); setSelectedDay(getMultiLangText(language, { vi: 'Tuần 1', en: 'W1', ja: '1週', ko: '1주', zh: '第1周', fr: 'S1', de: 'W1', es: 'S1' })); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'month' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{range === 'month' ? getMultiLangText(language, { vi: `Tháng ${currentMonthNumber}/${currentYear}`, en: `${currentMonthNumber}/${currentYear}`, ja: `${currentYear}年${currentMonthNumber}月`, ko: `${currentYear}.${currentMonthNumber}`, zh: `${currentYear}年${currentMonthNumber}月`, fr: `${currentMonthNumber}/${currentYear}`, de: `${currentMonthNumber}/${currentYear}`, es: `${currentMonthNumber}/${currentYear}` }) : translate(language, 'reports.thisMonth')}</button>
+                <button onClick={() => { setRange('quarter'); setSelectedDay(getMultiLangText(language, { vi: `T${quarterStartMonth + 1}`, en: `M${quarterStartMonth + 1}`, ja: `${quarterStartMonth + 1}月`, ko: `${quarterStartMonth + 1}월`, zh: `${quarterStartMonth + 1}月`, fr: `M${quarterStartMonth + 1}`, de: `M${quarterStartMonth + 1}`, es: `M${quarterStartMonth + 1}` })); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'quarter' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.quarter')}</button>
               </div>
               <button onClick={handleExport} disabled={isExporting} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-extrabold text-indigo-700 shadow-xl shadow-indigo-950/10 transition-all hover:-translate-y-0.5 hover:bg-indigo-50 active:scale-95 disabled:opacity-50">
                 {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
@@ -2195,9 +2188,9 @@ export const ReportsPage: React.FC = () => {
           </div>
 
           <div className="grid gap-3 md:grid-cols-4">
-            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.completedTasks')}</p><p className="mt-1 text-3xl font-black">{completedTasksCount}/{totalTasksCount}</p></div>
-            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.todayTasksCount')}</p><p className="mt-1 text-3xl font-black">{dashboardData?.summary.tasksCompletedToday || 0}/{dashboardData?.summary.tasksToday || 0}</p></div>
-            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.habitsCompletedCount')}</p><p className="mt-1 text-3xl font-black">{dashboardData?.summary.habitsCompletedToday || 0}/{dashboardData?.summary.totalHabits || 0}</p></div>
+            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.completedTasks')}</p><p className="mt-1 text-3xl font-black">{rangeTotals.tasksCompleted}/{rangeTotals.tasksTotal}</p></div>
+            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{getMultiLangText(language, { vi: 'Sự kiện & lịch trình', en: 'Events & schedules', ja: 'イベントと予定', ko: '이벤트 및 일정', zh: '事件与日程', fr: 'Événements', de: 'Termine', es: 'Eventos' })}</p><p className="mt-1 text-3xl font-black">{rangeTotals.events}</p></div>
+            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.habitsCompletedCount')}</p><p className="mt-1 text-3xl font-black">{rangeTotals.habitCheckIns}</p></div>
             <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.productivityScore')}</p><p className="mt-1 text-3xl font-black">{averageValue}/100</p></div>
           </div>
         </div>
@@ -2238,7 +2231,11 @@ export const ReportsPage: React.FC = () => {
               </div>
               <div>
                 <h2 className="font-heading text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
-                  {translate(language, 'reports.weeklyScore')}
+                  {range === 'week'
+                    ? translate(language, 'reports.weeklyScore')
+                    : range === 'month'
+                      ? getMultiLangText(language, { vi: `Điểm năng suất tháng ${currentMonthNumber}/${currentYear}`, en: `Productivity score for ${currentMonthNumber}/${currentYear}`, ja: `${currentYear}年${currentMonthNumber}月の生産性スコア`, ko: `${currentYear}년 ${currentMonthNumber}월 생산성 점수`, zh: `${currentYear}年${currentMonthNumber}月生产力评分`, fr: `Score de productivité — ${currentMonthNumber}/${currentYear}`, de: `Produktivitätswert – ${currentMonthNumber}/${currentYear}`, es: `Productividad de ${currentMonthNumber}/${currentYear}` })
+                      : getMultiLangText(language, { vi: 'Điểm năng suất quý', en: 'Quarterly productivity score', ja: '四半期生産性スコア', ko: '분기 생산성 점수', zh: '季度生产力评分', fr: 'Score de productivité trimestriel', de: 'Vierteljährlicher Produktivitätswert', es: 'Puntuación trimestral de productividad' })}
                 </h2>
                 <p className="text-xs font-medium text-slate-500 mt-0.5">
                   {translate(language, 'reports.compiledDesc')}
@@ -2422,6 +2419,11 @@ export const ReportsPage: React.FC = () => {
           </div>
 
           <div className="space-y-3.5 pt-2">
+            {categoriesBreakdown.length === 0 && !isRealDataLoading && (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center text-xs font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
+                {getMultiLangText(language, { vi: 'Chưa có công việc trong khoảng thời gian này.', en: 'No tasks in this period.', ja: 'この期間にはタスクがありません。', ko: '이 기간에 작업이 없습니다.', zh: '此时间段内没有任务。', fr: 'Aucune tâche sur cette période.', de: 'Keine Aufgaben in diesem Zeitraum.', es: 'No hay tareas en este período.' })}
+              </div>
+            )}
             {categoriesBreakdown.map((cat) => (
               <div key={cat.label} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-bold">
@@ -2436,7 +2438,7 @@ export const ReportsPage: React.FC = () => {
                 <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
                   <div
                     className={`h-full rounded-full ${cat.color} transition-all duration-500`}
-                    style={{ width: `${Math.max(5, cat.percent)}%` }}
+                    style={{ width: `${cat.percent}%` }}
                   />
                 </div>
               </div>

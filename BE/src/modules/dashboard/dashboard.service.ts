@@ -337,7 +337,7 @@ export class DashboardService {
    * Weekly statistics report (/api/dashboard/statistics/weekly)
    */
   static async getWeeklyStatistics(userId: string, dateInput?: string): Promise<WeeklyStatisticsResponse> {
-    const { now } = getTodayBounds();
+    const { now, todayStr } = getTodayBounds();
     const targetDateStr = dateInput || normalizeDateString(now);
     const targetDate = parseDateToUtc(targetDateStr);
 
@@ -383,9 +383,10 @@ export class DashboardService {
       }),
     ]);
 
-    const tasksTotalCount = tasksInWeek.filter(
-      (t) => t.dueDate >= weekStart && t.dueDate <= weekEnd
-    ).length;
+    // A task belongs to the reporting period when it is due in that period or
+    // when the user actually completes it in that period. This prevents a task
+    // completed after its due date from producing an impossible 1/0 metric.
+    const tasksTotalCount = tasksInWeek.length;
 
     const tasksCompletedCount = tasksInWeek.filter((t) => {
       if (t.completedAt) {
@@ -401,14 +402,17 @@ export class DashboardService {
     const habitCompletionRate = possibleHabitTarget > 0 ? Math.round((habitCheckInsCount / possibleHabitTarget) * 100) : 0;
 
     // Daily breakdown for 7 days (Monday..Sunday)
-    let totalDailyScores = 0;
-
     const daily = DAY_NAMES.map((dayName, idx) => {
       const dStr = getOffsetDateString(weekStartStr, idx);
       const dStart = parseDateToUtc(dStr);
       const dEnd = new Date(`${dStr}T23:59:59.999Z`);
 
-      const dayTasksDue = tasksInWeek.filter((t) => t.dueDate >= dStart && t.dueDate <= dEnd).length;
+      const dayTasks = tasksInWeek.filter((t) => {
+        const isDueToday = t.dueDate >= dStart && t.dueDate <= dEnd;
+        const isCompletedToday = Boolean(t.completedAt && t.completedAt >= dStart && t.completedAt <= dEnd);
+        return isDueToday || isCompletedToday;
+      });
+      const dayTasksDue = dayTasks.length;
       const dayTasksCompleted = tasksInWeek.filter((t) => {
         if (t.completedAt) return t.completedAt >= dStart && t.completedAt <= dEnd;
         return t.status === TaskStatus.COMPLETED && t.dueDate >= dStart && t.dueDate <= dEnd;
@@ -423,8 +427,6 @@ export class DashboardService {
       ).length;
 
       const dayScore = calculateProductivityScore(dayTasksDue, dayTasksCompleted, userHabits.length, dayHabitCheckIns);
-      totalDailyScores += dayScore;
-
       return {
         date: dStr,
         dayName,
@@ -433,10 +435,14 @@ export class DashboardService {
         tasksTotal: dayTasksDue,
         habitCheckIns: dayHabitCheckIns,
         events: dayEvents,
+        productivityScore: dayScore,
       };
     });
 
-    const weeklyProductivityScore = Math.round(totalDailyScores / 7);
+    const elapsedDays = daily.filter((day) => day.date <= todayStr);
+    const weeklyProductivityScore = elapsedDays.length > 0
+      ? Math.round(elapsedDays.reduce((sum, day) => sum + day.productivityScore, 0) / elapsedDays.length)
+      : 0;
 
     return {
       weekStart: weekStartStr,
@@ -488,7 +494,7 @@ export class DashboardService {
     const monthStart = parseDateToUtc(monthStartStr);
     const monthEnd = new Date(`${monthEndStr}T23:59:59.999Z`);
 
-    const [tasksInMonth, habitLogsInMonth, eventsInMonth, totalHabitsCount] = await Promise.all([
+    const [tasksInMonth, habitLogsInMonth, eventsInMonth, userHabits] = await Promise.all([
       prisma.task.findMany({
         where: {
           userId,
@@ -499,7 +505,7 @@ export class DashboardService {
         },
       }),
 
-      prisma.habitLog.count({
+      prisma.habitLog.findMany({
         where: {
           habit: { userId },
           isCompleted: true,
@@ -507,19 +513,20 @@ export class DashboardService {
         },
       }),
 
-      prisma.event.count({
+      prisma.event.findMany({
         where: {
           userId,
           startTime: { gte: monthStart, lte: monthEnd },
         },
       }),
 
-      prisma.habit.count({
+      prisma.habit.findMany({
         where: { userId },
+        select: { targetFrequency: true },
       }),
     ]);
 
-    const tasksTotal = tasksInMonth.filter((t) => t.dueDate >= monthStart && t.dueDate <= monthEnd).length;
+    const tasksTotal = tasksInMonth.length;
     const tasksCompleted = tasksInMonth.filter((t) => {
       if (t.completedAt) return t.completedAt >= monthStart && t.completedAt <= monthEnd;
       return t.status === TaskStatus.COMPLETED && t.dueDate >= monthStart && t.dueDate <= monthEnd;
@@ -531,7 +538,44 @@ export class DashboardService {
 
     const completionRate = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0;
 
-    const productivityScore = calculateProductivityScore(tasksTotal, tasksCompleted, totalHabitsCount, Math.min(totalHabitsCount * 30, habitLogsInMonth));
+    const weeksInMonth = Math.ceil(lastDayOfMonth / 7);
+    const monthlyHabitTarget = userHabits.reduce((sum, habit) => sum + habit.targetFrequency, 0) * weeksInMonth;
+    const productivityScore = calculateProductivityScore(tasksTotal, tasksCompleted, monthlyHabitTarget, habitLogsInMonth.length);
+
+    const weeks = Array.from({ length: weeksInMonth }, (_, index) => {
+      const startDay = index * 7 + 1;
+      const endDay = Math.min(lastDayOfMonth, startDay + 6);
+      const startDate = `${formattedMonth}-${String(startDay).padStart(2, '0')}`;
+      const endDate = `${formattedMonth}-${String(endDay).padStart(2, '0')}`;
+      const start = parseDateToUtc(startDate);
+      const end = new Date(`${endDate}T23:59:59.999Z`);
+
+      const weekTasks = tasksInMonth.filter((task) => {
+        const isDueInWeek = task.dueDate >= start && task.dueDate <= end;
+        const isCompletedInWeek = Boolean(task.completedAt && task.completedAt >= start && task.completedAt <= end);
+        return isDueInWeek || isCompletedInWeek;
+      });
+      const completedTasks = tasksInMonth.filter((task) => {
+        if (task.completedAt) return task.completedAt >= start && task.completedAt <= end;
+        return task.status === TaskStatus.COMPLETED && task.dueDate >= start && task.dueDate <= end;
+      }).length;
+      const habits = habitLogsInMonth.filter((log) => log.completedDate >= start && log.completedDate <= end).length;
+      const events = eventsInMonth.filter((event) => event.startTime >= start && event.startTime <= end).length;
+      const target = userHabits.reduce((sum, habit) => sum + habit.targetFrequency, 0);
+      const completionRate = weekTasks.length > 0 ? Math.round((completedTasks / weekTasks.length) * 100) : 0;
+
+      return {
+        week: index + 1,
+        startDate,
+        endDate,
+        totalTasks: weekTasks.length,
+        completedTasks,
+        habits,
+        events,
+        completionRate,
+        productivityScore: calculateProductivityScore(weekTasks.length, completedTasks, target, habits),
+      };
+    });
 
     return {
       month: formattedMonth,
@@ -542,11 +586,12 @@ export class DashboardService {
         completionRate,
       },
       habits: {
-        checkIns: habitLogsInMonth,
+        checkIns: habitLogsInMonth.length,
       },
       events: {
-        total: eventsInMonth,
+        total: eventsInMonth.length,
       },
+      weeks,
       productivityScore,
     };
   }
