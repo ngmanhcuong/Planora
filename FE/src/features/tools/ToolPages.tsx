@@ -1209,7 +1209,7 @@ export const GoalsPage: React.FC = () => {
                       }}
                       disabled={updateGoalMutation.isPending}
                       className={clsx(
-                        'group/check absolute -right-2 -top-2 grid h-5 w-5 place-items-center rounded-full border transition-all duration-200 cursor-pointer ring-2 ring-white disabled:cursor-not-allowed disabled:opacity-60',
+                        'group/check absolute -left-2 -top-2 grid h-5 w-5 place-items-center rounded-full border transition-all duration-200 cursor-pointer ring-2 ring-white disabled:cursor-not-allowed disabled:opacity-60',
                         isDone
                           ? 'border-emerald-400 bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-sm shadow-emerald-500/25'
                           : 'border-slate-200 bg-white text-slate-300 shadow-sm hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-500'
