@@ -2158,62 +2158,50 @@ export const ReportsPage: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col gap-6 pb-12">
-      <UserHeroBanner
-        tone="reports"
-        icon={BarChart3}
-        iconClassName="text-sky-100"
-        badge={(
-          <>
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            {translate(language, 'reports.liveData')}
-          </>
-        )}
-        title={translate(language, 'reports.title')}
-        subtitle={translate(language, 'reports.subtitle')}
-        actions={(
-          <>
-            <div className="flex items-center bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
-              <button
-                onClick={() => { setRange('week'); setSelectedDay(DAY_LABELS[4] || 'T6'); }}
-                className={clsx(
-                  'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer',
-                  range === 'week' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-100 hover:text-white'
-                )}
-              >
-                {translate(language, 'reports.thisWeek')}
-              </button>
-              <button
-                onClick={() => { setRange('month'); setSelectedDay(getMultiLangText(language, { vi: 'T1', en: 'W1', ja: '1週', ko: '1주', zh: '第1周', fr: 'S1', de: 'W1', es: 'S1' })); }}
-                className={clsx(
-                  'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer',
-                  range === 'month' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-100 hover:text-white'
-                )}
-              >
-                {translate(language, 'reports.thisMonth')}
-              </button>
-              <button
-                onClick={() => { setRange('quarter'); setSelectedDay('Q3'); }}
-                className={clsx(
-                  'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer',
-                  range === 'quarter' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-100 hover:text-white'
-                )}
-              >
-                {translate(language, 'reports.quarter')}
-              </button>
+      <section className="relative overflow-hidden rounded-[34px] border border-indigo-200/70 bg-gradient-to-br from-indigo-600 via-violet-600 to-sky-500 p-6 text-white shadow-2xl shadow-indigo-500/20 dark:border-white/10 dark:from-indigo-950 dark:via-violet-950 dark:to-slate-900">
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
+        <div className="absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-cyan-300/20 blur-3xl" />
+        <div className="relative z-10 space-y-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/15 shadow-inner backdrop-blur">
+                <BarChart3 className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.22em] text-indigo-50 backdrop-blur">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                  {translate(language, 'reports.liveData')}
+                </div>
+                <h1 className="font-heading text-3xl font-black leading-tight sm:text-4xl">
+                  {translate(language, 'reports.title')}
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-indigo-50/85">
+                  {translate(language, 'reports.subtitle')}
+                </p>
+              </div>
             </div>
 
-            <button
-              onClick={handleExport}
-              disabled={isExporting}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer active:scale-95 shrink-0 disabled:opacity-50"
-            >
-              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              <span>{translate(language, 'reports.exportPdf')}</span>
-            </button>
-          </>
-        )}
-      />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center rounded-2xl border border-white/15 bg-white/10 p-1 backdrop-blur-md">
+                <button onClick={() => { setRange('week'); setSelectedDay(DAY_LABELS[4] || 'T6'); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'week' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.thisWeek')}</button>
+                <button onClick={() => { setRange('month'); setSelectedDay(getMultiLangText(language, { vi: 'T1', en: 'W1', ja: '1週', ko: '1주', zh: '第1周', fr: 'S1', de: 'W1', es: 'S1' })); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'month' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.thisMonth')}</button>
+                <button onClick={() => { setRange('quarter'); setSelectedDay('Q3'); }} className={clsx('rounded-xl px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer', range === 'quarter' ? 'bg-white text-indigo-900 shadow-md' : 'text-indigo-50 hover:bg-white/10')}>{translate(language, 'reports.quarter')}</button>
+              </div>
+              <button onClick={handleExport} disabled={isExporting} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-extrabold text-indigo-700 shadow-xl shadow-indigo-950/10 transition-all hover:-translate-y-0.5 hover:bg-indigo-50 active:scale-95 disabled:opacity-50">
+                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                <span>{translate(language, 'reports.exportPdf')}</span>
+              </button>
+            </div>
+          </div>
 
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.completedTasks')}</p><p className="mt-1 text-3xl font-black">{completedTasksCount}/{totalTasksCount}</p></div>
+            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.todayTasksCount')}</p><p className="mt-1 text-3xl font-black">{dashboardData?.summary.tasksCompletedToday || 0}/{dashboardData?.summary.tasksToday || 0}</p></div>
+            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.habitsCompletedCount')}</p><p className="mt-1 text-3xl font-black">{dashboardData?.summary.habitsCompletedToday || 0}/{dashboardData?.summary.totalHabits || 0}</p></div>
+            <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.productivityScore')}</p><p className="mt-1 text-3xl font-black">{averageValue}/100</p></div>
+          </div>
+        </div>
+      </section>
       {/* Toast Banner on Export */}
       {exportedToast && (
         <div className="p-4 rounded-2xl bg-emerald-500 text-white text-xs font-bold shadow-lg flex items-center justify-between animate-in fade-in duration-200">
@@ -2237,62 +2225,6 @@ export const ReportsPage: React.FC = () => {
           </button>
         </div>
       )}
-
-      {/* Core Real Metrics Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          {
-            label: translate(language, 'reports.completedTasks'),
-            value: `${completedTasksCount}/${totalTasksCount} ${getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: 'タスク', ko: '작업', zh: '任务', fr: 'tâches', de: 'Aufgaben', es: 'tareas', ru: 'задачи', th: 'งาน', it: 'attività', hi: 'कार्य' })}`,
-            trend: `${getMultiLangText(language, { vi: 'Tỷ lệ', en: 'Rate', ja: '達成率', ko: '달성률', zh: '完成率', fr: 'Taux', de: 'Rate', es: 'Tasa' })} ${completedTasksCount > 0 ? Math.round((completedTasksCount / (totalTasksCount || 1)) * 100) : 0}%`,
-            icon: CheckCircle2,
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50 border-emerald-100',
-          },
-          {
-            label: translate(language, 'reports.todayTasksCount'),
-            value: `${dashboardData?.summary.tasksCompletedToday || 0}/${dashboardData?.summary.tasksToday || 0} ${getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: 'タスク', ko: '작업', zh: '任务', fr: 'tâches', de: 'Aufgaben', es: 'tareas', ru: 'задачи', th: 'งาน', it: 'attività', hi: 'कार्य' })}`,
-            trend: translate(language, 'reports.todayData'),
-            icon: Clock,
-            color: 'text-indigo-600',
-            bg: 'bg-indigo-50 border-indigo-100',
-          },
-          {
-            label: translate(language, 'reports.habitsCompletedCount'),
-            value: `${dashboardData?.summary.habitsCompletedToday || 0}/${dashboardData?.summary.totalHabits || 0} ${getMultiLangText(language, { vi: 'thói quen', en: 'habits', ja: '習慣', ko: '습관', zh: '习惯', fr: 'habitudes', de: 'Gewohnheiten', es: 'hábitos', ru: 'привычки', th: 'นิสัย', it: 'abitudini', hi: 'आदतें' })}`,
-            trend: translate(language, 'reports.streak'),
-            icon: Flag,
-            color: 'text-amber-600',
-            bg: 'bg-amber-50 border-amber-100',
-          },
-          {
-            label: translate(language, 'reports.productivityScore'),
-            value: `${averageValue} / 100`,
-            trend: bestItem.value > 0 ? `${bestItem.label} ${getMultiLangText(language, { vi: `cao nhất (${bestItem.value}đ)`, en: `peak (${bestItem.value} pts)`, ja: `最高 (${bestItem.value} pt)`, ko: `최고 (${bestItem.value}점)`, zh: `最高 (${bestItem.value}分)`, fr: `pic (${bestItem.value} pts)`, de: `Höchstwert (${bestItem.value} Pkt)`, es: `pico (${bestItem.value} pts)` })}` : translate(language, 'reports.calculating'),
-            icon: TrendingUp,
-            color: 'text-violet-600',
-            bg: 'bg-violet-50 border-violet-100',
-          },
-        ].map((item) => (
-          <article
-            key={item.label}
-            className="rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-xl transition-all dark:border-slate-700/80 dark:bg-slate-900/90"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-2xl border ${item.bg} ${item.color} flex items-center justify-center`}>
-                <item.icon className="h-5 w-5" />
-              </div>
-              <span className="text-[11px] font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 dark:text-indigo-200 dark:bg-indigo-500/15 dark:border-indigo-400/20">
-                {item.trend}
-              </span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-black text-slate-900 font-heading">
-              {isRealDataLoading ? <Loader2 className="w-6 h-6 animate-spin text-indigo-500" /> : item.value}
-            </p>
-            <p className="text-xs font-bold text-slate-500 mt-1">{item.label}</p>
-          </article>
-        ))}
-      </div>
 
       {/* Main Bar Chart & Day Detail Column */}
       <section className="grid gap-6 lg:grid-cols-5">
@@ -2606,6 +2538,7 @@ export const ReportsPage: React.FC = () => {
     </div>
   );
 };
+
 
 
 

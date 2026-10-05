@@ -35,8 +35,8 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsProps> = ({ setting
       </div>
 
       <div className="grid grid-cols-1 gap-3">
-        <div className="flex min-h-[148px] flex-col rounded-2xl bg-[var(--color-canvas)] p-4 ring-1 ring-inset ring-[var(--color-border)] sm:p-5">
-          <div className="mb-4 flex items-start gap-3">
+        <div className="grid gap-4 rounded-2xl bg-[var(--color-canvas)] p-4 ring-1 ring-inset ring-[var(--color-border)] sm:p-5 md:grid-cols-[minmax(0,1fr)_minmax(280px,380px)] md:items-center">
+          <div className="flex items-start gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-surface)] text-indigo-600 ring-1 ring-inset ring-[var(--color-border)] dark:text-indigo-300">
               <Languages className="h-4 w-4" />
             </span>
@@ -46,7 +46,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsProps> = ({ setting
             </div>
           </div>
 
-          <div ref={menuRef} className="relative mt-auto">
+          <div ref={menuRef} className="relative">
             <button
               type="button"
               aria-haspopup="listbox"
@@ -68,7 +68,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsProps> = ({ setting
               <div
                 role="listbox"
                 aria-label={translate(currentLanguage, 'settings.language.title')}
-                className="absolute left-0 right-0 z-30 mt-2 grid max-h-72 grid-cols-1 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-1.5 shadow-xl shadow-slate-950/10 sm:grid-cols-2 dark:shadow-black/30"
+                className="absolute left-0 right-0 z-30 mt-2 max-h-64 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-1.5 shadow-xl shadow-slate-950/10 dark:shadow-black/30"
               >
                 {LANGUAGE_OPTIONS.map((language) => {
                   const isActive = currentLanguage === language.id;
@@ -82,7 +82,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsProps> = ({ setting
                         onUpdate({ language: language.id });
                         setLanguageMenuOpen(false);
                       }}
-                      className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors ${isActive ? 'bg-indigo-50 dark:bg-indigo-400/10' : 'hover:bg-[var(--color-surface-container)]'}`}
+                      className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors ${isActive ? 'bg-indigo-50 dark:bg-indigo-400/10' : 'hover:bg-[var(--color-surface-container)]'}`}
                     >
                       <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[9px] font-bold ${isActive ? 'bg-indigo-600 text-white' : 'bg-[var(--color-surface-container)] text-[var(--color-text-sub)]'}`}>
                         {language.backendValue}

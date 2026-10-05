@@ -5,10 +5,16 @@
    which can mix dark controls into the app while Planora is set to light. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
+/* A single typography system shared by Tailwind utilities and plain elements. */
+@theme {
+  --font-sans: 'Plus Jakarta Sans', 'Segoe UI', 'Noto Sans', Arial, sans-serif;
+  --font-heading: 'Manrope', 'Plus Jakarta Sans', 'Segoe UI', 'Noto Sans', Arial, sans-serif;
+}
+
 @layer base {
   :root {
-    --font-heading: 'Be Vietnam Pro', sans-serif;
-    --font-sans: 'Be Vietnam Pro', sans-serif;
+    --font-heading: 'Manrope', 'Plus Jakarta Sans', 'Segoe UI', 'Noto Sans', Arial, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', 'Segoe UI', 'Noto Sans', Arial, sans-serif;
 
     /* Design System Colors Sourced from Stitch */
     --color-canvas: #FAF8FF;
@@ -25,8 +31,22 @@
 
   body {
     font-family: var(--font-sans);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.012em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     background-color: var(--color-canvas);
     color: var(--color-text-main);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    letter-spacing: inherit;
   }
 
   :root[data-theme='dark'] {
@@ -58,6 +78,17 @@
   h5,
   h6 {
     font-family: var(--font-heading);
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+  }
+
+  strong,
+  b {
+    font-weight: 700;
+  }
+
+  small {
+    letter-spacing: -0.004em;
   }
 }
 
