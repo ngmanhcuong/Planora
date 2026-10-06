@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, KeyRound, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Lock, KeyRound, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { normalizeLanguage, translate } from '@/lib/i18n';
@@ -17,6 +17,7 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
   settings,
   onUpdate,
 }) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const language = normalizeLanguage(settings.language);
   const currentUser = useAuthStore((state) => state.user);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -71,16 +72,30 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
   };
 
   return (
-    <section className="flex flex-col gap-6 p-6 border-b border-[#E2E8F0]">
-      <div className="border-b border-[#F1F5F9] pb-4">
-        <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-[#4F46E5]" />
-          {translate(language, 'settings.security.title')}
-        </h3>
-        <p className="text-xs text-[#64748B] mt-0.5">
-          {translate(language, 'settings.security.subtitle')}
-        </p>
+    <section className={`flex flex-col p-6 border-b border-[#E2E8F0] ${isCollapsed ? '' : 'gap-6'}`}>
+      <div className={`flex items-center justify-between gap-4 ${isCollapsed ? '' : 'border-b border-[#F1F5F9] pb-4'}`}>
+        <div>
+          <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-[#4F46E5]" />
+            {translate(language, 'settings.security.title')}
+          </h3>
+          <p className="text-xs text-[#64748B] mt-0.5">
+            {translate(language, 'settings.security.subtitle')}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsCollapsed((value) => !value)}
+          aria-expanded={!isCollapsed}
+          aria-label={isCollapsed ? 'Mở rộng cài đặt bảo mật' : 'Thu gọn cài đặt bảo mật'}
+          className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-canvas)] text-[var(--color-text-sub)] transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 dark:hover:bg-indigo-400/10 dark:hover:text-indigo-300"
+        >
+          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} />
+        </button>
       </div>
+
+      {!isCollapsed && (
+        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-1 duration-200">
 
       {/* Password Form */}
       <form
@@ -207,6 +222,8 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
           />
         </button>
       </div>
+        </div>
+      )}
     </section>
   );
 };

@@ -58,12 +58,7 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
   return (
     <UserHeroBanner
       icon={Sparkles}
-      badge={(
-        <>
-          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-          {greetingTime}
-        </>
-      )}
+      badge={greetingTime}
       badges={(
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-indigo-100/80">
           <Clock className="h-3.5 w-3.5" />

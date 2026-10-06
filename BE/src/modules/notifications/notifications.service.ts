@@ -8,6 +8,12 @@ import {
 } from './notifications.types';
 import { isDeliverableEmailAddress, sendScheduleReminderEmail } from '../../utils/mailer';
 
+const NOTIFICATION_RETENTION_MS = 14 * 24 * 60 * 60 * 1000;
+
+function getNotificationExpiryCutoff(): Date {
+  return new Date(Date.now() - NOTIFICATION_RETENTION_MS);
+}
+
 function formatNotification(n: any): NotificationResponse {
   return {
     id: n.id,
@@ -48,9 +54,34 @@ function getTaskDueAt(task: { dueDate: Date; dueTime?: string | null }): Date {
   return new Date(`${datePart.year}-${datePart.month}-${datePart.day}T${dueTime}:00+07:00`);
 }
 
+function getVietnamDateInfo(date: Date): { dateKey: string; dayOfWeek: number } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const dateKey = `${values.year}-${values.month}-${values.day}`;
+  const utcDay = new Date(`${dateKey}T00:00:00Z`).getUTCDay();
+  return { dateKey, dayOfWeek: (utcDay + 6) % 7 };
+}
+
 export class NotificationsService {
   private static pendingGeneration = new Map<string, Promise<{ createdCount: number }>>();
   private static allUsersGeneration: Promise<{ processedUsers: number; createdCount: number }> | null = null;
+
+  /** Permanently remove notifications once they are more than 14 days old. */
+  static async deleteExpiredNotifications(userId?: string): Promise<{ deletedCount: number }> {
+    const result = await prisma.notification.deleteMany({
+      where: {
+        ...(userId ? { userId } : {}),
+        createdAt: { lt: getNotificationExpiryCutoff() },
+      },
+    });
+
+    return { deletedCount: result.count };
+  }
   /**
    * Internal method to create a notification with duplicate prevention
    */
@@ -94,6 +125,7 @@ export class NotificationsService {
     userId: string,
     query: NotificationListQuery
   ): Promise<PaginatedNotificationsResponse> {
+    await this.deleteExpiredNotifications(userId);
     const { page = 1, limit = 20, isRead, type, search, sortOrder = 'desc' } = query;
 
     const where: any = { userId };
@@ -139,6 +171,7 @@ export class NotificationsService {
    * Get unread notification count
    */
   static async getUnreadCount(userId: string): Promise<{ unreadCount: number }> {
+    await this.deleteExpiredNotifications(userId);
     const unreadCount = await prisma.notification.count({
       where: {
         userId,
@@ -281,6 +314,7 @@ export class NotificationsService {
     if (this.allUsersGeneration) return this.allUsersGeneration;
 
     this.allUsersGeneration = (async () => {
+      await this.deleteExpiredNotifications();
       const users = await prisma.user.findMany({ select: { id: true } });
       let createdCount = 0;
       for (const user of users) {
@@ -309,10 +343,10 @@ export class NotificationsService {
     ]);
     const reminderHours = setting?.deadlineReminderHours ?? 24;
     const reminderThreshold = new Date(now.getTime() + reminderHours * 3600 * 1000);
-    const sendEmail = async (notificationId: string, emailSentAt: Date | null, item: { title: string; kind: 'Công việc' | 'Lịch trình'; scheduledAt: Date; isOverdue?: boolean }) => {
+    const sendEmail = async (notificationId: string, emailSentAt: Date | null, item: { title: string; kind: 'Công việc' | 'Lịch trình' | 'Thời khóa biểu'; scheduledAt: Date; isOverdue?: boolean }) => {
       if (
         emailSentAt
-        || !setting?.emailNotifications
+        || setting?.emailNotifications === false
         || !user?.email
         || !isDeliverableEmailAddress(user.email)
       ) return;
@@ -404,6 +438,42 @@ export class NotificationsService {
           link: '/calendar',
         });
         if (conflictRes.isNew) createdCount++;
+      }
+    }
+
+    // 4. Send the user's first timetable item of the current day at 06:30.
+    // The occurrence date is part of relatedEntityId so a weekly item can
+    // generate one fresh reminder every week without creating duplicates.
+    if (setting?.timetableAlerts !== false) {
+      const { dateKey, dayOfWeek } = getVietnamDateInfo(now);
+      const reminderReleaseAt = new Date(`${dateKey}T06:30:00+07:00`);
+      const firstTimetableItem = await prisma.timetableItem.findFirst({
+        where: {
+          dayOfWeek,
+          timetable: { userId, isCurrent: true },
+        },
+        orderBy: { startTime: 'asc' },
+      });
+
+      if (firstTimetableItem) {
+        const scheduledAt = new Date(`${dateKey}T${firstTimetableItem.startTime}:00+07:00`);
+        if (now >= reminderReleaseAt && now <= scheduledAt) {
+          const result = await NotificationsService.createNotification({
+            userId,
+            type: NotificationType.TIMETABLE,
+            title: 'Nhắc nhở thời khóa biểu hôm nay',
+            message: `Lịch "${firstTimetableItem.subjectName}" bắt đầu lúc ${firstTimetableItem.startTime}`,
+            relatedEntityType: 'TIMETABLE',
+            relatedEntityId: `${firstTimetableItem.id}:${dateKey}`,
+            link: '/timetable',
+          });
+          if (result.isNew) createdCount++;
+          await sendEmail(result.notification.id, result.notification.emailSentAt, {
+            title: firstTimetableItem.subjectName,
+            kind: 'Thời khóa biểu',
+            scheduledAt,
+          });
+        }
       }
     }
 

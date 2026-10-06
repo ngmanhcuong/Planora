@@ -58,7 +58,7 @@ export const isDeliverableEmailAddress = (email: string): boolean => {
 
 export const sendScheduleReminderEmail = async (
   to: string,
-  item: { title: string; kind: 'Công việc' | 'Lịch trình'; scheduledAt: Date; isOverdue?: boolean }
+  item: { title: string; kind: 'Công việc' | 'Lịch trình' | 'Thời khóa biểu'; scheduledAt: Date; isOverdue?: boolean }
 ): Promise<void> => {
   const { mailConfig, transporter } = createTransporter();
   const date = item.scheduledAt.toLocaleDateString('vi-VN', {
@@ -77,7 +77,12 @@ export const sendScheduleReminderEmail = async (
   const headline = item.isOverdue ? `${item.kind} đã quá hạn` : `${item.kind} sắp tới`;
   const safeTitle = escapeHtml(item.title);
   const safeHeadline = escapeHtml(headline);
-  const detailUrl = escapeHtml(`${config.clientUrl.replace(/\/$/, '')}${item.kind === 'Công việc' ? '/tasks' : '/calendar'}`);
+  const detailPath = item.kind === 'Công việc'
+    ? '/tasks'
+    : item.kind === 'Thời khóa biểu'
+      ? '/timetable'
+      : '/calendar';
+  const detailUrl = escapeHtml(`${config.clientUrl.replace(/\/$/, '')}${detailPath}`);
   const accent = item.isOverdue ? '#e11d48' : '#4f46e5';
 
   await transporter.sendMail({
@@ -105,7 +110,7 @@ export const sendScheduleReminderEmail = async (
                   <td style="padding:30px 28px 28px;">
                     <p style="margin:0 0 8px;color:${accent};font-size:13px;line-height:1.5;font-weight:600;letter-spacing:.1px;">${safeHeadline}</p>
                     <h1 style="margin:0 0 12px;font-size:25px;line-height:1.3;font-weight:750;letter-spacing:-.45px;color:#172033;">${safeTitle}</h1>
-                    <p style="margin:0 0 25px;color:#5d687b;font-size:15px;line-height:1.65;font-weight:400;">${item.isOverdue ? 'Thời hạn của công việc này đã qua. Bạn có thể mở Planora để cập nhật lại tiến độ.' : 'Công việc này sắp đến hạn. Bạn nên kiểm tra lại kế hoạch để hoàn thành đúng thời gian.'}</p>
+                    <p style="margin:0 0 25px;color:#5d687b;font-size:15px;line-height:1.65;font-weight:400;">${item.isOverdue ? 'Thời hạn của công việc này đã qua. Bạn có thể mở Planora để cập nhật lại tiến độ.' : `${item.kind} này sắp diễn ra. Bạn nên kiểm tra lại kế hoạch để chuẩn bị đúng giờ.`}</p>
 
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:26px;background:#f8f9fb;border:1px solid #e3e7ed;border-radius:8px;">
                       <tr>

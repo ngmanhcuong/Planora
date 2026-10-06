@@ -12,6 +12,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsProps> = ({ setting
   const currentLanguage = normalizeLanguage(settings.language);
   const selectedLanguage = LANGUAGE_OPTIONS.find((item) => item.id === currentLanguage) ?? LANGUAGE_OPTIONS[0];
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,17 +25,33 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsProps> = ({ setting
 
   return (
     <section className="border-b border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-7">
-      <div className="mb-5 flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-300">
-          <SlidersHorizontal className="h-4 w-4" />
-        </span>
-        <div>
-          <h3 className="font-heading text-[15px] font-bold text-[var(--color-text-main)]">{translate(currentLanguage, 'settings.general.title')}</h3>
-          <p className="mt-0.5 text-[11px] text-[var(--color-text-sub)]">{translate(currentLanguage, 'settings.general.subtitle')}</p>
+      <div className={`flex items-center justify-between gap-4 ${isCollapsed ? '' : 'mb-5'}`}>
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-300">
+            <SlidersHorizontal className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="font-heading text-[15px] font-bold text-[var(--color-text-main)]">{translate(currentLanguage, 'settings.general.title')}</h3>
+            <p className="mt-0.5 truncate text-[11px] text-[var(--color-text-sub)]">{translate(currentLanguage, 'settings.general.subtitle')}</p>
+          </div>
         </div>
+
+        <button
+          type="button"
+          aria-expanded={!isCollapsed}
+          aria-label={isCollapsed ? 'Mở rộng cài đặt hệ thống' : 'Thu gọn cài đặt hệ thống'}
+          title={isCollapsed ? 'Mở rộng' : 'Thu gọn'}
+          onClick={() => {
+            setIsCollapsed((collapsed) => !collapsed);
+            setLanguageMenuOpen(false);
+          }}
+          className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-canvas)] text-[var(--color-text-sub)] transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 dark:hover:bg-indigo-400/10 dark:hover:text-indigo-300"
+        >
+          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`} />
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      {!isCollapsed && <div className="grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
         <div className="grid gap-4 rounded-2xl bg-[var(--color-canvas)] p-4 ring-1 ring-inset ring-[var(--color-border)] sm:p-5 md:grid-cols-[minmax(0,1fr)_minmax(280px,380px)] md:items-center">
           <div className="flex items-start gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-surface)] text-indigo-600 ring-1 ring-inset ring-[var(--color-border)] dark:text-indigo-300">
@@ -122,7 +139,7 @@ export const GeneralSettingsSection: React.FC<GeneralSettingsProps> = ({ setting
             </button>
           </div>
         </div>
-      </div>
+      </div>}
     </section>
   );
 };
