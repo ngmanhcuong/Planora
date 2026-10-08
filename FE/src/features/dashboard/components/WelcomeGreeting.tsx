@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Sparkles, Bot, Clock } from 'lucide-react';
+import { Plus, Sparkles, Bot, Clock, LayoutGrid } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
@@ -57,7 +57,7 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
   const eventsCount = summary?.upcomingEvents || 0;
   return (
     <UserHeroBanner
-      icon={Sparkles}
+      icon={LayoutGrid}
       badge={greetingTime}
       badges={(
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-indigo-100/80">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, PlusCircle, Check, Calendar as CalendarIcon } from 'lucide-react';
+import { PlusCircle, Check, Calendar as CalendarIcon } from 'lucide-react';
 import type { CategoryType } from '@/types';
 import { CATEGORY_MAP } from '@/utils/categories';
 import type { CalendarViewMode } from '../types';
@@ -21,9 +21,6 @@ const LOCALE_MAP: Record<string, string> = {
 
 export interface CalendarHeaderProps {
   currentDate: Date;
-  onPrevWeek: () => void;
-  onNextWeek: () => void;
-  onToday: () => void;
   viewMode: CalendarViewMode;
   onViewModeChange: (mode: CalendarViewMode) => void;
   activeCategory: CategoryType | 'all';
@@ -35,9 +32,6 @@ export interface CalendarHeaderProps {
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   currentDate,
-  onPrevWeek,
-  onNextWeek,
-  onToday,
   viewMode,
   onViewModeChange,
   activeCategory,
@@ -111,31 +105,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         })}
         actions={(
           <>
-            {/* Today & Arrow Nav */}
-            <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
-              <button
-                onClick={onToday}
-                className="px-3 py-1.5 rounded-xl text-xs font-bold text-white hover:bg-white/20 transition-colors cursor-pointer"
-              >
-                {translate(language, 'calendar.today')}
-              </button>
-              <div className="h-4 w-px bg-white/20 mx-0.5" />
-              <button
-                onClick={onPrevWeek}
-                className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
-                title={getMultiLangText(language, { vi: 'Trước', en: 'Previous', ja: '前へ', ko: '이전', zh: '上一页', fr: 'Précédent', de: 'Zurück', es: 'Anterior' })}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={onNextWeek}
-                className="p-1.5 rounded-xl text-indigo-100 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
-                title={getMultiLangText(language, { vi: 'Sau', en: 'Next', ja: '次へ', ko: '다음', zh: '下一页', fr: 'Suivant', de: 'Weiter', es: 'Siguiente' })}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
             {/* View Switcher Tabs */}
             <div className="flex items-center bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
               {(['day', 'week', 'month'] as CalendarViewMode[]).map((mode) => {

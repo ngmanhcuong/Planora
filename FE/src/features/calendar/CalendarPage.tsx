@@ -56,10 +56,6 @@ export const CalendarPage: React.FC = () => {
     });
   };
 
-  const handleToday = () => {
-    setCurrentDate(new Date());
-  };
-
   // Convert ApiCalendarItem to CalendarEventItem for WeekGrid
   const rawItems: ApiCalendarItem[] = calendarData || [];
   const currentTime = new Date().getTime();
@@ -82,7 +78,7 @@ export const CalendarPage: React.FC = () => {
       const mins = d.getMinutes();
 
       // Top px: 07:00 is 0px. Each hour is 80px.
-      const clampedHours = Math.max(7, Math.min(19, hours));
+      const clampedHours = Math.max(7, Math.min(14, hours));
       startTopPx = (clampedHours - 7) * 80 + (mins / 60) * 80;
       timeRange = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
     }
@@ -236,9 +232,6 @@ export const CalendarPage: React.FC = () => {
     <div className="flex w-full flex-col gap-6 pb-12">
       <CalendarHeader
         currentDate={currentDate}
-        onPrevWeek={handlePrevWeek}
-        onNextWeek={handleNextWeek}
-        onToday={handleToday}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         activeCategory={activeCategory}

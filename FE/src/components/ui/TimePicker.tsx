@@ -31,7 +31,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0, width: 280, maxHeight: 320 });
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 256, maxHeight: 288 });
 
   useLayoutEffect(() => {
     if (!isOpen) return;
@@ -46,7 +46,8 @@ export const TimePicker: React.FC<TimePickerProps> = ({
       const topEdge = Math.max(8, panel ? panel.top + 64 : 8);
       // Reserve the modal footer so the picker does not cover Save/Cancel.
       const bottomEdge = Math.min(window.innerHeight - 8, panel ? panel.bottom - 76 : window.innerHeight - 8);
-      const width = Math.min(280, rightEdge - leftEdge);
+      // Keep the popup compact and visually aligned with the time input.
+      const width = Math.min(256, rect.width, rightEdge - leftEdge);
       const below = Math.max(0, bottomEdge - rect.bottom - 6);
       const above = Math.max(0, rect.top - topEdge - 6);
       const naturalHeight = popup.scrollHeight;
@@ -163,17 +164,17 @@ export const TimePicker: React.FC<TimePickerProps> = ({
       {error && <span className="text-xs font-medium text-[#F43F5E]">{error}</span>}
 
       {isOpen && createPortal(
-        <div ref={popupRef} role="dialog" aria-label={label || 'Chọn giờ'} style={position} className="fixed z-[100] max-h-[calc(100dvh-16px)] overflow-y-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-main)] shadow-[0_20px_45px_rgba(15,23,42,0.25)]">
+        <div ref={popupRef} role="dialog" aria-label={label || 'Chọn giờ'} style={position} className="fixed z-[100] max-h-[calc(100dvh-16px)] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-[0_20px_45px_rgba(15,23,42,0.16)] dark:border-[var(--color-border)] dark:bg-[var(--color-surface)] dark:text-[var(--color-text-main)] dark:shadow-[0_20px_45px_rgba(0,0,0,0.38)]">
           {/* Header Toolbar */}
-          <div className="flex items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-container)] px-2.5 py-2">
-            <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-sub)]">
+          <div className="flex items-center justify-between gap-1.5 border-b border-slate-200 bg-slate-50 px-2.5 py-1.5 dark:border-[var(--color-border)] dark:bg-[var(--color-surface-container)]">
+            <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-[var(--color-text-sub)]">
               <Clock className="h-3.5 w-3.5 text-[var(--color-primary)] shrink-0" />
               <span>Giờ</span>
             </div>
 
             <div className="flex items-center gap-1.5">
               {/* AM / PM Toggle */}
-              <div className="flex shrink-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5 shadow-xs">
+              <div className="flex shrink-0 rounded-lg border border-slate-200 bg-white p-0.5 shadow-xs dark:border-[var(--color-border)] dark:bg-[var(--color-surface)]">
                 {['AM', 'PM'].map((period) => (
                   <button
                     key={period}
@@ -183,7 +184,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                       'h-6 rounded-md px-2 text-[11px] font-black transition-all cursor-pointer',
                       meridiem === period
                         ? 'bg-indigo-600 text-white shadow-xs'
-                        : 'text-[var(--color-text-main)] hover:bg-indigo-500/15'
+                        : 'text-slate-700 hover:bg-indigo-50 dark:text-[var(--color-text-main)] dark:hover:bg-indigo-500/15'
                     )}
                   >
                     {period}
@@ -202,15 +203,15 @@ export const TimePicker: React.FC<TimePickerProps> = ({
           </div>
 
           {/* Hour & Minute Scroll Columns */}
-          <div className="p-3">
-            <div className="relative rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-container)] p-3">
-              <div className="grid grid-cols-[1fr_auto_1fr] gap-1 px-1 pb-1 text-center text-[10px] font-black uppercase tracking-wider text-slate-400">
+          <div className="p-2.5">
+            <div className="relative rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-[var(--color-border)] dark:bg-[var(--color-surface-container)]">
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-1 px-1 pb-1 text-center text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <div>Giờ</div>
                 <div className="w-3" />
                 <div>Phút</div>
               </div>
               <div className="relative">
-                <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 h-9 -translate-y-1/2 rounded-xl bg-indigo-500/15 ring-1 ring-indigo-400/50 shadow-sm" />
+                <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 h-8 -translate-y-1/2 rounded-lg bg-white ring-1 ring-indigo-300 shadow-sm dark:bg-indigo-500/15 dark:ring-indigo-400/50" />
                 <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-center gap-1">
                   <TimeWheel
                     label="Giờ"
@@ -218,7 +219,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                     value={hour12}
                     onChange={(h) => updateTime(h, minute, meridiem)}
                   />
-                  <div className="flex h-[108px] w-3 items-center justify-center text-lg font-black text-slate-300">:</div>
+                  <div className="flex h-24 w-3 items-center justify-center text-base font-black text-slate-400 dark:text-slate-300">:</div>
                   <TimeWheel
                     label="Phút"
                     options={minuteOptions}

@@ -18,11 +18,12 @@ export interface WeekGridProps {
 }
 
 const SLOT_HEIGHT_PX = 80;
-const GRID_HEIGHT_PX = 960;
+const DISPLAYED_SLOT_COUNT = 8;
+const GRID_HEIGHT_PX = SLOT_HEIGHT_PX * DISPLAYED_SLOT_COUNT;
 
 const TIME_SLOTS = [
-  '07:00', '08:00', '09:00', '10:00', '11:00', '12:00',
-  '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'
+  '07:00', '08:00', '09:00', '10:00',
+  '11:00', '12:00', '13:00', '14:00',
 ];
 
 const hourGridBackground = {
@@ -98,7 +99,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
   const getDropDateTime = (targetDate: Date, clientY: number, columnElement: HTMLDivElement) => {
     const rect = columnElement.getBoundingClientRect();
     const offsetY = Math.max(0, Math.min(GRID_HEIGHT_PX - 1, clientY - rect.top));
-    const slotIndex = Math.max(0, Math.min(TIME_SLOTS.length - 2, Math.floor(offsetY / SLOT_HEIGHT_PX)));
+    const slotIndex = Math.max(0, Math.min(TIME_SLOTS.length - 1, Math.floor(offsetY / SLOT_HEIGHT_PX)));
     const target = new Date(targetDate);
     target.setHours(7 + slotIndex, 0, 0, 0);
     return target;
@@ -329,8 +330,11 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
 
       {/* Grid Body */}
       <div
-        style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}
-        className="calendar-week-body relative grid w-full h-[960px]"
+        style={{
+          gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))`,
+          height: `${GRID_HEIGHT_PX}px`,
+        }}
+        className="calendar-week-body relative grid w-full"
       >
         {/* Day Columns */}
         {weekDays.map((day, dayIndex) => {
@@ -355,12 +359,12 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                 event.preventDefault();
                 handleDropOnDay(day.dateObj, event.clientY, event.currentTarget);
               }}
-              className={`calendar-week-day relative h-[960px] border-r last:border-r-0 transition-colors ${
+              className={`calendar-week-day relative border-r last:border-r-0 transition-colors ${
                 day.isToday
                   ? 'calendar-week-day-today'
                   : 'calendar-week-day-idle'
               } ${isDragOverDay ? 'calendar-week-day-drop-target' : ''}`}
-              style={hourGridBackground}
+              style={{ ...hourGridBackground, height: `${GRID_HEIGHT_PX}px` }}
             >
               {dayEvents.map((evt) => (
                 (() => {

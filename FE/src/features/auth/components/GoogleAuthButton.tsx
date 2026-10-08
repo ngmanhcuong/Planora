@@ -78,6 +78,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
           email: apiUser.email,
           role: apiUser.role,
           isVerified: apiUser.isVerified,
+          avatarUrl: apiUser.avatarUrl || undefined,
         };
 
         setAuth(accessToken, user);

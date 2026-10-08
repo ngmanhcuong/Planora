@@ -305,7 +305,21 @@ export class AiService {
     const userContext = await buildUserAiContext(userId);
 
     const fullSystemPrompt = `${ASSISTANT_PROMPT}\nUSER CONTEXT:\n${JSON.stringify(userContext, null, 2)}`;
-    const answer = await this.provider.chat(fullSystemPrompt, payload.message);
+    const rawAnswer = await this.provider.chat(fullSystemPrompt, payload.message);
+    // Do not leak internal context property names when a provider mirrors the JSON input.
+    const replacements: Array<[RegExp, string]> = [
+      [/`?incompleteTasks`?/gi, 'công việc chưa hoàn thành'],
+      [/`?upcomingEvents`?/gi, 'lịch sắp tới'],
+      [/`?timetableItems`?/gi, 'thời khóa biểu'],
+      [/`?habitSummaries`?/gi, 'thói quen'],
+      [/`?todayScore`?/gi, 'điểm năng suất hôm nay'],
+      [/`?currentTimeIso`?/gi, 'thời gian hiện tại'],
+      [/`?userName`?/gi, 'tên người dùng'],
+      [/time[- ]?blocking/gi, 'chia khung thời gian'],
+    ];
+    const answer = replacements
+      .reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), rawAnswer)
+      .replace(/`([^`]+)`/g, '$1');
 
     return {
       answer,

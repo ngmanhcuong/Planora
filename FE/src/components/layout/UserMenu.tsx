@@ -17,6 +17,10 @@ export const UserMenu: React.FC = () => {
   const isStaffOrAdmin = ['ADMIN', 'CONTENT_MANAGER', 'CUSTOMER_SUPPORT', 'ENTERPRISE_LEAD'].includes(user?.role || '');
 
   useEffect(() => {
+    setBrokenAvatar(null);
+  }, [user?.avatarUrl]);
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsOpen(false);

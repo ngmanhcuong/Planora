@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { X, Send, Bot, User, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { X, Send, Bot, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { useAiAssistant } from '../hooks/useAi';
 import { useCurrentLanguage } from '@/hooks/useCurrentLanguage';
 import { translate } from '@/lib/i18n';
+import { AssistantAnswer } from './AssistantAnswer';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export interface AiAssistantPanelProps {
   isOpen: boolean;
   onClose: () => void;
   initialPrompt?: string;
+  onResponse?: (answer: string) => void;
 }
 
 interface ChatMessage {
@@ -17,8 +20,16 @@ interface ChatMessage {
   timestamp: string;
 }
 
-export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onClose, initialPrompt }) => {
+export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onClose, initialPrompt, onResponse }) => {
   const language = useCurrentLanguage();
+  const user = useAuthStore((state) => state.user);
+  const [brokenAvatar, setBrokenAvatar] = useState<string | null>(null);
+  const userInitials = (user?.name || 'U')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(-2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
   const samplePrompts = [
     translate(language, 'assistant.panel.prompt.one'),
     translate(language, 'assistant.panel.prompt.two'),
@@ -45,6 +56,10 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
       setInputMsg(initialPrompt);
     }
   }, [initialPrompt, isOpen]);
+
+  useEffect(() => {
+    setBrokenAvatar(null);
+  }, [user?.avatarUrl]);
 
   if (!isOpen) return null;
 
@@ -78,6 +93,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
           timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         };
         setMessages((prev) => [...prev, botMsg]);
+        onResponse?.(data.answer);
       },
       onError: (err: any) => {
         const msg = err.response?.data?.message || translate(language, 'assistant.panel.unavailable');
@@ -139,13 +155,24 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
             }`}
           >
             <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-sm ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl text-xs font-bold shadow-sm ${
                 m.sender === 'user'
-                    ? 'bg-slate-950 text-white'
+                    ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
                     : 'bg-white text-indigo-600 ring-1 ring-indigo-100'
               }`}
             >
-              {m.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+              {m.sender === 'user' ? (
+                user?.avatarUrl && brokenAvatar !== user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name || 'Ảnh đại diện'}
+                    className="h-full w-full object-cover"
+                    onError={() => setBrokenAvatar(user.avatarUrl || null)}
+                  />
+                ) : (
+                  <span className="text-[10px] font-black">{userInitials}</span>
+                )
+              ) : <Bot className="w-4 h-4" />}
             </div>
 
             <div className="flex flex-col gap-1">
@@ -156,7 +183,7 @@ export const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ isOpen, onCl
                       : 'ai-assistant-message rounded-tl-md border border-slate-200/80 bg-white/95 text-slate-800'
                 }`}
               >
-                {m.text}
+                {m.sender === 'assistant' ? <AssistantAnswer text={m.text} compact /> : m.text}
               </div>
                 <span className={`px-1 text-[10px] font-bold text-slate-400 ${m.sender === 'user' ? 'text-right' : 'text-left'}`}>
                   {m.timestamp}

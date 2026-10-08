@@ -70,6 +70,10 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile }) => {
     .map((part) => part[0]?.toUpperCase())
     .join('') || 'P';
 
+  useEffect(() => {
+    setBrokenAvatar(null);
+  }, [profile.avatarUrl]);
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';

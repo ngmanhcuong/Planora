@@ -7,6 +7,7 @@ export interface SafeUserResponse {
   status: string;
   isVerified: boolean;
   createdAt: Date;
+  avatarUrl?: string | null;
 }
 
 export interface AuthSuccessData {

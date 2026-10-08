@@ -2,8 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid,
-  Calendar as CalendarIcon,
-  CalendarClock,
+  CalendarDays,
   CheckSquare,
   BarChart3,
   Sparkles,
@@ -30,6 +29,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 interface NavItem {
   to: string;
+  activePaths?: string[];
   labelKey?: TranslationKey;
   label?: string;
   labelMap?: { vi: string; en: string; ja?: string; ko?: string; zh?: string; fr?: string; de?: string; es?: string };
@@ -39,8 +39,12 @@ interface NavItem {
 
 const MAIN_NAV_ITEMS: NavItem[] = [
   { to: '/dashboard', labelKey: 'sidebar.dashboard', icon: <LayoutGrid className="w-5 h-5" /> },
-  { to: '/calendar', labelKey: 'sidebar.calendar', icon: <CalendarIcon className="w-5 h-5" /> },
-  { to: '/timetable', labelKey: 'sidebar.timetable', icon: <CalendarClock className="w-5 h-5" /> },
+  {
+    to: '/schedule',
+    activePaths: ['/schedule', '/calendar', '/timetable'],
+    labelMap: { vi: 'Lịch Biểu', en: 'Schedule', ja: 'スケジュール', ko: '일정', zh: '日程', fr: 'Planning', de: 'Zeitplan', es: 'Agenda' },
+    icon: <CalendarDays className="w-5 h-5" />,
+  },
   { to: '/tasks', labelKey: 'sidebar.tasks', icon: <CheckSquare className="w-5 h-5" /> },
   { to: '/notifications', labelKey: 'sidebar.notifications', icon: <Bell className="w-5 h-5" /> },
   { to: '/assistant', labelKey: 'sidebar.assistant', icon: <Sparkles className="w-5 h-5" /> },
@@ -152,6 +156,7 @@ const SidebarNavLink: React.FC<{
   const currentPathWithQuery = location.pathname + location.search;
   const isActive =
     location.pathname === item.to ||
+    item.activePaths?.includes(location.pathname) ||
     currentPathWithQuery === item.to ||
     (item.to === '/admin?tab=users' && location.pathname === '/admin' && (!location.search || location.search === '?tab=users'));
 

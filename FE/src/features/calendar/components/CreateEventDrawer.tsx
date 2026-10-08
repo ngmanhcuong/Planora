@@ -5,7 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
-import { Select } from '@/components/ui/Select';
+import { CategoryChipPicker } from './CategoryChipPicker';
 
 import { useQuery } from '@tanstack/react-query';
 import { calendarApi, type CreateEventPayload } from '../api/calendarApi';
@@ -108,15 +108,6 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
     }
     finally { setSaving(false); }
   };
-  const categoryOptions = [
-    { value: '', label: 'Không phân loại', color: '#94A3B8' },
-    ...(categories.data?.map(item => ({
-      value: item.id,
-      label: item.name,
-      color: item.color || '#6366F1'
-    })) || [])
-  ];
-
   return (
     <Modal isOpen={isOpen} onClose={close} title="Thêm lịch trình mới" maxWidth="xl">
     <div className="max-h-[75dvh] overflow-y-auto overflow-x-visible p-1 flex flex-col gap-5">
@@ -131,11 +122,10 @@ export const CreateEventDrawer: React.FC<CreateEventDrawerProps> = ({
           required
         />
 
-        <Select
-          label="Danh mục"
-          options={categoryOptions}
+        <CategoryChipPicker
+          categories={categories.data}
           value={category}
-          onChange={(val) => setCategory(val)}
+          onChange={setCategory}
         />
         {categories.isError && <p role="alert" className="text-xs text-red-500">Không tải được danh mục; có thể lưu không phân loại.</p>}
         {/* Date & Time */}

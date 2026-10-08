@@ -4,8 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
-import { CalendarPage } from '@/features/calendar/CalendarPage';
-import { TimetablePage } from '@/features/timetable/TimetablePage';
+import { SchedulePage } from '@/features/schedule/SchedulePage';
 import { TasksPage } from '@/features/tasks/TasksPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
@@ -76,8 +75,9 @@ export const AppRouter: React.FC = () => {
           <Route path="/" element={<RoleHomeRedirect />} />
           <Route path="/admin" element={<AdminOnlyRoute><AdminDashboardPage /></AdminOnlyRoute>} />
           <Route path="/dashboard" element={<UserOnlyRoute><DashboardPage /></UserOnlyRoute>} />
-          <Route path="/calendar" element={<UserOnlyRoute><CalendarPage /></UserOnlyRoute>} />
-          <Route path="/timetable" element={<UserOnlyRoute><TimetablePage /></UserOnlyRoute>} />
+          <Route path="/schedule" element={<UserOnlyRoute><SchedulePage /></UserOnlyRoute>} />
+          <Route path="/calendar" element={<Navigate to="/schedule" replace />} />
+          <Route path="/timetable" element={<Navigate to="/schedule" replace />} />
           <Route path="/tasks" element={<UserOnlyRoute><TasksPage /></UserOnlyRoute>} />
           <Route path="/notifications" element={<UserOnlyRoute><NotificationsPage /></UserOnlyRoute>} />
           <Route path="/assistant" element={<UserOnlyRoute><AssistantPage /></UserOnlyRoute>} />

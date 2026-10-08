@@ -5,7 +5,7 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { TimePicker } from '@/components/ui/TimePicker';
-import { Select } from '@/components/ui/Select';
+import { CategoryChipPicker } from './CategoryChipPicker';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/axios';
 import type { CreateEventPayload, UpdateEventPayload } from '../api/calendarApi';
@@ -92,15 +92,6 @@ export const CalendarItemEditorModal: React.FC<CalendarItemEditorModalProps> = (
     },
     enabled: isOpen && Boolean(event),
   });
-  const categoryOptions = [
-    { value: '', label: 'Không phân loại', color: '#94A3B8' },
-    ...(categories.data?.map((item) => ({
-      value: item.id,
-      label: item.name,
-      color: item.color || '#6366F1',
-    })) || []),
-  ];
-
   if (!event) return null;
 
   const start = combineDateAndTime(date, startTime);
@@ -170,11 +161,10 @@ export const CalendarItemEditorModal: React.FC<CalendarItemEditorModalProps> = (
         />
 
         {event.sourceType === 'TASK' && (
-          <Select
-            label="Danh mục"
+          <CategoryChipPicker
+            categories={categories.data}
             value={categoryId}
             onChange={setCategoryId}
-            options={categoryOptions}
           />
         )}
 

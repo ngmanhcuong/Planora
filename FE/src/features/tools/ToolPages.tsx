@@ -42,6 +42,7 @@ import {
   Download,
 } from 'lucide-react';
 import { AiAssistantPanel, SmartScheduleModal, useAiStatus, usePrioritizeTasks } from '@/features/ai';
+import { AssistantAnswer } from '@/features/ai/components/AssistantAnswer';
 import type { TaskPriorityRecommendation } from '@/features/ai';
 import { useDashboard, useWeeklyStats, useMonthlyStats } from '@/features/dashboard/hooks/useDashboard';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
@@ -55,8 +56,6 @@ import { notifyLocalActivity } from '@/lib/activityNotifications';
 import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '@/features/goals/hooks/useGoals';
 import { useCreateNote, useDeleteNote, useNotes, useUpdateNote } from '@/features/notes/hooks/useNotes';
 import type { ApiNote } from '@/features/notes/api/notesApi';
-
-const cardClass = 'rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-200';
 
 interface GoalItem {
   id: string;
@@ -190,6 +189,7 @@ export const AssistantPage: React.FC = () => {
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [assistantPrompt, setAssistantPrompt] = useState('');
   const [priorityResults, setPriorityResults] = useState<TaskPriorityRecommendation[]>([]);
+  const [latestAssistantResult, setLatestAssistantResult] = useState('');
   const language = useCurrentLanguage();
   const assistantCopy = {
     systemTask: getMultiLangText(language, { vi: 'Công việc trong hệ thống', en: 'Tasks in system', ja: 'システム内のタスク', ko: '시스템 내 작업', zh: '系统中的任务', fr: 'Tâches dans le système', de: 'Aufgaben im System', es: 'Tareas en el sistema' }),
@@ -231,12 +231,6 @@ export const AssistantPage: React.FC = () => {
   const upcomingEvents = dashboardData?.summary.upcomingEvents || 0;
   const todayScore = dashboardData?.productivity.todayScore || 0;
 
-  const promptCards = [
-    translate(language, 'assistant.prompt.today'),
-    translate(language, 'assistant.prompt.week'),
-    translate(language, 'assistant.prompt.breakdown'),
-  ];
-
   const openAssistantWithPrompt = (prompt = '') => {
     setAssistantPrompt(prompt);
     setIsAssistantOpen(true);
@@ -245,7 +239,10 @@ export const AssistantPage: React.FC = () => {
   const handlePrioritize = () => {
     const taskIds = incompleteTasks.map((task) => task.id);
     prioritizeMutation.mutate(taskIds.length ? taskIds : undefined, {
-      onSuccess: (data) => setPriorityResults(data.recommendations || []),
+      onSuccess: (data) => {
+        setPriorityResults(data.recommendations || []);
+        setLatestAssistantResult('');
+      },
     });
   };
 
@@ -407,6 +404,14 @@ export const AssistantPage: React.FC = () => {
                 </article>
               ))}
             </div>
+          ) : latestAssistantResult ? (
+            <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-indigo-50/60 p-5">
+              <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-violet-600">
+                <Bot className="h-4 w-4" />
+                {assistantCopy.dataAdvice}
+              </div>
+              <AssistantAnswer text={latestAssistantResult} />
+            </div>
           ) : (
             <div className="flex min-h-56 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 p-6 text-center">
               <Brain className="mb-3 h-9 w-9 text-slate-300" />
@@ -417,28 +422,15 @@ export const AssistantPage: React.FC = () => {
         </div>
       </section>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {promptCards.map((text) => (
-          <button
-            key={text}
-            onClick={() => openAssistantWithPrompt(text)}
-            className={`${cardClass} flex items-start gap-4 p-5 text-left transition-all hover:-translate-y-1 hover:border-indigo-300 hover:shadow-md cursor-pointer group`}
-          >
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-500 border border-amber-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <Lightbulb className="h-5 w-5" />
-            </div>
-            <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">
-              {text}
-            </span>
-          </button>
-        ))}
-      </div>
-
       <SmartScheduleModal isOpen={isScheduleOpen} onClose={() => setIsScheduleOpen(false)} />
       <AiAssistantPanel
         isOpen={isAssistantOpen}
         initialPrompt={assistantPrompt}
         onClose={() => setIsAssistantOpen(false)}
+        onResponse={(answer) => {
+          setLatestAssistantResult(answer);
+          setPriorityResults([]);
+        }}
       />
     </div>
   );

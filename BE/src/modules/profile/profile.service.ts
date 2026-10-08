@@ -1,6 +1,7 @@
 import { prisma } from '../../config/prisma';
 import type { UpdateProfileInput } from './profile.schemas';
 import type { UserProfileResponse } from './profile.types';
+import { downloadGoogleAvatar, isGoogleAvatarUrl } from '../../utils/googleAvatar';
 
 export class ProfileService {
   async getProfile(userId: string): Promise<UserProfileResponse> {
@@ -22,6 +23,18 @@ export class ProfileService {
       SELECT coverUrl FROM profiles WHERE userId = ${userId} LIMIT 1
     `;
 
+    let avatarUrl = user.profile.avatarUrl;
+    if (avatarUrl && isGoogleAvatarUrl(avatarUrl)) {
+      const storedAvatar = await downloadGoogleAvatar(avatarUrl);
+      if (storedAvatar) {
+        await prisma.profile.update({
+          where: { userId },
+          data: { avatarUrl: storedAvatar },
+        });
+        avatarUrl = storedAvatar;
+      }
+    }
+
     return {
       userId: user.id,
       name: user.name,
@@ -33,7 +46,7 @@ export class ProfileService {
       completedCredits: user.profile.completedCredits,
       totalCredits: user.profile.totalCredits,
       bio: user.profile.bio,
-      avatarUrl: user.profile.avatarUrl,
+      avatarUrl,
       coverUrl: coverRows[0]?.coverUrl ?? null,
     };
   }

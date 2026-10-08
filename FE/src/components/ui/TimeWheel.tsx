@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 
-const ROW_HEIGHT = 36;
+const ROW_HEIGHT = 32;
 
 export function TimeWheel({ label, options, value, onChange }: {
   label: string;
@@ -33,10 +33,10 @@ export function TimeWheel({ label, options, value, onChange }: {
       const index = Math.max(0, Math.min(options.length - 1, Math.round(event.currentTarget.scrollTop / ROW_HEIGHT)));
       if (options[index] !== value) onChange(options[index]);
     }}
-    className="time-wheel-scrollbar h-[108px] snap-y snap-mandatory overflow-y-scroll overscroll-contain touch-pan-y py-9 pl-2 pr-1">
+    className="time-wheel-scrollbar h-24 snap-y snap-mandatory overflow-y-scroll overscroll-contain touch-pan-y py-8 pl-1.5 pr-0.5">
     {options.map((option, index) => <div key={option} id={`time-wheel-${label}-${option}`} role="option" aria-selected={option === value}
       onClick={() => choose(index)}
-      className={`flex h-9 w-full shrink-0 snap-center cursor-pointer items-center justify-center rounded-xl text-xl font-black leading-none transition-colors ${option === value ? 'text-[var(--color-text-main)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'}`}>
+      className={`flex h-8 w-full shrink-0 snap-center cursor-pointer items-center justify-center rounded-lg text-lg font-black leading-none transition-colors ${option === value ? 'text-slate-950 dark:text-[var(--color-text-main)]' : 'text-slate-400 hover:text-slate-700 dark:text-[var(--color-text-muted)] dark:hover:text-[var(--color-text-main)]'}`}>
       {option}
     </div>)}
   </div>;

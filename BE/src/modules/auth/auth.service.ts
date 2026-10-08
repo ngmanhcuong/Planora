@@ -12,6 +12,7 @@ import type {
 } from './auth.schemas';
 import type { AuthSuccessData, SafeUserResponse, TwoFactorChallengeData } from './auth.types';
 import { randomUUID } from 'crypto';
+import { downloadGoogleAvatar, isGoogleAvatarUrl } from '../../utils/googleAvatar';
 
 type GoogleTokenPayload = {
   aud?: string;
@@ -60,6 +61,9 @@ export class AuthService {
 
     const normalizedEmail = payload.email.trim().toLowerCase();
     const displayName = payload.name ? payload.name.trim() : normalizedEmail.split('@')[0];
+    const googleAvatar = payload.picture
+      ? (await downloadGoogleAvatar(payload.picture)) || payload.picture
+      : null;
 
     // Find or create user
     let user = await prisma.user.findUnique({
@@ -81,7 +85,7 @@ export class AuthService {
         await tx.profile.create({
           data: {
             userId: newUser.id,
-            avatarUrl: payload.picture || null,
+            avatarUrl: googleAvatar,
           },
         });
 
@@ -117,6 +121,30 @@ export class AuthService {
       });
     }
 
+    // An account may already exist before the user signs in with Google.
+    // Import Google's picture only when the profile has no avatar so a
+    // user-uploaded image is never overwritten on later Google logins.
+    let profile = await prisma.profile.findUnique({
+      where: { userId: user.id },
+      select: { avatarUrl: true },
+    });
+
+    if (!profile) {
+      profile = await prisma.profile.create({
+        data: {
+          userId: user.id,
+          avatarUrl: payload.picture || null,
+        },
+        select: { avatarUrl: true },
+      });
+    } else if (googleAvatar && (!profile.avatarUrl?.trim() || isGoogleAvatarUrl(profile.avatarUrl))) {
+      profile = await prisma.profile.update({
+        where: { userId: user.id },
+        data: { avatarUrl: googleAvatar },
+        select: { avatarUrl: true },
+      });
+    }
+
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,
@@ -132,6 +160,7 @@ export class AuthService {
       status: user.status,
       isVerified: user.isVerified,
       createdAt: user.createdAt,
+      avatarUrl: profile.avatarUrl,
     };
 
     return {
