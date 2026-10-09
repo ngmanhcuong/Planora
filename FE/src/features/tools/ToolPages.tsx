@@ -1887,7 +1887,7 @@ export const ReportsPage: React.FC = () => {
   const currentYear = now.getFullYear();
 
   // Every report view is backed by the authenticated user's API data.
-  const { data: dashboardData, isLoading: isDashboardLoading } = useDashboard();
+  const { isLoading: isDashboardLoading } = useDashboard();
   const { data: weeklyStats, isLoading: isWeeklyLoading } = useWeeklyStats();
   const { data: monthlyStats, isLoading: isMonthlyLoading } = useMonthlyStats(currentMonthKey);
   const { data: quarterMonthOne, isLoading: isQuarterMonthOneLoading } = useMonthlyStats(quarterMonthKeys[0]);
@@ -1964,60 +1964,31 @@ export const ReportsPage: React.FC = () => {
       });
     }
 
-    // Dynamic real data fallback computed from real tasks & dashboard summaries
-    const today = new Date();
-    const currentDayIdx = (today.getDay() + 6) % 7;
-
+    // Do not infer weekly data from the full task list. That can mix tasks from
+    // different weeks simply because they share the same weekday.
     return DAY_LABELS.map((label, idx) => {
-      const isToday = idx === currentDayIdx;
-      const tasksOnDay = allTasks.filter((t) => {
-        if (!t.dueDate) return false;
-        const d = new Date(t.dueDate);
-        return (d.getDay() + 6) % 7 === idx;
-      });
-      const completedOnDay = tasksOnDay.filter((t) => t.status === 'COMPLETED').length;
-      const totalOnDay = tasksOnDay.length;
-
-      let score = 0;
-      if (totalOnDay > 0) {
-        score = Math.round((completedOnDay / totalOnDay) * 100);
-      } else if (isToday) {
-        score = dashboardData?.productivity.todayScore || (completedTasksCount > 0 ? 80 : 0);
-      }
-
       return {
         label,
         fullName: DAY_NAMES_FULL[idx],
-        value: score,
-        tasksCompleted: isToday ? (dashboardData?.summary.tasksCompletedToday || completedOnDay) : completedOnDay,
-        tasksTotal: isToday ? (dashboardData?.summary.tasksToday || totalOnDay) : totalOnDay,
-        habitCheckIns: isToday ? (dashboardData?.summary.habitsCompletedToday || 0) : 0,
-        events: isToday ? (dashboardData?.summary.upcomingEvents || 0) : 0,
+        value: 0,
+        tasksCompleted: 0,
+        tasksTotal: 0,
+        habitCheckIns: 0,
+        events: 0,
         date: label,
-        detail: totalOnDay > 0
-          ? getMultiLangText(language, {
-            vi: `${completedOnDay}/${totalOnDay} công việc đã xong`,
-            en: `${completedOnDay}/${totalOnDay} tasks completed`,
-            ja: `${completedOnDay}/${totalOnDay} タスク完了`,
-            ko: `${completedOnDay}/${totalOnDay} 작업 완료`,
-            zh: `${completedOnDay}/${totalOnDay} 任务已完成`,
-            fr: `${completedOnDay}/${totalOnDay} tâches terminées`,
-            de: `${completedOnDay}/${totalOnDay} Aufgaben erledigt`,
-            es: `${completedOnDay}/${totalOnDay} tareas completadas`,
-          })
-          : getMultiLangText(language, {
-            vi: 'Chưa có hoạt động',
-            en: 'No activity yet',
-            ja: 'まだアクティビティがありません',
-            ko: '아직 활동 없음',
-            zh: '暂无活动',
-            fr: 'Aucune activité pour le moment',
-            de: 'Noch keine Aktivität',
-            es: 'Sin actividad aún',
-          }),
+        detail: getMultiLangText(language, {
+          vi: 'Chưa có hoạt động',
+          en: 'No activity yet',
+          ja: 'まだアクティビティがありません',
+          ko: '아직 활동 없음',
+          zh: '暂无活动',
+          fr: 'Aucune activité pour le moment',
+          de: 'Noch keine Aktivität',
+          es: 'Sin actividad aún',
+        }),
       };
     });
-  }, [weeklyStats, allTasks, dashboardData, completedTasksCount, language, DAY_LABELS, DAY_NAMES_FULL]);
+  }, [weeklyStats, language, DAY_LABELS, DAY_NAMES_FULL]);
 
   // Monthly Data Processed from Backend
   const monthlyChartData = useMemo(() => {

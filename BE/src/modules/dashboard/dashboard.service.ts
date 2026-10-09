@@ -383,17 +383,11 @@ export class DashboardService {
       }),
     ]);
 
-    // A task belongs to the reporting period when it is due in that period or
-    // when the user actually completes it in that period. This prevents a task
-    // completed after its due date from producing an impossible 1/0 metric.
-    const tasksTotalCount = tasksInWeek.length;
-
-    const tasksCompletedCount = tasksInWeek.filter((t) => {
-      if (t.completedAt) {
-        return t.completedAt >= weekStart && t.completedAt <= weekEnd;
-      }
-      return t.status === TaskStatus.COMPLETED && t.dueDate >= weekStart && t.dueDate <= weekEnd;
-    }).length;
+    // Report tasks on their scheduled due date. Completing an older task today
+    // must not create activity on today's column when no task is due today.
+    const dueTasksInWeek = tasksInWeek.filter((task) => task.dueDate >= weekStart && task.dueDate <= weekEnd);
+    const tasksTotalCount = dueTasksInWeek.length;
+    const tasksCompletedCount = dueTasksInWeek.filter((task) => task.status === TaskStatus.COMPLETED).length;
 
     const taskCompletionRate = tasksTotalCount > 0 ? Math.round((tasksCompletedCount / tasksTotalCount) * 100) : 0;
 
@@ -407,16 +401,9 @@ export class DashboardService {
       const dStart = parseDateToUtc(dStr);
       const dEnd = new Date(`${dStr}T23:59:59.999Z`);
 
-      const dayTasks = tasksInWeek.filter((t) => {
-        const isDueToday = t.dueDate >= dStart && t.dueDate <= dEnd;
-        const isCompletedToday = Boolean(t.completedAt && t.completedAt >= dStart && t.completedAt <= dEnd);
-        return isDueToday || isCompletedToday;
-      });
+      const dayTasks = dueTasksInWeek.filter((task) => task.dueDate >= dStart && task.dueDate <= dEnd);
       const dayTasksDue = dayTasks.length;
-      const dayTasksCompleted = tasksInWeek.filter((t) => {
-        if (t.completedAt) return t.completedAt >= dStart && t.completedAt <= dEnd;
-        return t.status === TaskStatus.COMPLETED && t.dueDate >= dStart && t.dueDate <= dEnd;
-      }).length;
+      const dayTasksCompleted = dayTasks.filter((task) => task.status === TaskStatus.COMPLETED).length;
 
       const dayHabitCheckIns = habitLogsInWeek.filter(
         (l) => normalizeDateString(l.completedDate) === dStr
