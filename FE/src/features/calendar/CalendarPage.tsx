@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CalendarHeader } from './components/CalendarHeader';
 import { WeekGrid } from './components/WeekGrid';
 import { MonthGrid } from './components/MonthGrid';
+import { DayView } from './components/DayView';
 import { CreateEventDrawer } from './components/CreateEventDrawer';
 import { CalendarItemEditorModal } from './components/CalendarItemEditorModal';
 import { useCalendarRange, useCreateEvent, useUpdateEvent } from './hooks/useCalendar';
@@ -11,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 import { getStartOfWeek, getEndOfWeek, getWeekDays } from '@/utils/dateUtils';
 import { useUpdateTask } from '@/features/tasks/hooks/useTasks';
 import { useDeleteTimetableItem } from '@/features/timetable/hooks/useTimetable';
+import { CATEGORY_MAP } from '@/utils/categories';
 
 export const CalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -93,10 +95,12 @@ export const CalendarPage: React.FC = () => {
 
     const isTask = normalizedSourceType === 'TASK';
     const isTimetable = normalizedSourceType === 'TIMETABLE';
-    const catName = item.category?.name || (isTask ? 'Deadline' : isTimetable ? 'Thời khóa biểu' : 'Sự kiện');
-    const catBg = item.category?.bgColor || (isTask ? '#FFF7ED' : isTimetable ? '#ECFDF5' : '#EFF6FF');
-    const catText = item.category?.textColor || (isTask ? '#9A3412' : isTimetable ? '#065F46' : '#1E3A8A');
-    const catColor = item.category?.color || (isTask ? '#F97316' : isTimetable ? '#10B981' : '#2563EB');
+    const rawCategoryType = (item.category?.type?.toLowerCase() || (isTask ? 'deadline' : isTimetable ? 'study' : 'personal')) as CategoryType;
+    const catMapInfo = CATEGORY_MAP[rawCategoryType] || CATEGORY_MAP.personal;
+    const catName = item.category?.name || (isTask ? 'Deadline' : isTimetable ? 'Thời khóa biểu' : catMapInfo.label);
+    const catBg = item.category?.bgColor || catMapInfo.bgColor;
+    const catText = item.category?.textColor || '#0f172a';
+    const catColor = item.category?.color || catMapInfo.color;
     const itemStartTime = new Date(item.start).getTime();
     const itemEndTime = item.end ? new Date(item.end).getTime() : itemStartTime;
     const isCompleted = isTask && item.status === 'COMPLETED';
@@ -156,7 +160,6 @@ export const CalendarPage: React.FC = () => {
     pendingFocusEventIdRef.current = event.id;
     setCurrentDate(new Date(event.startAt));
     setActiveCategory('all');
-    setViewMode('day');
     return event;
   };
 
@@ -260,6 +263,39 @@ export const CalendarPage: React.FC = () => {
                 setCurrentDate(date);
                 setViewMode('day');
               }}
+              onSelectEvent={(event) => {
+                setEditingEvent(event);
+              }}
+              onPrevMonth={handlePrevWeek}
+              onNextMonth={handleNextWeek}
+              onToday={() => setCurrentDate(new Date())}
+            />
+          ) : viewMode === 'day' ? (
+            <DayView
+              currentDate={currentDate}
+              weekDays={getWeekDays(monday)}
+              events={filteredEvents}
+              onSelectEvent={(event) => {
+                setEditingEvent(event);
+              }}
+              onSelectDate={(date) => {
+                setCurrentDate(date);
+              }}
+              onPrevDay={() => {
+                setCurrentDate((prev) => {
+                  const d = new Date(prev);
+                  d.setDate(d.getDate() - 1);
+                  return d;
+                });
+              }}
+              onNextDay={() => {
+                setCurrentDate((prev) => {
+                  const d = new Date(prev);
+                  d.setDate(d.getDate() + 1);
+                  return d;
+                });
+              }}
+              onOpenCreate={() => setIsCreateOpen(true)}
             />
           ) : (
             <WeekGrid

@@ -30,6 +30,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             id={inputId}
             ref={ref}
+            autoComplete="off"
+            data-lpignore="true"
+            data-form-type="other"
             className={twMerge(
               'w-full h-10 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#131B2E] placeholder-[#94A3B8] transition-all duration-150 focus:outline-none focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/10 disabled:bg-[#F8FAFC] disabled:cursor-not-allowed',
               leftIcon ? 'pl-9 pr-3' : 'px-3',

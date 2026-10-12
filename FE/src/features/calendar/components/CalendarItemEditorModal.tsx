@@ -129,6 +129,7 @@ export const CalendarItemEditorModal: React.FC<CalendarItemEditorModalProps> = (
         const payload = {
           title: title.trim(),
           description: description.trim() || undefined,
+          categoryId: categoryId || null,
           startAt: start.toISOString(),
           endAt: end.toISOString(),
           allDay: false,
@@ -160,13 +161,11 @@ export const CalendarItemEditorModal: React.FC<CalendarItemEditorModalProps> = (
           required
         />
 
-        {event.sourceType === 'TASK' && (
-          <CategoryChipPicker
-            categories={categories.data}
-            value={categoryId}
-            onChange={setCategoryId}
-          />
-        )}
+        <CategoryChipPicker
+          categories={categories.data}
+          value={categoryId}
+          onChange={setCategoryId}
+        />
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <DatePicker
@@ -192,19 +191,19 @@ export const CalendarItemEditorModal: React.FC<CalendarItemEditorModalProps> = (
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-slate-200">
+          <label className="text-xs font-semibold text-[#131B2E]">
             Ghi chú chi tiết
           </label>
           <textarea
             value={description}
             onChange={(changeEvent) => setDescription(changeEvent.target.value)}
             rows={3}
-            className="w-full resize-none rounded-xl border border-slate-600 bg-slate-800 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-400 outline-none transition-all focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
+            className="w-full resize-none rounded-xl border border-[#E2E8F0] bg-white p-2.5 text-sm text-[#131B2E] placeholder-[#94A3B8] outline-none transition-all focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/10"
             placeholder="Thêm mô tả hoặc tài liệu cần làm..."
           />
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs font-semibold text-slate-600">
+        <div className="rounded-xl border border-[#E2E8F0] bg-[#FAF8FF] p-3 text-xs font-semibold text-[#64748B]">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-indigo-500" />
             <span>{date}</span>
@@ -217,7 +216,7 @@ export const CalendarItemEditorModal: React.FC<CalendarItemEditorModalProps> = (
 
         {error && <p role="alert" className="text-sm font-semibold text-rose-600">{error}</p>}
 
-        <div className="flex justify-end gap-2 border-t border-slate-200 pt-4">
+        <div className="flex justify-end gap-2 border-t border-[#E2E8F0] pt-4">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Hủy
           </Button>

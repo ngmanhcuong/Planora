@@ -83,63 +83,143 @@ export const sendScheduleReminderEmail = async (
       ? '/timetable'
       : '/calendar';
   const detailUrl = escapeHtml(`${config.clientUrl.replace(/\/$/, '')}${detailPath}`);
-  const accent = item.isOverdue ? '#e11d48' : '#4f46e5';
+  const accentColor = item.isOverdue ? '#e11d48' : '#4f46e5';
+  const badgeBg = item.isOverdue ? '#ffe4e6' : '#e0e7ff';
+  const badgeTextColor = item.isOverdue ? '#9f1239' : '#3730a3';
+  const iconEmoji = item.isOverdue ? '⚠️' : item.kind === 'Thời khóa biểu' ? '📚' : item.kind === 'Công việc' ? '📌' : '🗓️';
 
   await transporter.sendMail({
     from: mailConfig.from,
     to,
-    subject: `${headline}: ${item.title}`,
-    text: `${headline}: “${item.title}” vào ${fullTime}. Mở Planora: ${detailUrl}`,
+    subject: `${item.isOverdue ? '⚠️ ' : '🔔 '}${headline}: ${item.title}`,
+    text: `${headline}: “${item.title}” vào ${fullTime}. Xem chi tiết trong Planora: ${detailUrl}`,
     html: `
-      <div style="margin:0;padding:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#172033;-webkit-font-smoothing:antialiased;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f5f6f8;">
+      <!DOCTYPE html>
+      <html lang="vi">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${safeHeadline}: ${safeTitle}</title>
+        <style>
+          @media (prefers-color-scheme: dark) {
+            .email-bg { background-color: #0b0f19 !important; }
+            .card-bg { background-color: #111827 !important; border-color: #1f2937 !important; }
+            .header-border { border-bottom-color: #1f2937 !important; }
+            .main-title { color: #f9fafb !important; }
+            .sub-desc { color: #9ca3af !important; }
+            .info-box { background-color: #1a2234 !important; border-color: #27354f !important; }
+            .info-label { color: #94a3b8 !important; }
+            .info-val { color: #f1f5f9 !important; }
+            .footer-bg { background-color: #0f172a !important; border-top-color: #1e293b !important; color: #64748b !important; }
+            .tag-pill { background-color: #1e293b !important; color: #cbd5e1 !important; border-color: #334155 !important; }
+          }
+        </style>
+      </head>
+      <body style="margin:0;padding:0;background-color:#f4f6fb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" class="email-bg" style="border-collapse:collapse;background-color:#f4f6fb;padding:32px 12px;">
           <tr>
-            <td align="center" style="padding:32px 16px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;border-collapse:separate;background:#ffffff;border:1px solid #dde2ea;border-top:4px solid ${accent};border-radius:10px;overflow:hidden;">
+            <td align="center" style="padding:28px 12px;">
+              <!-- Container Card -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" class="card-bg" style="max-width:540px;border-collapse:separate;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:20px;overflow:hidden;box-shadow:0 10px 25px -5px rgba(15,23,42,0.06), 0 8px 10px -6px rgba(15,23,42,0.04);">
+                
+                <!-- Top Brand Banner with Gradient Accent -->
                 <tr>
-                  <td style="padding:21px 28px;border-bottom:1px solid #e8ebf0;">
+                  <td style="height:5px;background:linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%);padding:0;line-height:5px;font-size:5px;">&nbsp;</td>
+                </tr>
+
+                <!-- Header / Logo -->
+                <tr>
+                  <td class="header-border" style="padding:22px 28px;border-bottom:1px solid #f1f5f9;">
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
                       <tr>
-                        <td style="vertical-align:middle;"><img src="${EMAIL_LOGO_URL}" width="132" alt="Planora" style="display:block;width:132px;max-width:132px;height:auto;border:0;" /></td>
-                        <td align="right" style="font-size:12px;line-height:1.4;font-weight:500;color:#7b8496;">Thông báo lịch trình</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:30px 28px 28px;">
-                    <p style="margin:0 0 8px;color:${accent};font-size:13px;line-height:1.5;font-weight:600;letter-spacing:.1px;">${safeHeadline}</p>
-                    <h1 style="margin:0 0 12px;font-size:25px;line-height:1.3;font-weight:750;letter-spacing:-.45px;color:#172033;">${safeTitle}</h1>
-                    <p style="margin:0 0 25px;color:#5d687b;font-size:15px;line-height:1.65;font-weight:400;">${item.isOverdue ? 'Thời hạn của công việc này đã qua. Bạn có thể mở Planora để cập nhật lại tiến độ.' : `${item.kind} này sắp diễn ra. Bạn nên kiểm tra lại kế hoạch để chuẩn bị đúng giờ.`}</p>
-
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:26px;background:#f8f9fb;border:1px solid #e3e7ed;border-radius:8px;">
-                      <tr>
-                        <td style="padding:15px 18px;color:#697386;font-size:13px;line-height:1.5;font-weight:500;border-bottom:1px solid #e3e7ed;">Ngày</td>
-                        <td align="right" style="padding:15px 18px;color:#20293a;font-size:14px;line-height:1.5;font-weight:650;border-bottom:1px solid #e3e7ed;text-transform:capitalize;">${date}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding:15px 18px;color:#697386;font-size:13px;line-height:1.5;font-weight:500;">Thời gian</td>
-                        <td align="right" style="padding:15px 18px;color:#20293a;font-size:14px;line-height:1.5;font-weight:650;font-variant-numeric:tabular-nums;">${time}</td>
-                      </tr>
-                    </table>
-
-                    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
-                      <tr>
-                        <td align="center" style="border-radius:7px;background:#4f46e5;">
-                          <a href="${detailUrl}" target="_blank" style="display:inline-block;padding:11px 18px;color:#ffffff;text-decoration:none;font-size:14px;line-height:1.4;font-weight:650;letter-spacing:-.05px;">Xem trong Planora</a>
+                        <td style="vertical-align:middle;">
+                          <img src="${EMAIL_LOGO_URL}" width="128" alt="Planora" style="display:block;width:128px;max-width:128px;height:auto;border:0;" />
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <span class="tag-pill" style="display:inline-block;padding:5px 12px;border-radius:9999px;font-size:11px;line-height:1;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;background-color:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">
+                            ${escapeHtml(item.kind)}
+                          </span>
                         </td>
                       </tr>
                     </table>
                   </td>
                 </tr>
+
+                <!-- Body Content -->
                 <tr>
-                  <td style="padding:17px 28px;background:#fafbfc;border-top:1px solid #e8ebf0;color:#7c8698;font-size:12px;line-height:1.6;font-weight:400;">Email được gửi theo thiết lập thông báo của bạn trên Planora. Đây là thư tự động, vui lòng không trả lời.</td>
+                  <td style="padding:32px 28px 24px;">
+                    <!-- Kind / Status badge -->
+                    <div style="margin:0 0 12px 0;">
+                      <span style="display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;line-height:1.2;background-color:${badgeBg};color:${badgeTextColor};">
+                        ${iconEmoji}&nbsp;${safeHeadline}
+                      </span>
+                    </div>
+
+                    <!-- Event Title -->
+                    <h1 class="main-title" style="margin:0 0 12px 0;font-size:24px;line-height:1.35;font-weight:800;letter-spacing:-0.4px;color:#0f172a;">
+                      ${safeTitle}
+                    </h1>
+
+                    <!-- Message description -->
+                    <p class="sub-desc" style="margin:0 0 24px 0;color:#64748b;font-size:14px;line-height:1.6;font-weight:400;">
+                      ${item.isOverdue ? 'Thời hạn hoàn thành mục này đã trôi qua. Hãy mở Planora để rà soát hoặc điều chỉnh lại tiến độ.' : `Lịch trình này sắp bắt đầu theo kế hoạch đã đặt. Vui lòng kiểm tra lại để sắp xếp thời gian hợp lý.`}
+                    </p>
+
+                    <!-- Info Box (Date, Time) -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" class="info-box" style="border-collapse:collapse;margin:0 0 26px 0;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">
+                      <tr>
+                        <td class="info-label" style="padding:14px 18px;color:#64748b;font-size:13px;line-height:1.4;font-weight:600;border-bottom:1px solid #edf2f7;width:40%;">
+                          🗓️&nbsp;&nbsp;Ngày diễn ra
+                        </td>
+                        <td align="right" class="info-val" style="padding:14px 18px;color:#0f172a;font-size:13.5px;line-height:1.4;font-weight:700;border-bottom:1px solid #edf2f7;">
+                          ${date}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="info-label" style="padding:14px 18px;color:#64748b;font-size:13px;line-height:1.4;font-weight:600;">
+                          ⏰&nbsp;&nbsp;Thời gian
+                        </td>
+                        <td align="right" class="info-val" style="padding:14px 18px;color:#0f172a;font-size:14px;line-height:1.4;font-weight:800;font-variant-numeric:tabular-nums;">
+                          ${time}
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Primary Action Button -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td align="center">
+                          <a href="${detailUrl}" target="_blank" style="display:inline-block;width:100%;box-sizing:border-box;text-align:center;padding:13px 24px;border-radius:12px;background:linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);color:#ffffff;text-decoration:none;font-size:14px;line-height:1.4;font-weight:700;letter-spacing:-0.1px;box-shadow:0 4px 12px rgba(79,70,229,0.3);">
+                            Xem chi tiết trong Planora &rarr;
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td class="footer-bg" style="padding:18px 28px;background-color:#faf8ff;border-top:1px solid #f1f5f9;color:#8590a2;font-size:12px;line-height:1.6;font-weight:400;text-align:center;">
+                    Email này được gửi tự động từ <strong>Planora</strong> theo cài đặt nhắc nhở của bạn.<br />
+                    Vui lòng không phản hồi thư này.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Bottom copyright / branding -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:540px;margin-top:16px;">
+                <tr>
+                  <td align="center" style="font-size:11px;color:#94a3b8;line-height:1.5;">
+                    &copy; ${new Date().getFullYear()} Planora &bull; Trợ lý quản lý thời gian &amp; lịch trình học tập
+                  </td>
                 </tr>
               </table>
             </td>
           </tr>
         </table>
-      </div>
+      </body>
+      </html>
     `,
   });
 };
