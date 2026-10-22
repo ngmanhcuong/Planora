@@ -155,7 +155,7 @@ export const MobileNavigation: React.FC = () => {
       {/* Bottom Navigation Bar (Visible only on mobile/tablet < 1024px) */}
       <nav
         aria-label="Thanh điều hướng dưới"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-surface)]/95 backdrop-blur-md border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-surface)]/95 backdrop-blur-xl border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-8px_30px_rgba(15,23,42,0.08)]"
       >
         <div className="grid grid-cols-5 h-16 max-w-lg mx-auto px-1 items-center">
           {primaryTabs.map((tab) => {
@@ -167,19 +167,26 @@ export const MobileNavigation: React.FC = () => {
                 onClick={() => handleNavigate(tab.to)}
                 aria-current={tab.active ? 'page' : undefined}
                 className={clsx(
-                  'flex flex-col items-center justify-center gap-1 h-full w-full py-1 transition-colors select-none group',
-                  tab.active ? 'text-[#4F46E5] font-bold' : 'text-[#64748B] hover:text-[#131B2E]'
+                  'relative flex flex-col items-center justify-center gap-1 h-full w-full py-1 transition-all select-none group',
+                  tab.active ? 'text-[#4F46E5]' : 'text-slate-500 hover:text-slate-900'
                 )}
               >
+                {tab.active && (
+                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#4F46E5] shadow-[0_0_8px_rgba(79,70,229,0.8)]" />
+                )}
                 <span
                   className={clsx(
-                    'flex items-center justify-center w-8 h-8 rounded-xl transition-all',
-                    tab.active ? 'bg-[#EEF2FF] text-[#4F46E5] scale-105 shadow-xs' : 'group-active:scale-95'
+                    'flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200',
+                    tab.active
+                      ? 'bg-gradient-to-tr from-[#4F46E5] to-[#6366F1] text-white shadow-md shadow-indigo-500/25 scale-105'
+                      : 'text-slate-500 group-hover:bg-slate-100/80 group-active:scale-95'
                   )}
                 >
-                  <Icon className="w-5 h-5 stroke-[2]" />
+                  <Icon className="w-4.5 h-4.5 stroke-[2.2]" />
                 </span>
-                <span className="text-[10px] leading-tight truncate max-w-[62px] tracking-tight">{tab.label}</span>
+                <span className={clsx('text-[10px] leading-tight truncate max-w-[62px] tracking-tight', tab.active ? 'font-bold' : 'font-medium')}>
+                  {tab.label}
+                </span>
               </button>
             );
           })}
@@ -191,34 +198,39 @@ export const MobileNavigation: React.FC = () => {
             aria-expanded={isDrawerOpen}
             aria-label="Mở menu mở rộng"
             className={clsx(
-              'flex flex-col items-center justify-center gap-1 h-full w-full py-1 transition-colors select-none group relative',
-              isDrawerActive && !primaryTabs.some(t => t.active) ? 'text-[#4F46E5] font-bold' : 'text-[#64748B] hover:text-[#131B2E]'
+              'relative flex flex-col items-center justify-center gap-1 h-full w-full py-1 transition-all select-none group',
+              isDrawerActive && !primaryTabs.some((t) => t.active) ? 'text-[#4F46E5]' : 'text-slate-500 hover:text-slate-900'
             )}
           >
+            {isDrawerActive && !primaryTabs.some((t) => t.active) && (
+              <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[#4F46E5] shadow-[0_0_8px_rgba(79,70,229,0.8)]" />
+            )}
             <span
               className={clsx(
-                'flex items-center justify-center w-8 h-8 rounded-xl transition-all relative',
-                isDrawerOpen ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'group-active:scale-95'
+                'flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 relative',
+                isDrawerOpen || (isDrawerActive && !primaryTabs.some((t) => t.active))
+                  ? 'bg-gradient-to-tr from-[#4F46E5] to-[#6366F1] text-white shadow-md shadow-indigo-500/25'
+                  : 'text-slate-500 group-hover:bg-slate-100/80 group-active:scale-95'
               )}
             >
-              <MenuIcon className="w-5 h-5 stroke-[2]" />
+              <MenuIcon className="w-4.5 h-4.5 stroke-[2.2]" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5 rounded-full bg-[#F43F5E] ring-2 ring-white" />
+                <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5 rounded-full bg-[#F43F5E] ring-2 ring-white animate-pulse" />
               )}
             </span>
-            <span className="text-[10px] leading-tight truncate max-w-[62px] tracking-tight">
+            <span className={clsx('text-[10px] leading-tight truncate max-w-[62px] tracking-tight', isDrawerActive && !primaryTabs.some(t => t.active) ? 'font-bold' : 'font-medium')}>
               {getMultiLangText(language, { vi: 'Thêm', en: 'More', ja: 'メニュー', ko: '더보기', zh: '更多', fr: 'Plus', de: 'Mehr', es: 'Más' })}
             </span>
           </button>
         </div>
       </nav>
 
-      {/* Expanded Menu Drawer (Bottom Sheet / Side Drawer on Mobile) */}
+      {/* Expanded Menu Drawer (Bottom Sheet on Mobile) */}
       {isDrawerOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
             onClick={() => setIsDrawerOpen(false)}
             aria-hidden="true"
           />
@@ -227,43 +239,46 @@ export const MobileNavigation: React.FC = () => {
           <div
             role="dialog"
             aria-label="Menu chức năng Planora"
-            className="relative z-10 w-full max-h-[85vh] bg-[var(--color-surface)] rounded-t-[1.75rem] border-t border-[var(--color-border)] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-250 pb-[env(safe-area-inset-bottom,0.75rem)]"
+            className="relative z-10 w-full max-h-[88vh] bg-white rounded-t-[2rem] border-t border-slate-200/80 shadow-[0_-12px_40px_rgba(0,0,0,0.18)] overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-250 pb-[env(safe-area-inset-bottom,0.75rem)]"
           >
             {/* Sheet Handle & Header */}
-            <div className="flex flex-col items-center pt-3 pb-2 px-5 border-b border-[var(--color-border)] shrink-0">
-              <div className="w-10 h-1 rounded-full bg-slate-300 mb-3" />
+            <div className="flex flex-col items-center pt-3 pb-3 px-5 border-b border-slate-100 shrink-0 bg-slate-50/60">
+              <div className="w-12 h-1.5 rounded-full bg-slate-300 mb-3" />
               <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <Logo size="sm" showText theme="light" />
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    Menu
+                  </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsDrawerOpen(false)}
-                  className="p-1.5 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-900 transition-colors shadow-xs active:scale-95"
                   aria-label="Đóng menu"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* User Quick Info */}
-            <div className="px-5 py-3.5 bg-slate-50 border-b border-[var(--color-border)] flex items-center justify-between">
+            {/* User Profile Summary Card */}
+            <div className="px-5 py-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 {user?.avatarUrl ? (
                   <img
                     src={user.avatarUrl}
                     alt={user.name}
-                    className="w-10 h-10 rounded-full object-cover border border-[#E2E8F0]"
+                    className="w-11 h-11 rounded-2xl object-cover border-2 border-white/20 shadow-md"
                   />
                 ) : (
-                  <span className="flex w-10 h-10 items-center justify-center rounded-full bg-[#EEF2FF] text-sm font-bold text-[#4F46E5]">
+                  <span className="flex w-11 h-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-500 text-sm font-extrabold text-white shadow-md">
                     {user?.name?.[0]?.toUpperCase() || 'P'}
                   </span>
                 )}
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-900 truncate">{user?.name || 'Người dùng Planora'}</p>
-                  <p className="text-[11px] text-slate-500 truncate">{user?.email || 'user@planora.vn'}</p>
+                  <p className="text-xs font-bold text-white truncate">{user?.name || 'Người dùng Planora'}</p>
+                  <p className="text-[11px] text-indigo-200/80 truncate font-mono">{user?.email || 'user@planora.vn'}</p>
                 </div>
               </div>
               <button
@@ -272,56 +287,65 @@ export const MobileNavigation: React.FC = () => {
                   setIsDrawerOpen(false);
                   openLogoutModal();
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-rose-500/80 border border-white/15 text-rose-200 hover:text-white transition-all shrink-0 active:scale-95"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>{getMultiLangText(language, { vi: 'Thoát', en: 'Exit', ja: 'ログアウト', ko: '로그아웃', zh: '退出', fr: 'Sortir', de: 'Beenden', es: 'Salir' })}</span>
               </button>
             </div>
 
-            {/* Menu Items List */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 divide-y divide-slate-100">
-              <div className="grid grid-cols-2 gap-2 pb-3">
-                {drawerItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.to || (item.to.includes('?') && location.pathname + location.search === item.to);
-                  return (
-                    <button
-                      key={item.to}
-                      type="button"
-                      onClick={() => handleNavigate(item.to)}
-                      className={clsx(
-                        'flex items-center gap-2.5 p-3 rounded-2xl text-left transition-all border text-xs font-semibold select-none cursor-pointer',
-                        isActive
-                          ? 'bg-[#EEF2FF] text-[#4F46E5] border-indigo-200 shadow-xs'
-                          : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50 hover:text-slate-900'
-                      )}
-                    >
-                      <span
+            {/* Menu Items Grid & Sections */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Feature Grid */}
+              <div>
+                <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5 px-1">
+                  {getMultiLangText(language, { vi: 'Chức năng & Tiện ích', en: 'Features & Utilities', ja: '機能とツール', ko: '기능 및 유틸리티', zh: '功能与工具', fr: 'Fonctionnalités', de: 'Funktionen', es: 'Herramientas' })}
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {drawerItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.to || (item.to.includes('?') && location.pathname + location.search === item.to);
+                    return (
+                      <button
+                        key={item.to}
+                        type="button"
+                        onClick={() => handleNavigate(item.to)}
                         className={clsx(
-                          'flex items-center justify-center w-8 h-8 rounded-xl shrink-0',
-                          isActive ? 'bg-white text-[#4F46E5] shadow-xs' : 'bg-slate-100 text-slate-600'
+                          'group relative flex items-center gap-3 p-3.5 rounded-2xl text-left transition-all duration-150 border select-none cursor-pointer',
+                          isActive
+                            ? 'bg-gradient-to-tr from-indigo-50 to-violet-50 text-indigo-700 border-indigo-200 shadow-sm ring-1 ring-indigo-500/20'
+                            : 'bg-white text-slate-700 border-slate-200/90 hover:border-indigo-200 hover:bg-slate-50/80 active:scale-95 shadow-xs'
                         )}
                       >
-                        <Icon className="w-4 h-4" />
-                      </span>
-                      <span className="truncate flex-1">{item.label}</span>
-                      {item.badge !== undefined && item.badge > 0 && (
-                        <span className="ml-auto inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F43F5E] text-white">
-                          {item.badge > 99 ? '99+' : item.badge}
+                        <span
+                          className={clsx(
+                            'flex items-center justify-center w-9 h-9 rounded-xl shrink-0 transition-transform group-hover:scale-105',
+                            isActive ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-indigo-50 text-indigo-600 border border-indigo-100/60'
+                          )}
+                        >
+                          <Icon className="w-4.5 h-4.5 stroke-[2]" />
                         </span>
-                      )}
-                    </button>
-                  );
-                })}
+                        <div className="min-w-0 flex-1">
+                          <span className="block truncate text-xs font-bold leading-tight">{item.label}</span>
+                          <span className="block text-[10px] text-slate-400 truncate mt-0.5 font-medium">Mở trang</span>
+                        </div>
+                        {item.badge !== undefined && item.badge > 0 && (
+                          <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F43F5E] text-white shadow-xs">
+                            {item.badge > 99 ? '99+' : item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Quick links to primary pages if needed */}
-              <div className="pt-3">
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                  {getMultiLangText(language, { vi: 'Trang chính', en: 'Main views', ja: 'メインビュー', ko: '주요 화면', zh: '主要页面', fr: 'Vues principales', de: 'Hauptansichten', es: 'Vistas principales' })}
+              {/* All Navigation Links / Primary Views */}
+              <div className="pt-2 border-t border-slate-100">
+                <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 px-1">
+                  {getMultiLangText(language, { vi: 'Trang chính Planora', en: 'Main workspaces', ja: 'メインワークスペース', ko: '주요 작업 공간', zh: '主要工作区', fr: 'Espaces principaux', de: 'Hauptarbeitsbereiche', es: 'Espacios principales' })}
                 </p>
-                <div className="flex flex-col gap-1">
+                <div className="grid grid-cols-2 gap-1.5">
                   {primaryTabs.map((tab) => {
                     const Icon = tab.icon;
                     return (
@@ -330,15 +354,17 @@ export const MobileNavigation: React.FC = () => {
                         type="button"
                         onClick={() => handleNavigate(tab.to)}
                         className={clsx(
-                          'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors',
-                          tab.active ? 'text-indigo-600 bg-indigo-50/70 font-bold' : 'text-slate-600 hover:bg-slate-50'
+                          'flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all border',
+                          tab.active
+                            ? 'text-indigo-700 bg-indigo-50/90 border-indigo-200 shadow-xs'
+                            : 'text-slate-600 bg-slate-50/60 border-slate-200/60 hover:bg-slate-100/80 hover:text-slate-900 active:scale-95'
                         )}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="w-4 h-4" />
-                          <span>{tab.label}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Icon className={clsx('w-4 h-4 shrink-0', tab.active ? 'text-indigo-600' : 'text-slate-500')} />
+                          <span className="truncate">{tab.label}</span>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                       </button>
                     );
                   })}

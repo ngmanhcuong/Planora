@@ -253,15 +253,23 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
             <button
               type="button"
               onClick={onPrevRange}
-              className="calendar-week-nav-button flex h-9 w-9 items-center justify-center rounded-2xl border transition-all active:scale-95"
+              className="calendar-week-nav-button flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 transition-all active:scale-95 shadow-xs"
               title="Tuần trước"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/90 text-[11px] font-extrabold text-slate-700">
+              <CalendarIcon className="w-3.5 h-3.5 text-indigo-600" />
+              <span>
+                {weekDays[0] && weekDays[weekDays.length - 1]
+                  ? `${weekDays[0].dateNum}/${weekDays[0].dateObj.getMonth() + 1} – ${weekDays[weekDays.length - 1].dateNum}/${weekDays[weekDays.length - 1].dateObj.getMonth() + 1}`
+                  : 'Lịch tuần'}
+              </span>
+            </div>
             <button
               type="button"
               onClick={onNextRange}
-              className="calendar-week-nav-button flex h-9 w-9 items-center justify-center rounded-2xl border transition-all active:scale-95"
+              className="calendar-week-nav-button flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 transition-all active:scale-95 shadow-xs"
               title="Tuần tới"
             >
               <ChevronRight className="h-4 w-4" />

@@ -67,7 +67,7 @@ const ACCOUNT_NAV_ITEMS: NavItem[] = [
 ];
 
 export const Sidebar: React.FC = () => {
-  const { isSidebarCollapsed, toggleSidebar } = useUIStore();
+  const { isSidebarCollapsed, toggleSidebar, isMobileSidebarOpen, setMobileSidebarOpen } = useUIStore();
   const { data: settings } = useSettings();
   const { data: unreadData } = useUnreadCount();
   const user = useAuthStore((state) => state.user);
@@ -81,66 +81,97 @@ export const Sidebar: React.FC = () => {
     : ACCOUNT_NAV_ITEMS;
 
   return (
-    <aside
-      className={clsx(
-        'hidden lg:flex fixed top-0 left-0 bottom-0 z-30 bg-[var(--color-surface)] flex-col transition-all duration-300 ease-in-out select-none',
-        isSidebarCollapsed ? 'w-20' : 'w-64'
+    <>
+      {/* Mobile Drawer Backdrop */}
+      {isMobileSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-xs lg:hidden transition-opacity duration-200"
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
       )}
-    >
-      {/* Brand Logo */}
-      <div
+
+      {/* Sidebar Aside (Both Desktop + Mobile Slide-over Drawer) */}
+      <aside
         className={clsx(
-          'relative h-16 flex items-center border-b border-[var(--color-border)]',
-          isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-4'
+          'fixed top-0 left-0 bottom-0 z-50 bg-[var(--color-surface)] flex flex-col transition-all duration-300 ease-in-out select-none shadow-2xl lg:shadow-none border-r border-[var(--color-border)]',
+          // Desktop styles
+          'lg:flex',
+          isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64',
+          // Mobile styles: slide in from left if open, otherwise translate-x-full
+          isMobileSidebarOpen
+            ? 'w-72 max-w-[85vw] translate-x-0'
+            : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className={clsx('flex items-center gap-3 overflow-hidden', isSidebarCollapsed && 'justify-center')}>
-          <Logo size="md" theme="light" showText={!isSidebarCollapsed} />
-        </div>
-      </div>
-
-      <button
-        onClick={toggleSidebar}
-        className="absolute -right-4 top-1/2 z-40 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[#64748B] shadow-md shadow-slate-900/10 transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
-        aria-label={isSidebarCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
-      >
-        {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-      </button>
-
-      {/* Navigation Menu */}
-      <nav
-        className={clsx(
-          'flex-1 overflow-y-auto py-4',
-          isSidebarCollapsed ? 'px-2' : 'px-3'
-        )}
-      >
-        <div className="flex min-h-full flex-col justify-between gap-6">
-          <div className="flex flex-col gap-1">
-            {mainNavItems.map((item) => (
-              <SidebarNavLink
-                key={item.to}
-                item={item}
-                language={language}
-                collapsed={isSidebarCollapsed}
-                badge={!isStaffOrAdmin && item.to === '/notifications' ? unreadCount : item.badge}
-              />
-            ))}
+        {/* Brand Logo & Close on mobile */}
+        <div
+          className={clsx(
+            'relative h-16 flex items-center border-b border-[var(--color-border)] px-4 justify-between',
+            isSidebarCollapsed ? 'lg:justify-center lg:px-0' : 'lg:justify-between'
+          )}
+        >
+          <div className={clsx('flex items-center gap-3 overflow-hidden', isSidebarCollapsed && 'lg:justify-center')}>
+            <Logo size="md" theme="light" showText={!isSidebarCollapsed || isMobileSidebarOpen} />
           </div>
 
-          <div className="flex flex-col gap-1 border-t border-[var(--color-border)] pt-3">
-            {accountNavItems.map((item) => (
-              <SidebarNavLink
-                key={item.to}
-                item={item}
-                language={language}
-                collapsed={isSidebarCollapsed}
-                badge={item.badge}
-              />
-            ))}
-          </div>
+          {/* Close button for mobile drawer */}
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(false)}
+            className="flex lg:hidden h-8 w-8 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+            aria-label="Đóng menu"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
         </div>
-      </nav>
-    </aside>
+
+        {/* Desktop Toggle Sidebar Button */}
+        <button
+          onClick={toggleSidebar}
+          className="hidden lg:flex absolute -right-4 top-1/2 z-40 h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[#64748B] shadow-md shadow-slate-900/10 transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+          aria-label={isSidebarCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+        >
+          {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+        </button>
+
+        {/* Navigation Menu */}
+        <nav
+          className={clsx(
+            'flex-1 overflow-y-auto py-4 px-3',
+            isSidebarCollapsed && 'lg:px-2'
+          )}
+        >
+          <div className="flex min-h-full flex-col justify-between gap-6 pb-6">
+            <div className="flex flex-col gap-1">
+              {mainNavItems.map((item) => (
+                <SidebarNavLink
+                  key={item.to}
+                  item={item}
+                  language={language}
+                  collapsed={isSidebarCollapsed && !isMobileSidebarOpen}
+                  badge={!isStaffOrAdmin && item.to === '/notifications' ? unreadCount : item.badge}
+                  onItemClick={() => setMobileSidebarOpen(false)}
+                />
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-1 border-t border-[var(--color-border)] pt-3">
+              {accountNavItems.map((item) => (
+                <SidebarNavLink
+                  key={item.to}
+                  item={item}
+                  language={language}
+                  collapsed={isSidebarCollapsed && !isMobileSidebarOpen}
+                  badge={item.badge}
+                  onItemClick={() => setMobileSidebarOpen(false)}
+                />
+              ))}
+            </div>
+          </div>
+        </nav>
+      </aside>
+    </>
   );
 };
 
@@ -149,7 +180,8 @@ const SidebarNavLink: React.FC<{
   language: string;
   collapsed: boolean;
   badge?: number;
-}> = ({ item, language, collapsed, badge }) => {
+  onItemClick?: () => void;
+}> = ({ item, language, collapsed, badge, onItemClick }) => {
   const label = item.labelMap ? getMultiLangText(language, item.labelMap) : item.label || translate(language, item.labelKey!);
   const navigate = useNavigate();
   const location = useLocation();
@@ -163,7 +195,10 @@ const SidebarNavLink: React.FC<{
   return (
     <button
       type="button"
-      onClick={() => navigate(item.to)}
+      onClick={() => {
+        onItemClick?.();
+        navigate(item.to);
+      }}
       aria-label={label}
       aria-current={isActive ? 'page' : undefined}
       className={clsx(

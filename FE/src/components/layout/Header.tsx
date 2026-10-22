@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarClock, CalendarDays, CheckSquare, Loader2, Search, X } from 'lucide-react';
+import { CalendarClock, CalendarDays, CheckSquare, Loader2, Menu, Search, X } from 'lucide-react';
 import { NotificationMenu } from './NotificationMenu';
 import { UserMenu } from './UserMenu';
 import { Logo } from '@/components/ui/Logo';
@@ -26,7 +26,7 @@ const getTimetableDetail = (item: ApiTimetableItem) => [item.courseCode, item.ro
 const getIcon = (kind: SearchResult['kind']) => kind === 'task' ? CheckSquare : kind === 'event' ? CalendarDays : CalendarClock;
 
 export const Header: React.FC = () => {
-  const { isSidebarCollapsed } = useUIStore();
+  const { isSidebarCollapsed, toggleMobileSidebar } = useUIStore();
   const { data: settings } = useSettings();
   const language = normalizeLanguage(settings?.language);
   const navigate = useNavigate();
@@ -115,8 +115,16 @@ export const Header: React.FC = () => {
         isSidebarCollapsed && 'lg:left-20'
       )}
     >
-      {/* Mobile Brand Logo */}
+      {/* Mobile Brand Logo with Sidebar Hamburger Button */}
       <div className="flex items-center gap-2 lg:hidden">
+        <button
+          type="button"
+          onClick={toggleMobileSidebar}
+          aria-label="Mở menu chức năng"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A] transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         <Logo size="sm" showText variant="plain" theme="light" />
       </div>
 
