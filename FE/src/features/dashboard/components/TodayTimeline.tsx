@@ -73,15 +73,15 @@ export const TodayTimeline: React.FC<TodayTimelineProps> = ({ timetableToday = [
   const totalCount = useCalendarItems ? normalizedCalendarItems.length : timetableToday.length + sortedTodayEvents.length;
 
   return (
-    <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-sm flex flex-col gap-6">
+    <div className="rounded-2xl bg-white border border-slate-200/80 p-4 sm:p-6 shadow-sm flex flex-col gap-4 sm:gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <Clock className="w-5 h-5" />
+      <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-100 flex-wrap gap-2">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900 font-heading">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 font-heading">
               {translate(language, 'dashboard.todaySchedule')}
             </h2>
             <p className="text-xs text-slate-500 font-medium">

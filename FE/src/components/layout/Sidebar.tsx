@@ -83,7 +83,7 @@ export const Sidebar: React.FC = () => {
   return (
     <aside
       className={clsx(
-        'fixed top-0 left-0 bottom-0 z-30 bg-[var(--color-surface)] flex flex-col transition-all duration-300 ease-in-out select-none',
+        'hidden lg:flex fixed top-0 left-0 bottom-0 z-30 bg-[var(--color-surface)] flex-col transition-all duration-300 ease-in-out select-none',
         isSidebarCollapsed ? 'w-20' : 'w-64'
       )}
     >

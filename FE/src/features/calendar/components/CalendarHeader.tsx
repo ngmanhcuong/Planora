@@ -104,9 +104,9 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           es: 'Gestiona clases, fechas límite y eventos en un espacio sincronizado.',
         })}
         actions={(
-          <>
+          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full lg:w-auto">
             {/* View Switcher Tabs */}
-            <div className="flex items-center bg-white/10 p-1 rounded-2xl border border-white/15 backdrop-blur-md">
+            <div className="flex items-center bg-white/10 p-1 rounded-xl sm:rounded-2xl border border-white/15 backdrop-blur-md">
               {(['day', 'week', 'month'] as CalendarViewMode[]).map((mode) => {
                 const labelMap: Record<CalendarViewMode, string> = {
                   day: translate(language, 'calendar.day'),
@@ -119,7 +119,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                     key={mode}
                     aria-pressed={isActive}
                     onClick={() => onViewModeChange(mode)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isActive
                         ? 'bg-white text-indigo-700 shadow-md shadow-black/10'
                         : 'text-indigo-100 hover:text-white'
@@ -134,12 +134,12 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             {/* Create Button */}
             <button
               onClick={onOpenCreatePanel}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-md shadow-indigo-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
             >
-              <PlusCircle className="w-4 h-4" />
+              <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{translate(language, 'calendar.newSchedule')}</span>
             </button>
-          </>
+          </div>
         )}
       />
 

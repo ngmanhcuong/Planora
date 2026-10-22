@@ -303,7 +303,7 @@ export const AssistantPage: React.FC = () => {
         )}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         {insightCards.map((item) => (
           <article key={item.label} className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
             <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border ${item.tone}`}>
@@ -2189,7 +2189,7 @@ export const ReportsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
             <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.completedTasks')}</p><p className="mt-1 text-3xl font-black">{rangeTotals.tasksCompleted}/{rangeTotals.tasksTotal}</p></div>
             <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{getMultiLangText(language, { vi: 'Sự kiện & lịch trình', en: 'Events & schedules', ja: 'イベントと予定', ko: '이벤트 및 일정', zh: '事件与日程', fr: 'Événements', de: 'Termine', es: 'Eventos' })}</p><p className="mt-1 text-3xl font-black">{rangeTotals.events}</p></div>
             <div className="rounded-2xl border border-white/15 bg-white/12 p-4 backdrop-blur"><p className="text-[11px] font-bold uppercase tracking-wide text-indigo-100/80">{translate(language, 'reports.habitsCompletedCount')}</p><p className="mt-1 text-3xl font-black">{rangeTotals.habitCheckIns}</p></div>

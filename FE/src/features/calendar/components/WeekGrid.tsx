@@ -267,7 +267,8 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-          <div className="grid" style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}>
+          <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="grid min-w-[620px] md:min-w-0" style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}>
           {weekDays.map((d, index) => {
             const isSelected = selectedDate
               ? d.dateObj.toDateString() === selectedDate.toDateString()
@@ -325,18 +326,20 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
             );
           })}
           </div>
+          </div>
         </div>
       )}
 
       {/* Grid Body */}
-      <div
-        style={{
-          gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))`,
-          height: `${GRID_HEIGHT_PX}px`,
-        }}
-        className="calendar-week-body relative grid w-full"
-      >
-        {/* Day Columns */}
+      <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          style={{
+            gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))`,
+            height: `${GRID_HEIGHT_PX}px`,
+          }}
+          className="calendar-week-body relative grid w-full min-w-[620px] md:min-w-0"
+        >
+          {/* Day Columns */}
         {weekDays.map((day, dayIndex) => {
           const dayKey = day.dateObj.toDateString();
           const isDragOverDay = dragOverDayKey === dayKey;
@@ -433,6 +436,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

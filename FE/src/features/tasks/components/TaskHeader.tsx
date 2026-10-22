@@ -50,34 +50,36 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
       title={translate(language, 'tasks.title')}
       subtitle={translate(language, 'tasks.search')}
       actions={(
-        <>
-          <div className="relative w-64">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
+          <div className="relative w-full sm:w-56 md:w-64">
             <Search className="w-4 h-4 text-indigo-200 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={translate(language, 'tasks.search')}
-              className="w-full pl-9 pr-3 py-2.5 rounded-2xl bg-white/10 border border-white/15 text-xs text-white placeholder-indigo-200/80 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all font-medium backdrop-blur-md"
+              className="w-full pl-9 pr-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/10 border border-white/15 text-xs text-white placeholder-indigo-200/80 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all font-medium backdrop-blur-md"
             />
           </div>
 
-          <button
-            onClick={onOpenPriorityModal}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white/10 border border-white/15 text-xs font-bold text-indigo-100 hover:bg-white/20 transition-all cursor-pointer backdrop-blur-md"
-          >
-            <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300" />
-            <span>{translate(language, 'tasks.aiPriority')}</span>
-          </button>
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+            <button
+              onClick={onOpenPriorityModal}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/10 border border-white/15 text-xs font-bold text-indigo-100 hover:bg-white/20 transition-all cursor-pointer backdrop-blur-md active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300 shrink-0" />
+              <span className="truncate">{translate(language, 'tasks.aiPriority')}</span>
+            </button>
 
-          <button
-            onClick={onOpenCreateModal}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>{translate(language, 'tasks.create')}</span>
-          </button>
-        </>
+            <button
+              onClick={onOpenCreateModal}
+              className="flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-md shadow-indigo-600/30 transition-all cursor-pointer active:scale-95"
+            >
+              <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="truncate">{translate(language, 'tasks.create')}</span>
+            </button>
+          </div>
+        </div>
       )}
     />
   );

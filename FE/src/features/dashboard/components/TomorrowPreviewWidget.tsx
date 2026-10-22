@@ -12,11 +12,11 @@ export const TomorrowPreviewWidget: React.FC<TomorrowPreviewWidgetProps> = ({ ev
   const language = useCurrentLanguage();
 
   return (
-    <div className="rounded-2xl bg-white border border-slate-200/80 p-6 shadow-sm flex flex-col gap-4">
+    <div className="rounded-2xl bg-white border border-slate-200/80 p-4 sm:p-6 shadow-sm flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
             <CalendarIcon className="w-4 h-4" />
           </div>
           <h2 className="text-base font-bold text-slate-900 font-heading">

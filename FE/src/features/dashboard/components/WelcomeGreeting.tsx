@@ -76,20 +76,20 @@ export const WelcomeGreeting: React.FC<WelcomeGreetingProps> = ({
         .replace('{events}', String(eventsCount))
         .replace('{tasks}', String(tasksToday))}
       actions={(
-        <>
-          <button type="button" onClick={onOpenAssistantPanel} className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-black/10 backdrop-blur-md transition hover:bg-white/16">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+          <button type="button" onClick={onOpenAssistantPanel} className="inline-flex items-center justify-center gap-1.5 rounded-xl sm:rounded-2xl border border-white/15 bg-white/10 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md backdrop-blur-md transition hover:bg-white/16 active:scale-95">
             <Bot className="h-4 w-4 text-indigo-200" />
-            {translate(language, 'dashboard.assistant')}
+            <span>{translate(language, 'dashboard.assistant')}</span>
           </button>
-          <button type="button" onClick={onOpenScheduleModal} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/25 transition hover:opacity-95">
+          <button type="button" onClick={onOpenScheduleModal} className="inline-flex items-center justify-center gap-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-950 shadow-md shadow-amber-500/25 transition hover:opacity-95 active:scale-95">
             <Sparkles className="h-4 w-4 fill-slate-950 text-slate-950" />
-            {translate(language, 'dashboard.aiSchedule')}
+            <span>{translate(language, 'dashboard.aiSchedule')}</span>
           </button>
-          <button type="button" onClick={() => navigate('/tasks')} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500">
+          <button type="button" onClick={() => navigate('/tasks')} className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 rounded-xl sm:rounded-2xl bg-indigo-600 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-indigo-600/25 transition hover:bg-indigo-500 active:scale-95">
             <Plus className="h-4 w-4" />
-            {translate(language, 'dashboard.createTask')}
+            <span>{translate(language, 'dashboard.createTask')}</span>
           </button>
-        </>
+        </div>
       )}
     />
   );
