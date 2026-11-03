@@ -278,10 +278,7 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
           <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="grid min-w-[620px] md:min-w-0" style={{ gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))` }}>
           {weekDays.map((d, index) => {
-            const isSelected = selectedDate
-              ? d.dateObj.toDateString() === selectedDate.toDateString()
-              : d.isToday;
-            const isTodaySelected = isSelected && d.isToday;
+            const isToday = d.isToday;
 
             return (
               <button
@@ -289,47 +286,33 @@ export const WeekGrid: React.FC<WeekGridProps> = ({
                 type="button"
                 onClick={() => onSelectDate?.(d.dateObj)}
                 className={`mx-1 flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-2xl py-2 transition-all cursor-pointer ${
-                  isTodaySelected
+                  isToday
                     ? 'calendar-week-day-button-selected text-white shadow-md shadow-cyan-500/20 scale-[1.02]'
-                    : isSelected
-                    ? 'calendar-week-day-button-active'
                     : 'calendar-week-day-button-idle'
                 }`}
               >
                 <span
                   className={`text-[11px] font-black uppercase tracking-wider ${
-                    isTodaySelected
+                    isToday
                       ? 'text-cyan-50'
-                      : isSelected
-                      ? 'text-cyan-200'
                       : d.isWeekend
-                      ? 'text-slate-400'
-                      : 'text-slate-500'
+                      ? 'text-slate-400 dark:text-slate-500'
+                      : 'text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   {translate(language, d.dayKey as TranslationKey)}
                 </span>
                 <span
                   className={`w-7 h-7 flex items-center justify-center rounded-lg text-sm font-extrabold ${
-                    isTodaySelected
+                    isToday
                       ? 'text-white'
-                      : isSelected
-                      ? 'text-cyan-100'
-                      : d.isToday
-                      ? 'text-cyan-300'
                       : d.isWeekend
-                      ? 'text-slate-400'
-                      : 'text-slate-800'
+                      ? 'text-slate-400 dark:text-slate-500'
+                      : 'text-slate-800 dark:text-slate-100'
                   }`}
                 >
                   {d.dateNum}
                 </span>
-                {d.isToday && !isSelected && (
-                  <span
-                    className="mt-0.5 h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_0_3px_rgba(34,211,238,0.14)]"
-                    title="Hôm nay"
-                  />
-                )}
               </button>
             );
           })}
