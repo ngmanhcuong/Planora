@@ -26,19 +26,29 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
   const [passSuccess, setPassSuccess] = useState(false);
   const [passError, setPassError] = useState('');
   const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const changePasswordMutation = useChangePassword();
 
   const updateSecuritySetting = async (updated: Partial<UserSettingsState>) => {
     setSecurityMessage(null);
+    setIsUpdating(true);
     try {
       await onUpdate(updated);
-      setSecurityMessage({ type: 'success', text: 'Đã lưu thiết lập bảo mật vào tài khoản.' });
+      setSecurityMessage({
+        type: 'success',
+        text: updated.twoFactorAuth !== undefined
+          ? (updated.twoFactorAuth ? 'Đã bật xác thực 2 yếu tố (2FA). Mã OTP sẽ gửi về email khi đăng nhập.' : 'Đã tắt xác thực 2 yếu tố (2FA).')
+          : (updated.loginAlerts ? 'Đã bật cảnh báo đăng nhập qua email.' : 'Đã tắt cảnh báo đăng nhập qua email.'),
+      });
+      setTimeout(() => setSecurityMessage(null), 4000);
     } catch (error: any) {
       setSecurityMessage({
         type: 'error',
-        text: error.response?.data?.message || 'Không thể lưu thiết lập bảo mật.',
+        text: error.response?.data?.message || error.message || 'Không thể lưu thiết lập bảo mật.',
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -180,19 +190,24 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
 
       {/* 2FA Toggle */}
       {securityMessage && (
-        <div className={`rounded-lg border p-2.5 text-xs font-semibold ${securityMessage.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
-          {securityMessage.text}
+        <div className={`rounded-xl border p-3 text-xs font-semibold flex items-center gap-2 ${securityMessage.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300'}`}>
+          <ShieldCheck className="w-4 h-4 shrink-0" />
+          <span>{securityMessage.text}</span>
         </div>
       )}
-      <div className="flex items-center justify-between gap-4 py-2 border-b border-[#F1F5F9]">
+      <div className="flex items-center justify-between gap-4 py-3 border-b border-[#F1F5F9] dark:border-slate-800">
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.security.twoFactor.title')}</span>
-          <span className="text-xs text-[#64748B]">{translate(language, 'settings.security.twoFactor.subtitle')}</span>
+          <span className="text-xs font-bold text-[#131B2E] dark:text-white">{translate(language, 'settings.security.twoFactor.title')}</span>
+          <span className="text-xs text-[#64748B] dark:text-slate-400">{translate(language, 'settings.security.twoFactor.subtitle')}</span>
         </div>
         <button
+          type="button"
+          role="switch"
+          aria-checked={Boolean(settings.twoFactorAuth)}
+          disabled={isUpdating}
           onClick={() => updateSecuritySetting({ twoFactorAuth: !settings.twoFactorAuth })}
-          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-            settings.twoFactorAuth ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out disabled:opacity-50 ${
+            settings.twoFactorAuth ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1] dark:bg-slate-700'
           }`}
         >
           <span
@@ -204,15 +219,19 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       </div>
 
       {/* Login Alerts */}
-      <div className="flex items-center justify-between gap-4 py-2">
+      <div className="flex items-center justify-between gap-4 py-3">
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-bold text-[#131B2E]">{translate(language, 'settings.security.loginAlerts.title')}</span>
-          <span className="text-xs text-[#64748B]">{translate(language, 'settings.security.loginAlerts.subtitle')}</span>
+          <span className="text-xs font-bold text-[#131B2E] dark:text-white">{translate(language, 'settings.security.loginAlerts.title')}</span>
+          <span className="text-xs text-[#64748B] dark:text-slate-400">{translate(language, 'settings.security.loginAlerts.subtitle')}</span>
         </div>
         <button
+          type="button"
+          role="switch"
+          aria-checked={Boolean(settings.loginAlerts)}
+          disabled={isUpdating}
           onClick={() => updateSecuritySetting({ loginAlerts: !settings.loginAlerts })}
-          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-            settings.loginAlerts ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1]'
+          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out disabled:opacity-50 ${
+            settings.loginAlerts ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1] dark:bg-slate-700'
           }`}
         >
           <span

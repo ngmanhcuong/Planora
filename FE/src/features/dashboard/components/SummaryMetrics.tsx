@@ -27,55 +27,51 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
   const upcomingEventsCount = summary?.upcomingEvents || 0;
 
   return (
-    <div className="grid grid-cols-1 min-[360px]:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {/* Card 1: Today Schedule / Upcoming Events */}
-      <div className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-3 sm:gap-4">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+      <div className="group rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-5 shadow-xs transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900/90 flex flex-col justify-between">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
             {translate(language, 'dashboard.scheduleEvents')}
           </span>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform">
-            <CalendarIcon className="w-5 h-5" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-800/60 shrink-0">
+            <CalendarIcon className="h-4 w-4" />
           </div>
         </div>
-        <div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl sm:text-4xl font-black text-slate-900 font-heading">
-              {upcomingEventsCount}
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-              {translate(language, 'dashboard.eventsNext7Days')}
-            </span>
-          </div>
+        <div className="mt-3 flex items-baseline justify-between gap-2 flex-wrap">
+          <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-heading">
+            {upcomingEventsCount}
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+            {translate(language, 'dashboard.eventsNext7Days')}
+          </span>
         </div>
       </div>
 
       {/* Card 2: Tasks Progress */}
-      <div className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-3 sm:gap-4">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-600" />
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider truncate">
+      <div className="group rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-5 shadow-xs transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900/90 flex flex-col justify-between">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
             {translate(language, 'dashboard.todayTasks')}
           </span>
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-110 transition-transform shrink-0">
-            <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60 shrink-0">
+            <CheckSquare className="h-4 w-4" />
           </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-baseline justify-between gap-1 flex-wrap">
-            <span className="text-2xl sm:text-4xl font-black text-slate-900 font-heading">
+        <div className="mt-3 flex flex-col gap-2">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-heading">
               {completedTasks}
-              <span className="text-base sm:text-lg font-semibold text-slate-400">/{totalTasks}</span>
+              <span className="text-sm sm:text-base font-bold text-slate-400 dark:text-slate-500">/{totalTasks}</span>
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-indigo-50 text-indigo-700">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40">
               {translate(language, 'dashboard.completedPercent').replace('{percent}', String(taskPercent))}
             </span>
           </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full transition-all duration-500"
+              className="h-full bg-indigo-600 rounded-full transition-all duration-500"
               style={{ width: `${taskPercent}%` }}
             />
           </div>
@@ -83,66 +79,60 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({ summary, product
       </div>
 
       {/* Card 3: Overdue Tasks */}
-      <div className={`group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-5 border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-3 sm:gap-4 ${
-        overdueCount > 0 ? 'border-red-200 bg-red-50/20' : 'border-slate-200/80'
+      <div className={`group rounded-2xl sm:rounded-3xl border bg-white/95 p-4 sm:p-5 shadow-xs transition-all hover:shadow-md dark:bg-slate-900/90 flex flex-col justify-between ${
+        overdueCount > 0 ? 'border-rose-300/80 bg-rose-50/30 dark:border-rose-900/50' : 'border-slate-200/80 dark:border-slate-800'
       }`}>
-        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
-          overdueCount > 0 ? 'from-rose-500 to-red-600' : 'from-emerald-400 to-teal-500'
-        }`} />
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider truncate">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
             {translate(language, 'dashboard.overdueTasks')}
           </span>
-          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform shrink-0 bg-gradient-to-br ${
-            overdueCount > 0 ? 'from-rose-500 to-red-600 shadow-rose-500/20' : 'from-emerald-500 to-teal-600 shadow-emerald-500/20'
+          <div className={`flex h-8 w-8 items-center justify-center rounded-xl border shrink-0 ${
+            overdueCount > 0
+              ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-800/60'
+              : 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60'
           }`}>
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Clock className="h-4 w-4" />
           </div>
         </div>
-        <div>
-          <div className="flex items-baseline justify-between gap-1 flex-wrap">
-            <span className={`text-2xl sm:text-4xl font-black font-heading ${
-              overdueCount > 0 ? 'text-red-600' : 'text-slate-900'
-            }`}>
-              {overdueCount}
+        <div className="mt-3 flex items-baseline justify-between gap-2 flex-wrap">
+          <span className={`text-2xl sm:text-3xl font-black font-heading ${
+            overdueCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
+          }`}>
+            {overdueCount}
+          </span>
+          {overdueCount > 0 ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/40">
+              <AlertTriangle className="w-3 h-3 text-rose-500" />
+              {translate(language, 'dashboard.needsAction')}
             </span>
-            {overdueCount > 0 ? (
-              <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-100 text-red-700">
-                <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-600" />
-                {translate(language, 'dashboard.needsAction')}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-800">
-                <ShieldCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600" />
-                {translate(language, 'dashboard.noOverdue')}
-              </span>
-            )}
-          </div>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+              <ShieldCheck className="w-3 h-3 text-emerald-500" />
+              {translate(language, 'dashboard.noOverdue')}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Card 4: Habit Tracker & Productivity */}
-      <div className="group relative overflow-hidden rounded-2xl bg-white p-4 sm:p-5 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-3 sm:gap-4">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider truncate">
+      <div className="group rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-5 shadow-xs transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900/90 flex flex-col justify-between">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
             {translate(language, 'dashboard.habitsScore')}
           </span>
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 shadow-md shadow-orange-500/20 group-hover:scale-110 transition-transform shrink-0">
-            <Flame className="w-4 h-4 sm:w-5 sm:h-5 fill-slate-950" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-100 dark:border-amber-800/60 shrink-0">
+            <Flame className="h-4 w-4 fill-amber-500" />
           </div>
         </div>
-        <div>
-          <div className="flex items-baseline justify-between gap-1 flex-wrap">
-            <span className="text-2xl sm:text-4xl font-black text-slate-900 font-heading">
-              {habitsCompleted}
-              <span className="text-base sm:text-lg font-semibold text-slate-400">/{habitsTotal}</span>
-            </span>
-            <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/60">
-              <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600" />
-              {translate(language, 'dashboard.score')}: {productivityScore}/100
-            </span>
-          </div>
+        <div className="mt-3 flex items-baseline justify-between gap-2 flex-wrap">
+          <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-heading">
+            {habitsCompleted}
+            <span className="text-sm sm:text-base font-bold text-slate-400 dark:text-slate-500">/{habitsTotal}</span>
+          </span>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40">
+            <TrendingUp className="w-3 h-3 text-amber-600" />
+            {productivityScore}/100
+          </span>
         </div>
       </div>
     </div>

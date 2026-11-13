@@ -2166,15 +2166,15 @@ export const ReportsPage: React.FC = () => {
         subtitle={
           range === 'month'
             ? getMultiLangText(language, {
-                vi: `Tổng hợp nhịp làm việc và hiệu suất trong tháng ${currentMonthNumber}/${currentYear}.`,
-                en: `Work rhythm and productivity overview for ${currentMonthNumber}/${currentYear}.`,
-                ja: `${currentYear}年${currentMonthNumber}月の作業リズムと生産性。`,
-                ko: `${currentYear}년 ${currentMonthNumber}월 업무 리듬 및 생산성.`,
-                zh: `${currentYear}年${currentMonthNumber}月的工作节奏和生产力。`,
-                fr: `Rythme de travail et productivité pour ${currentMonthNumber}/${currentYear}.`,
-                de: `Arbeitsrhythmus und Produktivität für ${currentMonthNumber}/${currentYear}.`,
-                es: `Ritmo de trabajo y productividad de ${currentMonthNumber}/${currentYear}.`,
-              })
+              vi: `Tổng hợp nhịp làm việc và hiệu suất trong tháng ${currentMonthNumber}/${currentYear}.`,
+              en: `Work rhythm and productivity overview for ${currentMonthNumber}/${currentYear}.`,
+              ja: `${currentYear}年${currentMonthNumber}月の作業リズムと生産性。`,
+              ko: `${currentYear}년 ${currentMonthNumber}월 업무 리듬 및 생산성.`,
+              zh: `${currentYear}年${currentMonthNumber}月的工作节奏和生产力。`,
+              fr: `Rythme de travail et productivité pour ${currentMonthNumber}/${currentYear}.`,
+              de: `Arbeitsrhythmus und Produktivität für ${currentMonthNumber}/${currentYear}.`,
+              es: `Ritmo de trabajo y productividad de ${currentMonthNumber}/${currentYear}.`,
+            })
             : translate(language, 'reports.subtitle')
         }
         actions={
@@ -2218,15 +2218,15 @@ export const ReportsPage: React.FC = () => {
               >
                 {range === 'month'
                   ? getMultiLangText(language, {
-                      vi: `Tháng ${currentMonthNumber}/${currentYear}`,
-                      en: `${currentMonthNumber}/${currentYear}`,
-                      ja: `${currentYear}年${currentMonthNumber}月`,
-                      ko: `${currentYear}.${currentMonthNumber}`,
-                      zh: `${currentYear}年${currentMonthNumber}月`,
-                      fr: `${currentMonthNumber}/${currentYear}`,
-                      de: `${currentMonthNumber}/${currentYear}`,
-                      es: `${currentMonthNumber}/${currentYear}`,
-                    })
+                    vi: `Tháng ${currentMonthNumber}/${currentYear}`,
+                    en: `${currentMonthNumber}/${currentYear}`,
+                    ja: `${currentYear}年${currentMonthNumber}月`,
+                    ko: `${currentYear}.${currentMonthNumber}`,
+                    zh: `${currentYear}年${currentMonthNumber}月`,
+                    fr: `${currentMonthNumber}/${currentYear}`,
+                    de: `${currentMonthNumber}/${currentYear}`,
+                    es: `${currentMonthNumber}/${currentYear}`,
+                  })
                   : translate(language, 'reports.thisMonth')}
               </button>
               <button
@@ -2392,465 +2392,471 @@ export const ReportsPage: React.FC = () => {
       </section>
 
       {/* 3. Main Productivity Chart & Day Detail Inspector */}
-      <section className="grid gap-6 lg:grid-cols-5">
-        {/* Interactive Bar Chart Card */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm flex flex-col justify-between dark:border-slate-800 dark:bg-slate-900/90 lg:col-span-3">
-          {/* Card Top Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100/80 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800/60 shadow-xs">
-                <BarChart3 className="h-5 w-5" />
+        <section className="grid gap-6 lg:grid-cols-5 items-stretch">
+          {/* Interactive Bar Chart Card */}
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm flex flex-col justify-between dark:border-slate-800 dark:bg-slate-900/90 lg:col-span-3">
+            {/* Card Top Header */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800/80 mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100/80 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800/60 shadow-xs">
+                    <BarChart3 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-heading text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      {range === 'week'
+                        ? translate(language, 'reports.weeklyScore')
+                        : range === 'month'
+                          ? getMultiLangText(language, {
+                            vi: `Điểm năng suất tháng ${currentMonthNumber}/${currentYear}`,
+                            en: `Productivity score for ${currentMonthNumber}/${currentYear}`,
+                            ja: `${currentYear}年${currentMonthNumber}月の生産性スコア`,
+                            ko: `${currentYear}년 ${currentMonthNumber}월 생산성 점수`,
+                            zh: `${currentYear}年${currentMonthNumber}月生产力评分`,
+                            fr: `Score de productivité — ${currentMonthNumber}/${currentYear}`,
+                            de: `Produktivitätswert – ${currentMonthNumber}/${currentYear}`,
+                            es: `Productividad de ${currentMonthNumber}/${currentYear}`,
+                          })
+                          : getMultiLangText(language, {
+                            vi: 'Điểm năng suất quý',
+                            en: 'Quarterly productivity score',
+                            ja: '四半期生産性スコア',
+                            ko: '분기 생산성 점수',
+                            zh: '季度生产力评分',
+                            fr: 'Score de productivité trimestriel',
+                            de: 'Vierteljährlicher Produktivitätswert',
+                            es: 'Puntuación trimestral de productividad',
+                          })}
+                    </h2>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                      {translate(language, 'reports.compiledDesc')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Peak Day Badge */}
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-2xl bg-amber-50 text-amber-800 border border-amber-200/70 shadow-xs dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50">
+                  <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                  <span>
+                    {bestItem.value > 0
+                      ? `${getMultiLangText(language, { vi: 'Cao nhất', en: 'Peak', ja: '最高', ko: '최고', zh: '最高' })}: ${bestItem.label} (${bestItem.value}đ)`
+                      : translate(language, 'reports.calculating')}
+                  </span>
+                </span>
               </div>
-              <div>
-                <h2 className="font-heading text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
-                  {range === 'week'
-                    ? translate(language, 'reports.weeklyScore')
-                    : range === 'month'
-                    ? getMultiLangText(language, {
-                        vi: `Điểm năng suất tháng ${currentMonthNumber}/${currentYear}`,
-                        en: `Productivity score for ${currentMonthNumber}/${currentYear}`,
-                        ja: `${currentYear}年${currentMonthNumber}月の生産性スコア`,
-                        ko: `${currentYear}년 ${currentMonthNumber}월 생산성 점수`,
-                        zh: `${currentYear}年${currentMonthNumber}月生产力评分`,
-                        fr: `Score de productivité — ${currentMonthNumber}/${currentYear}`,
-                        de: `Produktivitätswert – ${currentMonthNumber}/${currentYear}`,
-                        es: `Productividad de ${currentMonthNumber}/${currentYear}`,
-                      })
-                    : getMultiLangText(language, {
-                        vi: 'Điểm năng suất quý',
-                        en: 'Quarterly productivity score',
-                        ja: '四半期生産性スコア',
-                        ko: '분기 생산성 점수',
-                        zh: '季度生产力评分',
-                        fr: 'Score de productivité trimestriel',
-                        de: 'Vierteljährlicher Produktivitätswert',
-                        es: 'Puntuación trimestral de productividad',
-                      })}
-                </h2>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                  {translate(language, 'reports.compiledDesc')}
-                </p>
-              </div>
-            </div>
 
-            {/* Peak Day Badge */}
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-2xl bg-amber-50 text-amber-800 border border-amber-200/70 shadow-xs dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50">
-              <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
-              <span>
-                {bestItem.value > 0
-                  ? `${getMultiLangText(language, { vi: 'Cao nhất', en: 'Peak', ja: '最高', ko: '최고', zh: '最高' })}: ${bestItem.label} (${bestItem.value}đ)`
-                  : translate(language, 'reports.calculating')}
-              </span>
-            </span>
-          </div>
-
-          {/* Clean Chart Area with Dedicated Y-Axis & Baseline */}
-          <div className="relative flex items-end gap-2 sm:gap-4 pt-4 pb-2">
-            {/* Left Y-Axis Scale */}
-            <div className="flex h-52 flex-col justify-between text-right text-[10px] font-bold text-slate-400 dark:text-slate-500 pr-2 border-r border-slate-200/70 dark:border-slate-800 select-none pb-8 shrink-0">
-              <span>100</span>
-              <span>75</span>
-              <span>50</span>
-              <span>25</span>
-              <span>0</span>
-            </div>
-
-            {/* Horizontal Dashed Background Grid Lines */}
-            <div className="absolute left-10 right-2 top-4 bottom-10 flex flex-col justify-between pointer-events-none z-0">
-              <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
-              <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
-              <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
-              <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
-              <div className="border-b border-slate-200 dark:border-slate-700 w-full" />
-            </div>
-
-            {/* Columns Row */}
-            <div className="relative z-10 flex flex-1 items-end justify-between h-52 gap-1.5 sm:gap-3">
-              {currentChartData.map((item: any) => {
-                const isSelected = selectedDay === item.label;
-                const isBest = item.label === bestItem.label && item.value > 0;
-                const hasScore = item.value > 0;
-
-                return (
-                  <div
-                    key={item.label}
-                    onClick={() => setSelectedDay(item.label)}
-                    className={clsx(
-                      'group relative flex flex-1 flex-col items-center justify-end h-full pb-1 pt-2 rounded-2xl cursor-pointer transition-all duration-200',
-                      isSelected
-                        ? 'bg-indigo-50/80 dark:bg-indigo-950/40 ring-1 ring-indigo-200 dark:ring-indigo-800'
-                        : 'hover:bg-slate-50/90 dark:hover:bg-slate-800/50'
-                    )}
-                  >
-                    {/* Score Tooltip Badge on top */}
-                    <div
-                      className={clsx(
-                        'transition-all duration-200 mb-2',
-                        isSelected ? 'scale-110 -translate-y-1' : 'group-hover:scale-105',
-                        !hasScore && !isSelected && 'opacity-0 group-hover:opacity-100'
-                      )}
-                    >
-                      {isBest ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-md shadow-amber-400/30 border border-amber-300">
-                          <Crown className="w-2.5 h-2.5 fill-slate-950" />
-                          {item.value}đ
-                        </span>
-                      ) : hasScore ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white shadow-xs">
-                          {item.value}đ
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800">
-                          0đ
-                        </span>
-                      )}
+              {/* Clean Chart Area with Dedicated Y-Axis & Baseline */}
+                <div className="relative flex-1 flex flex-col justify-end pt-3">
+                  <div className="relative flex items-end gap-2 sm:gap-4 h-64 sm:h-72 w-full pb-2">
+                    {/* Left Y-Axis Scale */}
+                    <div className="flex h-full flex-col justify-between text-right text-[10px] font-bold text-slate-400 dark:text-slate-500 pr-2.5 border-r border-slate-200/70 dark:border-slate-800 select-none pb-8 shrink-0">
+                      <span>100</span>
+                      <span>75</span>
+                      <span>50</span>
+                      <span>25</span>
+                      <span>0</span>
                     </div>
 
-                    {/* Bar Track with smooth height */}
-                    <div className="flex flex-1 items-end justify-center w-full pb-2">
+                    {/* Horizontal Dashed Background Grid Lines */}
+                    <div className="absolute left-9 right-1 top-1 bottom-8 flex flex-col justify-between pointer-events-none z-0">
+                      <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
+                      <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
+                      <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
+                      <div className="border-b border-dashed border-slate-200/70 dark:border-slate-800 w-full" />
+                      <div className="border-b border-slate-200 dark:border-slate-700 w-full" />
+                    </div>
+
+              {/* Columns Row */}
+              <div className="relative z-10 flex flex-1 items-end justify-around h-full px-2 sm:px-6">
+                {currentChartData.map((item: any) => {
+                  const isSelected = selectedDay === item.label;
+                  const isBest = item.label === bestItem.label && item.value > 0;
+                  const hasScore = item.value > 0;
+
+                  return (
+                    <div
+                      key={item.label}
+                      onClick={() => setSelectedDay(item.label)}
+                      className="group relative flex flex-col items-center justify-end h-full pb-1 cursor-pointer w-14 sm:w-20 md:w-24 max-w-[120px]"
+                    >
+                      {/* Bar Track Container (covers height from 0 line up to 100 line) */}
                       <div
                         className={clsx(
-                          'w-7 sm:w-9 max-w-[36px] rounded-t-xl transition-all duration-500 relative',
-                          hasScore
-                            ? isBest
-                              ? 'bg-gradient-to-t from-amber-500 via-amber-400 to-amber-300 shadow-md shadow-amber-400/30 ring-1 ring-amber-300'
-                              : isSelected
-                              ? 'bg-gradient-to-t from-indigo-600 via-indigo-500 to-violet-400 shadow-md shadow-indigo-600/30'
-                              : 'bg-gradient-to-t from-indigo-500 to-sky-400 opacity-80 group-hover:opacity-100'
-                            : 'h-1.5 rounded-full bg-slate-200 dark:bg-slate-700/80 group-hover:bg-indigo-300'
+                          'relative w-full flex-1 flex flex-col items-center justify-end pb-2 rounded-2xl transition-all duration-200',
+                          isSelected
+                            ? 'bg-indigo-50/70 dark:bg-indigo-950/40 ring-1 ring-indigo-200/80 dark:ring-indigo-800/80'
+                            : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
                         )}
-                        style={hasScore ? { height: `${Math.max(item.value, 8)}%` } : undefined}
                       >
-                        {hasScore && (
-                          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent rounded-t-xl pointer-events-none" />
-                        )}
-                      </div>
-                    </div>
+                        {/* Score Tooltip Badge directly over the bar top or top track */}
+                        <div
+                          className={clsx(
+                            'transition-all duration-200 mb-1.5 z-10',
+                            isSelected ? 'scale-105' : 'group-hover:scale-105',
+                            !hasScore && !isSelected && 'opacity-0 group-hover:opacity-100'
+                          )}
+                        >
+                          {isBest ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-md shadow-amber-400/30 border border-amber-300">
+                              <Crown className="w-2.5 h-2.5 fill-slate-950" />
+                              {item.value}đ
+                            </span>
+                          ) : hasScore ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white shadow-xs">
+                              {item.value}đ
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 bg-white/90 dark:bg-slate-800 shadow-xs border border-slate-200/60 dark:border-slate-700/60">
+                              0đ
+                            </span>
+                          )}
+                        </div>
 
-                    {/* Day Label Pill */}
-                    <span
-                      className={clsx(
-                        'transition-all duration-200 text-xs font-bold px-2.5 py-1 rounded-xl',
-                        isSelected
-                          ? 'bg-indigo-600 text-white font-extrabold shadow-md shadow-indigo-600/25 scale-105'
-                          : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'
-                      )}
-                    >
-                      {item.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Selected Day Inspector & Breakdown */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-4 flex flex-col justify-between dark:border-slate-800 dark:bg-slate-900/90 lg:col-span-2">
-          <div>
-            {/* Inspector Top Row */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 flex-col items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-heading shadow-md shadow-indigo-600/25 shrink-0">
-                  <span className="text-sm font-black leading-none">{selectedData.label}</span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white font-heading">
-                    {getMultiLangText(language, {
-                      vi: 'Chi tiết chỉ số',
-                      en: 'Metrics detail for',
-                      ja: 'メトリクス詳細:',
-                      ko: '지표 상세:',
-                      zh: '指标详情:',
-                    })}{' '}
-                    {selectedData.fullName || selectedData.label}
-                  </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    {selectedData.detail}
-                  </p>
-                </div>
-              </div>
-
-              {/* Day Score Display */}
-              <div className="flex flex-col items-end">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400 font-heading">
-                    {selectedData.value}
-                  </span>
-                  <span className="text-xs font-bold text-slate-400">/100đ</span>
-                </div>
-                <span className="text-[10px] font-semibold text-slate-400">
-                  {selectedData.value >= 80 ? 'Rất tích cực' : selectedData.value > 0 ? 'Có hoạt động' : 'Chưa có hoạt động'}
-                </span>
-              </div>
-            </div>
-
-            {/* Rich Breakdown Metric Cards */}
-            <div className="space-y-3">
-              {/* Task Metric */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                    </div>
-                    <span>
-                      {getMultiLangText(language, {
-                        vi: 'Task hoàn thành',
-                        en: 'Completed tasks',
-                        ja: '完了したタスク',
-                        ko: '완료된 작업',
-                        zh: '已完成任务',
-                      })}
-                    </span>
-                  </div>
-                  <span className="text-xs font-black text-slate-900 dark:text-white">
-                    {selectedData.tasksCompleted}/{selectedData.tasksTotal || selectedData.tasksCompleted}
-                  </span>
-                </div>
-                {/* Mini Progress Bar */}
-                <div className="mt-2 h-1.5 w-full bg-slate-200/70 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-300"
-                    style={{
-                      width: `${
-                        selectedData.tasksTotal > 0
-                          ? Math.round((selectedData.tasksCompleted / selectedData.tasksTotal) * 100)
-                          : selectedData.tasksCompleted > 0
-                          ? 100
-                          : 0
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Event Metric */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400">
-                    <Clock className="h-3.5 w-3.5" />
-                  </div>
-                  <span>
-                    {getMultiLangText(language, {
-                      vi: 'Sự kiện & Lịch trình',
-                      en: 'Events & Schedules',
-                      ja: 'イベント & スケジュール',
-                      ko: '일정 & 스케줄',
-                      zh: '事件与日程',
-                    })}
-                  </span>
-                </div>
-                <span className="text-xs font-black text-slate-900 dark:text-white">
-                  {selectedData.events}{' '}
-                  {getMultiLangText(language, { vi: 'mục', en: 'items', ja: '件', ko: '개', zh: '项' })}
-                </span>
-              </div>
-
-              {/* Habit Metric */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
-                    <Zap className="h-3.5 w-3.5" />
-                  </div>
-                  <span>
-                    {getMultiLangText(language, {
-                      vi: 'Thói quen tích lũy',
-                      en: 'Accumulated habits',
-                      ja: '蓄積された習慣',
-                      ko: '누적 습관',
-                      zh: '累计习惯',
-                    })}
-                  </span>
-                </div>
-                <span className="text-xs font-black text-amber-600 dark:text-amber-400">
-                  {selectedData.habitCheckIns}{' '}
-                  {getMultiLangText(language, { vi: 'lượt', en: 'check-ins', ja: '回', ko: '회', zh: '次' })}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Realtime Status Notice */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50/70 to-slate-50 border border-indigo-100/80 dark:from-indigo-950/40 dark:to-slate-800/80 dark:border-indigo-800/40 flex items-center gap-3">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <div className="min-w-0">
-              <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                {translate(language, 'reports.realtimeData')}
-              </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                {translate(language, 'reports.realtimeDesc')}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Category Breakdown & AI Advice Section */}
-      <section className="grid gap-6 lg:grid-cols-2">
-        {/* Category Time Distribution */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-4 dark:border-slate-800 dark:bg-slate-900/90 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800/60 shadow-xs">
-                  <PieChart className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-heading text-base font-extrabold text-slate-900 dark:text-white">
-                    {translate(language, 'reports.realCategoryDistribution')}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Phân bố thời gian theo danh mục công việc
-                  </p>
-                </div>
-              </div>
-              <span className="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-                {tasksInSelectedRange.length} task
-              </span>
-            </div>
-
-            <div className="pt-3">
-              {categoriesBreakdown.length === 0 && !isRealDataLoading ? (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 mb-2">
-                    <PieChart className="h-6 w-6" />
-                  </div>
-                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                    Chưa có công việc trong khoảng thời gian này
-                  </p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xs mt-0.5">
-                    Hãy tạo công việc và gán danh mục để hệ thống tự động phân tích tỷ lệ làm việc của bạn.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/tasks')}
-                    className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all active:scale-95 cursor-pointer"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span>Tạo công việc ngay</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-3.5">
-                  {categoriesBreakdown.map((cat) => (
-                    <div key={cat.label} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs font-bold">
-                        <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                          <span className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                          {cat.label} ({cat.count} {getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: 'タスク', ko: '작업', zh: '任务' })})
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className={`font-black ${cat.text}`}>{cat.percent}%</span>
+                        {/* Bar Pillar */}
+                        <div className="flex items-end justify-center w-full px-1">
+                          <div
+                            className={clsx(
+                              'w-8 sm:w-10 md:w-12 max-w-[48px] rounded-t-xl transition-all duration-500 relative',
+                              hasScore
+                                ? isBest
+                                  ? 'bg-gradient-to-t from-amber-500 via-amber-400 to-amber-300 shadow-md shadow-amber-400/30 ring-1 ring-amber-300'
+                                  : isSelected
+                                  ? 'bg-gradient-to-t from-indigo-600 via-indigo-500 to-violet-400 shadow-md shadow-indigo-600/30'
+                                  : 'bg-gradient-to-t from-indigo-500 to-sky-400 opacity-80 group-hover:opacity-100'
+                                : 'h-1.5 rounded-full bg-slate-200 dark:bg-slate-700/80 group-hover:bg-indigo-300'
+                            )}
+                            style={hasScore ? { height: `${Math.max(item.value, 8)}%` } : undefined}
+                          >
+                            {hasScore && (
+                              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent rounded-t-xl pointer-events-none" />
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
-                        <div
-                          className={`h-full rounded-full ${cat.color} transition-all duration-500`}
-                          style={{ width: `${cat.percent}%` }}
-                        />
-                      </div>
+
+                      {/* Day Label Pill at bottom */}
+                      <span
+                        className={clsx(
+                          'mt-2 transition-all duration-200 text-xs font-bold px-2.5 py-1 rounded-xl',
+                          isSelected
+                            ? 'bg-indigo-600 text-white font-extrabold shadow-md shadow-indigo-600/25 scale-105'
+                            : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'
+                        )}
+                      >
+                        {item.label}
+                      </span>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* AI Productivity Suggestions */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-4 dark:border-slate-800 dark:bg-slate-900/90 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-52 h-52 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
+            {/* Selected Day Inspector & Breakdown */}
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-4 flex flex-col justify-between dark:border-slate-800 dark:bg-slate-900/90 lg:col-span-2">
+              <div>
+                {/* Inspector Top Row */}
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 flex-col items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-heading shadow-md shadow-indigo-600/25 shrink-0">
+                      <span className="text-sm font-black leading-none">{selectedData.label}</span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-extrabold text-slate-900 dark:text-white font-heading">
+                        {getMultiLangText(language, {
+                          vi: 'Chi tiết chỉ số',
+                          en: 'Metrics detail for',
+                          ja: 'メトリクス詳細:',
+                          ko: '지표 상세:',
+                          zh: '指标详情:',
+                        })}{' '}
+                        {selectedData.fullName || selectedData.label}
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                        {selectedData.detail}
+                      </p>
+                    </div>
+                  </div>
 
-          <div className="space-y-4 relative z-10">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xs">
-                  <Bot className="w-5 h-5" />
+                  {/* Day Score Display */}
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400 font-heading">
+                        {selectedData.value}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400">/100đ</span>
+                    </div>
+                    <span className="text-[10px] font-semibold text-slate-400">
+                      {selectedData.value >= 80 ? 'Rất tích cực' : selectedData.value > 0 ? 'Có hoạt động' : 'Chưa có hoạt động'}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-heading text-base font-extrabold text-slate-900 dark:text-white">
-                    {translate(language, 'reports.aiAdviceTitle')}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {translate(language, 'reports.aiAdviceSubtitle')}
+
+                {/* Rich Breakdown Metric Cards */}
+                <div className="space-y-3">
+                  {/* Task Metric */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        </div>
+                        <span>
+                          {getMultiLangText(language, {
+                            vi: 'Task hoàn thành',
+                            en: 'Completed tasks',
+                            ja: '完了したタスク',
+                            ko: '완료된 작업',
+                            zh: '已完成任务',
+                          })}
+                        </span>
+                      </div>
+                      <span className="text-xs font-black text-slate-900 dark:text-white">
+                        {selectedData.tasksCompleted}/{selectedData.tasksTotal || selectedData.tasksCompleted}
+                      </span>
+                    </div>
+                    {/* Mini Progress Bar */}
+                    <div className="mt-2 h-1.5 w-full bg-slate-200/70 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${selectedData.tasksTotal > 0
+                              ? Math.round((selectedData.tasksCompleted / selectedData.tasksTotal) * 100)
+                              : selectedData.tasksCompleted > 0
+                                ? 100
+                                : 0
+                            }%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Event Metric */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400">
+                        <Clock className="h-3.5 w-3.5" />
+                      </div>
+                      <span>
+                        {getMultiLangText(language, {
+                          vi: 'Sự kiện & Lịch trình',
+                          en: 'Events & Schedules',
+                          ja: 'イベント & スケジュール',
+                          ko: '일정 & 스케줄',
+                          zh: '事件与日程',
+                        })}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-slate-900 dark:text-white">
+                      {selectedData.events}{' '}
+                      {getMultiLangText(language, { vi: 'mục', en: 'items', ja: '件', ko: '개', zh: '项' })}
+                    </span>
+                  </div>
+
+                  {/* Habit Metric */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+                        <Zap className="h-3.5 w-3.5" />
+                      </div>
+                      <span>
+                        {getMultiLangText(language, {
+                          vi: 'Thói quen tích lũy',
+                          en: 'Accumulated habits',
+                          ja: '蓄積された習慣',
+                          ko: '누적 습관',
+                          zh: '累计习惯',
+                        })}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-amber-600 dark:text-amber-400">
+                      {selectedData.habitCheckIns}{' '}
+                      {getMultiLangText(language, { vi: 'lượt', en: 'check-ins', ja: '回', ko: '회', zh: '次' })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Realtime Status Notice */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50/70 to-slate-50 border border-indigo-100/80 dark:from-indigo-950/40 dark:to-slate-800/80 dark:border-indigo-800/40 flex items-center gap-3">
+                <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                    {translate(language, 'reports.realtimeData')}
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    {translate(language, 'reports.realtimeDesc')}
                   </p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Analysis
-              </span>
             </div>
+        </section>
 
-            {/* AI Insights Cards */}
-            <div className="space-y-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300 font-medium pt-1">
-              {/* Insight 1: Tasks Progress */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 mt-0.5">
-                  <Lightbulb className="w-4 h-4" />
+        {/* 4. Category Breakdown & AI Advice Section */}
+        <section className="grid gap-6 lg:grid-cols-2">
+          {/* Category Time Distribution */}
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-4 dark:border-slate-800 dark:bg-slate-900/90 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800/60 shadow-xs">
+                    <PieChart className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-base font-extrabold text-slate-900 dark:text-white">
+                      {translate(language, 'reports.realCategoryDistribution')}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Phân bố thời gian theo danh mục công việc
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <span className="block font-bold text-slate-900 dark:text-white mb-0.5">Tiến độ hoàn thành</span>
-                  {getMultiLangText(language, {
-                    vi: `Bạn đã hoàn thành ${completedTasksCount}/${totalTasksCount} công việc (${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% tổng số task).`,
-                    en: `You completed ${completedTasksCount}/${totalTasksCount} tasks (${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% of total tasks).`,
-                    ja: `合計タスクの ${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% (${completedTasksCount}/${totalTasksCount}) を完了しました。`,
-                    ko: `전체 작업의 ${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% (${completedTasksCount}/${totalTasksCount})를 완료했습니다。`,
-                    zh: `您已完成总任务的 ${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}%（${completedTasksCount}/${totalTasksCount}）。`,
-                  })}
-                </div>
+                <span className="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                  {tasksInSelectedRange.length} task
+                </span>
               </div>
 
-              {/* Insight 2: Optimal Tip */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 mt-0.5">
-                  <Zap className="w-4 h-4" />
+              <div className="pt-3">
+                {categoriesBreakdown.length === 0 && !isRealDataLoading ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 mb-2">
+                      <PieChart className="h-6 w-6" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Chưa có công việc trong khoảng thời gian này
+                    </p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xs mt-0.5">
+                      Hãy tạo công việc và gán danh mục để hệ thống tự động phân tích tỷ lệ làm việc của bạn.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/tasks')}
+                      className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all active:scale-95 cursor-pointer"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>Tạo công việc ngay</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3.5">
+                    {categoriesBreakdown.map((cat) => (
+                      <div key={cat.label} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                            <span className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
+                            {cat.label} ({cat.count} {getMultiLangText(language, { vi: 'công việc', en: 'tasks', ja: 'タスク', ko: '작업', zh: '任务' })})
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`font-black ${cat.text}`}>{cat.percent}%</span>
+                          </div>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
+                          <div
+                            className={`h-full rounded-full ${cat.color} transition-all duration-500`}
+                            style={{ width: `${cat.percent}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* AI Productivity Suggestions */}
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-sm space-y-4 dark:border-slate-800 dark:bg-slate-900/90 flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-52 h-52 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
+
+            <div className="space-y-4 relative z-10">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-xs">
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-base font-extrabold text-slate-900 dark:text-white">
+                      {translate(language, 'reports.aiAdviceTitle')}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {translate(language, 'reports.aiAdviceSubtitle')}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <strong className="text-slate-900 dark:text-white block mb-0.5 font-bold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-200/70 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Analysis
+                </span>
+              </div>
+
+              {/* AI Insights Cards */}
+              <div className="space-y-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300 font-medium pt-1">
+                {/* Insight 1: Tasks Progress */}
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-start gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 mt-0.5">
+                    <Lightbulb className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <span className="block font-bold text-slate-900 dark:text-white mb-0.5">Tiến độ hoàn thành</span>
                     {getMultiLangText(language, {
-                      vi: 'Chiến lược tối ưu hóa:',
-                      en: 'Optimal schedule tip:',
-                      ja: '最適なスケジュールのアドバイス:',
-                      ko: '최적 일정 팁:',
-                      zh: '最佳日程建议:',
+                      vi: `Bạn đã hoàn thành ${completedTasksCount}/${totalTasksCount} công việc (${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% tổng số task).`,
+                      en: `You completed ${completedTasksCount}/${totalTasksCount} tasks (${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% of total tasks).`,
+                      ja: `合計タスクの ${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% (${completedTasksCount}/${totalTasksCount}) を完了しました。`,
+                      ko: `전체 작업의 ${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}% (${completedTasksCount}/${totalTasksCount})를 완료했습니다。`,
+                      zh: `您已完成总任务的 ${totalTasksCount > 0 ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0}%（${completedTasksCount}/${totalTasksCount}）。`,
                     })}
-                  </strong>
-                  {bestItem.value > 0
-                    ? getMultiLangText(language, {
+                  </div>
+                </div>
+
+                {/* Insight 2: Optimal Tip */}
+                <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/60 dark:bg-slate-800/60 dark:border-slate-700/60 flex items-start gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 mt-0.5">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <strong className="text-slate-900 dark:text-white block mb-0.5 font-bold">
+                      {getMultiLangText(language, {
+                        vi: 'Chiến lược tối ưu hóa:',
+                        en: 'Optimal schedule tip:',
+                        ja: '最適なスケジュールのアドバイス:',
+                        ko: '최적 일정 팁:',
+                        zh: '最佳日程建议:',
+                      })}
+                    </strong>
+                    {bestItem.value > 0
+                      ? getMultiLangText(language, {
                         vi: `Ngày ${bestItem.fullName} bạn đạt điểm hiệu suất cao nhất (${bestItem.value}đ). Hãy duy trì đà làm việc này!`,
                         en: `On ${bestItem.fullName} you achieved your peak productivity score (${bestItem.value} pts). Keep up the momentum!`,
                         ja: `${bestItem.fullName} に最高の生産性スコア（${bestItem.value} pt）を記録しました。この調子を維持しましょう！`,
                         ko: `${bestItem.fullName}에 최고 생산성 점수(${bestItem.value}점)를 달성했습니다. 이 기세를 유지하세요!`,
                         zh: `在${bestItem.fullName}，您达到了最高生产力得分（${bestItem.value}分）。保持这个势头！`,
                       })
-                    : getMultiLangText(language, {
+                      : getMultiLangText(language, {
                         vi: 'Tạo thêm công việc và hoàn thành lịch trình hôm nay để AI ghi nhận điểm số năng suất đầu tiên!',
                         en: "Create tasks and complete today's schedule for AI to calculate your first productivity score!",
                         ja: 'タスクを作成して今日のスケジュールを完了し、AIに最初の生産性スコアを計算させましょう！',
                         ko: '작업을 생성하고 오늘 일정을 완료하여 AI가 첫 생산성 점수를 계산하도록 하세요!',
                         zh: '创建任务并完成今天的日程，让 AI 计算您的第一个生产力得分！',
                       })}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* AI CTA Button */}
-          <div className="pt-2 relative z-10">
-            <button
-              type="button"
-              onClick={() => navigate('/assistant')}
-              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/25 active:scale-95 transition-all cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4 fill-white" />
-              <span>{translate(language, 'reports.aiScheduleBtn')}</span>
-            </button>
+            {/* AI CTA Button */}
+            <div className="pt-2 relative z-10">
+              <button
+                type="button"
+                onClick={() => navigate('/assistant')}
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/25 active:scale-95 transition-all cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 fill-white" />
+                <span>{translate(language, 'reports.aiScheduleBtn')}</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
     </div>
   );
 };

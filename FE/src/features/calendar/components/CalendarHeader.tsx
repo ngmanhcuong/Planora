@@ -119,11 +119,10 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                     key={mode}
                     aria-pressed={isActive}
                     onClick={() => onViewModeChange(mode)}
-                    className={`px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-white text-indigo-700 shadow-md shadow-black/10'
-                        : 'text-indigo-100 hover:text-white'
-                    }`}
+                    className={`px-2.5 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive
+                          ? 'bg-white text-teal-900 shadow-md shadow-black/10'
+                          : 'text-cyan-100 hover:text-white'
+                      }`}
                   >
                     {labelMap[mode]}
                   </button>
@@ -134,9 +133,9 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             {/* Create Button */}
             <button
               onClick={onOpenCreatePanel}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-md shadow-indigo-600/30 transition-all cursor-pointer active:scale-95 shrink-0"
+              className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-black shadow-lg shadow-cyan-500/25 transition-all cursor-pointer active:scale-95 shrink-0"
             >
-              <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-950" />
               <span>{translate(language, 'calendar.newSchedule')}</span>
             </button>
           </div>
@@ -144,48 +143,46 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       />
 
       <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-3 shadow-sm backdrop-blur">
-          <div className="flex items-center gap-2 overflow-x-auto">
-            <span className="shrink-0 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-              {translate(language, 'calendar.filterBy')}:
-            </span>
-            {categories.map((cat) => {
-              const isActive = activeCategory === cat;
-              if (cat === 'all') {
-                return (
-                  <button
-                    key="all"
-                    onClick={() => onCategoryChange('all')}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      isActive
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
-                    }`}
-                  >
-                    {isActive && <Check className="w-3.5 h-3.5" />}
-                    <span>{translate(language, 'tasks.filter.all')}</span>
-                  </button>
-                );
-              }
-              const info = CATEGORY_MAP[cat];
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <span className="shrink-0 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+            {translate(language, 'calendar.filterBy')}:
+          </span>
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat;
+            if (cat === 'all') {
               return (
                 <button
-                  key={cat}
-                  onClick={() => onCategoryChange(cat)}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    isActive
+                  key="all"
+                  onClick={() => onCategoryChange('all')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${isActive
                       ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
                       : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
-                  }`}
+                    }`}
                 >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: info.color }}
-                  />
-                  <span>{translate(language, `category.${cat}` as TranslationKey) || info.label}</span>
+                  {isActive && <Check className="w-3.5 h-3.5" />}
+                  <span>{translate(language, 'tasks.filter.all')}</span>
                 </button>
               );
-            })}
-          </div>
+            }
+            const info = CATEGORY_MAP[cat];
+            return (
+              <button
+                key={cat}
+                onClick={() => onCategoryChange(cat)}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${isActive
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  }`}
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: info.color }}
+                />
+                <span>{translate(language, `category.${cat}` as TranslationKey) || info.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

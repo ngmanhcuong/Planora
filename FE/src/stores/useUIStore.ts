@@ -7,6 +7,10 @@ interface UIState {
   isMobileSidebarOpen: boolean;
   toggleMobileSidebar: () => void;
   setMobileSidebarOpen: (open: boolean) => void;
+  isAiChatOpen: boolean;
+  openAiChat: () => void;
+  closeAiChat: () => void;
+  toggleAiChat: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -16,4 +20,8 @@ export const useUIStore = create<UIState>((set) => ({
   isMobileSidebarOpen: false,
   toggleMobileSidebar: () => set((state) => ({ isMobileSidebarOpen: !state.isMobileSidebarOpen })),
   setMobileSidebarOpen: (open) => set({ isMobileSidebarOpen: open }),
+  isAiChatOpen: false,
+  openAiChat: () => set({ isAiChatOpen: true }),
+  closeAiChat: () => set({ isAiChatOpen: false }),
+  toggleAiChat: () => set((state) => ({ isAiChatOpen: !state.isAiChatOpen })),
 }));
