@@ -83,6 +83,16 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
 
   return (
     <section className={`flex flex-col p-6 border-b border-[#E2E8F0] ${isCollapsed ? '' : 'gap-6'}`}>
+      {/* Toast Notification appearing at top-right under user account */}
+      {securityMessage && (
+        <div className="fixed top-20 right-6 z-50 flex items-center gap-2.5 rounded-2xl border px-4 py-3 shadow-xl backdrop-blur-md transition-all animate-in fade-in slide-in-from-top-3 duration-200 border-emerald-200 bg-white/95 text-emerald-800 shadow-emerald-500/10 dark:border-emerald-800 dark:bg-slate-900/95 dark:text-emerald-300">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <span className="text-xs font-bold">{securityMessage.text}</span>
+        </div>
+      )}
+
       <div className={`flex items-center justify-between gap-4 ${isCollapsed ? '' : 'border-b border-[#F1F5F9] pb-4'}`}>
         <div>
           <h3 className="text-base font-bold text-[#131B2E] font-heading flex items-center gap-2">
@@ -107,140 +117,130 @@ export const SecuritySettingsSection: React.FC<SecuritySettingsProps> = ({
       {!isCollapsed && (
         <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-top-1 duration-200">
 
-      {/* Password Form */}
-      <form
-        onSubmit={handlePasswordSubmit}
-        autoComplete="off"
-        className="flex flex-col gap-4 border-b border-[#F1F5F9] pb-6"
-      >
-        <input
-          type="text"
-          name="username"
-          value={currentUser?.email || ''}
-          autoComplete="username"
-          readOnly
-          tabIndex={-1}
-          aria-hidden="true"
-          className="sr-only"
-        />
-        <h4 className="text-xs font-bold text-[#131B2E] uppercase tracking-wider">
-          {translate(language, 'settings.security.password.title')}
-        </h4>
+          {/* Password Form */}
+          <form
+            onSubmit={handlePasswordSubmit}
+            autoComplete="off"
+            className="flex flex-col gap-4 border-b border-[#F1F5F9] pb-6"
+          >
+            <input
+              type="text"
+              name="username"
+              value={currentUser?.email || ''}
+              autoComplete="username"
+              readOnly
+              tabIndex={-1}
+              aria-hidden="true"
+              className="sr-only"
+            />
+            <h4 className="text-xs font-bold text-[#131B2E] uppercase tracking-wider">
+              {translate(language, 'settings.security.password.title')}
+            </h4>
 
-        {passSuccess && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-[#ECFDF5] border border-[#A7F3D0] text-xs font-semibold text-[#047857]">
-            <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-            <span>{translate(language, 'settings.security.password.success')}</span>
+            {passSuccess && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-[#ECFDF5] border border-[#A7F3D0] text-xs font-semibold text-[#047857]">
+                <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                <span>{translate(language, 'settings.security.password.success')}</span>
+              </div>
+            )}
+
+            {passError && (
+              <div className="text-xs font-semibold text-[#BA1A1A] bg-[#FFDAD6] p-2.5 rounded-lg border border-[#F43F5E]">
+                {passError}
+              </div>
+            )}
+
+            <Input
+              label={translate(language, 'settings.security.password.current')}
+              type="password"
+              name={`planora-current-password-${currentUser?.id || 'user'}`}
+              autoComplete="new-password"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="••••••••"
+              leftIcon={<Lock className="w-4 h-4" />}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={translate(language, 'settings.security.password.new')}
+                type="password"
+                name="new-password"
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-1p-ignore="true"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                leftIcon={<KeyRound className="w-4 h-4" />}
+              />
+
+              <Input
+                label={translate(language, 'settings.security.password.confirm')}
+                type="password"
+                name="confirm-password"
+                autoComplete="new-password"
+                data-lpignore="true"
+                data-1p-ignore="true"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                leftIcon={<KeyRound className="w-4 h-4" />}
+              />
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button type="submit" variant="primary" size="sm" disabled={changePasswordMutation.isPending}>
+                <span>{translate(language, 'settings.security.password.update')}</span>
+              </Button>
+            </div>
+          </form>
+
+          {/* 2FA Toggle */}
+          <div className="flex items-center justify-between gap-4 py-3 border-b border-[#F1F5F9] dark:border-slate-800">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-bold text-[#131B2E] dark:text-white">{translate(language, 'settings.security.twoFactor.title')}</span>
+              <span className="text-xs text-[#64748B] dark:text-slate-400">{translate(language, 'settings.security.twoFactor.subtitle')}</span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={Boolean(settings.twoFactorAuth)}
+              disabled={isUpdating}
+              onClick={() => updateSecuritySetting({ twoFactorAuth: !settings.twoFactorAuth })}
+              className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out disabled:opacity-50 ${settings.twoFactorAuth ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1] dark:bg-slate-700'
+                }`}
+            >
+              <span
+                className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${settings.twoFactorAuth ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+              />
+            </button>
           </div>
-        )}
 
-        {passError && (
-          <div className="text-xs font-semibold text-[#BA1A1A] bg-[#FFDAD6] p-2.5 rounded-lg border border-[#F43F5E]">
-            {passError}
+          {/* Login Alerts */}
+          <div className="flex items-center justify-between gap-4 py-3">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-bold text-[#131B2E] dark:text-white">{translate(language, 'settings.security.loginAlerts.title')}</span>
+              <span className="text-xs text-[#64748B] dark:text-slate-400">{translate(language, 'settings.security.loginAlerts.subtitle')}</span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={Boolean(settings.loginAlerts)}
+              disabled={isUpdating}
+              onClick={() => updateSecuritySetting({ loginAlerts: !settings.loginAlerts })}
+              className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out disabled:opacity-50 ${settings.loginAlerts ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1] dark:bg-slate-700'
+                }`}
+            >
+              <span
+                className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${settings.loginAlerts ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+              />
+            </button>
           </div>
-        )}
-
-        <Input
-          label={translate(language, 'settings.security.password.current')}
-          type="password"
-          name={`planora-current-password-${currentUser?.id || 'user'}`}
-          autoComplete="new-password"
-          data-lpignore="true"
-          data-1p-ignore="true"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          placeholder="••••••••"
-          leftIcon={<Lock className="w-4 h-4" />}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input
-            label={translate(language, 'settings.security.password.new')}
-            type="password"
-            name="new-password"
-            autoComplete="new-password"
-            data-lpignore="true"
-            data-1p-ignore="true"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="••••••••"
-            leftIcon={<KeyRound className="w-4 h-4" />}
-          />
-
-          <Input
-            label={translate(language, 'settings.security.password.confirm')}
-            type="password"
-            name="confirm-password"
-            autoComplete="new-password"
-            data-lpignore="true"
-            data-1p-ignore="true"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="••••••••"
-            leftIcon={<KeyRound className="w-4 h-4" />}
-          />
-        </div>
-
-        <div className="flex justify-end pt-2">
-          <Button type="submit" variant="primary" size="sm" disabled={changePasswordMutation.isPending}>
-            <span>{translate(language, 'settings.security.password.update')}</span>
-          </Button>
-        </div>
-      </form>
-
-      {/* 2FA Toggle */}
-      {securityMessage && (
-        <div className={`rounded-xl border p-3 text-xs font-semibold flex items-center gap-2 ${securityMessage.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300'}`}>
-          <ShieldCheck className="w-4 h-4 shrink-0" />
-          <span>{securityMessage.text}</span>
-        </div>
-      )}
-      <div className="flex items-center justify-between gap-4 py-3 border-b border-[#F1F5F9] dark:border-slate-800">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-bold text-[#131B2E] dark:text-white">{translate(language, 'settings.security.twoFactor.title')}</span>
-          <span className="text-xs text-[#64748B] dark:text-slate-400">{translate(language, 'settings.security.twoFactor.subtitle')}</span>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={Boolean(settings.twoFactorAuth)}
-          disabled={isUpdating}
-          onClick={() => updateSecuritySetting({ twoFactorAuth: !settings.twoFactorAuth })}
-          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out disabled:opacity-50 ${
-            settings.twoFactorAuth ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1] dark:bg-slate-700'
-          }`}
-        >
-          <span
-            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
-              settings.twoFactorAuth ? 'translate-x-5' : 'translate-x-0'
-            }`}
-          />
-        </button>
-      </div>
-
-      {/* Login Alerts */}
-      <div className="flex items-center justify-between gap-4 py-3">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-bold text-[#131B2E] dark:text-white">{translate(language, 'settings.security.loginAlerts.title')}</span>
-          <span className="text-xs text-[#64748B] dark:text-slate-400">{translate(language, 'settings.security.loginAlerts.subtitle')}</span>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={Boolean(settings.loginAlerts)}
-          disabled={isUpdating}
-          onClick={() => updateSecuritySetting({ loginAlerts: !settings.loginAlerts })}
-          className={`settings-switch relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out disabled:opacity-50 ${
-            settings.loginAlerts ? 'bg-[#4F46E5]' : 'bg-[#CBD5E1] dark:bg-slate-700'
-          }`}
-        >
-          <span
-            className={`settings-switch-thumb pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
-              settings.loginAlerts ? 'translate-x-5' : 'translate-x-0'
-            }`}
-          />
-        </button>
-      </div>
         </div>
       )}
     </section>
